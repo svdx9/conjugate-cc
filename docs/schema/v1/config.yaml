@@ -1,7 +1,5 @@
 package: api
 generate:
   chi-server: true
-  embedded-spec: true
   models: true
 output: internal/api/v1/api.gen.go
-
