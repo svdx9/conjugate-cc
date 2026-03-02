@@ -38,7 +38,10 @@ func NewServer(cfg config.Config, logger *slog.Logger, handler http.Handler) *Se
 	httpServer := &http.Server{
 		Addr:              cfg.ListenAddress(),
 		Handler:           handler,
-		ReadHeaderTimeout: 5 * time.Second,
+		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
+		ReadTimeout:       cfg.ReadTimeout,
+		WriteTimeout:      cfg.WriteTimeout,
+		IdleTimeout:       cfg.IdleTimeout,
 	}
 
 	return &Server{
