@@ -28,7 +28,10 @@ func (h *Handler) GetBuildInfo(w http.ResponseWriter, r *http.Request) {
 		GitSha:    response.GitSHA,
 	}
 
-	_ = httpserver.WriteJSON(w, http.StatusOK, payload)
+	err := httpserver.WriteJSON(w, http.StatusOK, payload)
+	if err != nil {
+		h.logger.Error("failed to write response", "error", err)
+	}
 }
 
 // GetHealth handles GET /v1/health.
@@ -41,6 +44,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 
 	err := httpserver.WriteJSON(w, http.StatusOK, payload)
 	if err != nil {
-		h.logger.Error("service handler", "msg", err)
+		h.logger.Error("failed to write response", "error", err)
 	}
 }
