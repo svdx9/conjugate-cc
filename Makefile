@@ -61,16 +61,16 @@ lint: install-golangci-lint require-backend-module
 test: require-backend-module
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) test ./...
 
-build: generate require-backend-module go-cache-dir
+build: generate
 	mkdir -p $(BACKEND_BINARY_DIR)
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) build -ldflags "$(LDFLAGS)" -o $(abspath $(BACKEND_BINARY_DIR))/$(BACKEND_BINARY_NAME) $(BACKEND_APP_DIR)
 
-debug-build: generate require-backend-module go-cache-dir
+debug-build: generate
 	mkdir -p $(BACKEND_BINARY_DIR)
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) build -gcflags "all=-N -l" -ldflags "$(LDFLAGS)" -o $(abspath $(BACKEND_BINARY_DIR))/$(BACKEND_BINARY_NAME)-debug $(BACKEND_APP_DIR)
 
-backend-run: generate require-backend-module go-cache-dir
+backend-run: generate
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) run -ldflags "$(LDFLAGS)" $(BACKEND_APP_DIR)
 
-backend-dev: install-air generate require-backend-module go-cache-dir
+backend-dev: install-air generate
 	cd $(BACKEND_DIR) && GOCACHE=$(GO_BUILD_CACHE) $(TOOLS_BIN)/air -c .air.toml
