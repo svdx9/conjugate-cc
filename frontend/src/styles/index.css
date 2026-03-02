@@ -1,0 +1,88 @@
+:root {
+  color-scheme: light;
+  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #102033;
+  background:
+    radial-gradient(circle at top, rgba(121, 198, 255, 0.38), transparent 42%),
+    linear-gradient(180deg, #f7fbff 0%, #deedf8 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.app-shell__panel {
+  width: min(100%, 40rem);
+  padding: 2.5rem;
+  border: 1px solid rgba(16, 32, 51, 0.12);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 24px 60px rgba(17, 45, 78, 0.12);
+}
+
+.app-shell__eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2d5b86;
+}
+
+.app-shell h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  line-height: 0.98;
+}
+
+.app-shell__body {
+  margin: 1rem 0 1.5rem;
+  max-width: 28rem;
+  font-size: 1.1rem;
+}
+
+.app-shell__action {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.3rem;
+  background: #102033;
+  color: #f7fbff;
+}
+
+.app-shell__action:focus-visible {
+  outline: 3px solid #79c6ff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 1rem;
+  }
+
+  .app-shell__panel {
+    padding: 1.5rem;
+  }
+}

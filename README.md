@@ -72,18 +72,28 @@ curl http://localhost:8080/v1/build-info
 
 ## Frontend Workflow
 
-The frontend application is introduced in `TASK-1.3`. Once it exists, contributors should work from `frontend/`:
+The frontend application lives under `frontend/`. Contributors should work from that directory:
 
 ```sh
 cd frontend
 npm install
 npm run dev
+npm run test
+npm run build
 ```
+
+Notes:
+
+- `npm run dev` starts the Vite development server for the SolidJS app shell introduced in `TASK-1.3`.
+- `npm run test` verifies the first render path by rendering the app shell with Vitest and `@solidjs/testing-library`.
+- `npm run build` confirms the frontend bootstrap produces a production bundle.
+- `TASK-1.3` bootstraps the reusable frontend shell only; `TASK-1.4` will replace the placeholder content with the MVP front page.
 
 ## Verification
 
-The shared setup and backend bootstrap are considered verified when:
+The shared setup, backend bootstrap, and frontend bootstrap are considered verified when:
 
 - `backend/`, `backend/cmd/`, `backend/internal/`, `backend/tools/`, `frontend/`, and `frontend/src/` exist in the repository.
 - The root `Makefile` exposes `test`, `lint`, `build`, `debug-build`, `format`, `generate`, `backend-run`, and `backend-dev`.
-- The documented commands above match the repository layout and the `Makefile` recipes.
+- `frontend/package.json` exposes `dev`, `test`, and `build` scripts that match the documented npm workflow.
+- The documented commands above match the repository layout, npm scripts, and the `Makefile` recipes.
