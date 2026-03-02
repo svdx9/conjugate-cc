@@ -1,6 +1,6 @@
 module github.com/svdx9/conjugate-cc/backend
 
-go 1.25.0
+go 1.25.7
 
 require (
 	github.com/getkin/kin-openapi v0.133.0
