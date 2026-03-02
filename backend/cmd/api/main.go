@@ -31,7 +31,7 @@ func main() {
 
 	logger = newLogger(cfg)
 	service := statusservice.New(serviceGitSHA, serviceBuildTime)
-	handler := statusapi.NewHandler(service)
+	handler := statusapi.NewHandler(logger, service)
 	router := httpserver.NewRouter(logger, handler)
 	server := httpserver.NewServer(cfg, logger, router)
 

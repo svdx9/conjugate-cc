@@ -2,7 +2,7 @@ package api
 
 import (
 	"net/http"
-
+	"log/slog"
 	apiv1 "github.com/svdx9/conjugate-cc/backend/internal/api/v1"
 	httpserver "github.com/svdx9/conjugate-cc/backend/internal/http"
 	statusservice "github.com/svdx9/conjugate-cc/backend/internal/status/service"
@@ -10,12 +10,13 @@ import (
 
 // Handler adapts the status service to the generated API surface.
 type Handler struct {
+	logger *slog.Logger
 	service *statusservice.Service
 }
 
 // NewHandler constructs a status API handler.
-func NewHandler(service *statusservice.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(logger *slog.Logger, service *statusservice.Service) *Handler {
+	return &Handler{logger: logger, service: service}
 }
 
 // GetBuildInfo handles GET /v1/build-info.
@@ -38,5 +39,8 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		Status: response.Status,
 	}
 
-	_ = httpserver.WriteJSON(w, http.StatusOK, payload)
+	err := httpserver.WriteJSON(w, http.StatusOK, payload)
+	if err != nil {
+		h.logger.Error("service handler", "msg", err)
+	}
 }
