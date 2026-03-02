@@ -21,20 +21,15 @@ var (
 )
 
 func main() {
-	err := run()
-	if err != nil {
-		slog.Error("backend exited", "error", err)
-		os.Exit(1)
-	}
-}
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-func run() error {
 	cfg, err := config.Load()
 	if err != nil {
-		return err
+		logger.Error("backend exited", "error", err)
+		os.Exit(1)
 	}
 
-	logger := newLogger(cfg)
+	logger = newLogger(cfg)
 	service := statusservice.New(serviceGitSHA, serviceBuildTime)
 	handler := statusapi.NewHandler(service)
 	router := apphttp.NewRouter(logger, handler)
@@ -45,10 +40,9 @@ func run() error {
 
 	err = server.Run(ctx)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		return err
+		logger.Error("backend exited", "error", err)
+		os.Exit(1)
 	}
-
-	return nil
 }
 
 func newLogger(cfg config.Config) *slog.Logger {
