@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/svdx9/conjugate-cc/backend/internal/config"
-	apphttp "github.com/svdx9/conjugate-cc/backend/internal/http"
+	httpserver "github.com/svdx9/conjugate-cc/backend/internal/http"
 	statusapi "github.com/svdx9/conjugate-cc/backend/internal/status/api"
 	statusservice "github.com/svdx9/conjugate-cc/backend/internal/status/service"
 )
@@ -32,8 +32,8 @@ func main() {
 	logger = newLogger(cfg)
 	service := statusservice.New(serviceGitSHA, serviceBuildTime)
 	handler := statusapi.NewHandler(service)
-	router := apphttp.NewRouter(logger, handler)
-	server := apphttp.NewServer(cfg, logger, router)
+	router := httpserver.NewRouter(logger, handler)
+	server := httpserver.NewServer(cfg, logger, router)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

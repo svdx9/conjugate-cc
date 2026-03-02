@@ -1,11 +1,10 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
 
 	apiv1 "github.com/svdx9/conjugate-cc/backend/internal/api/v1"
+	httpserver "github.com/svdx9/conjugate-cc/backend/internal/http"
 	statusservice "github.com/svdx9/conjugate-cc/backend/internal/status/service"
 )
 
@@ -28,7 +27,7 @@ func (h *Handler) GetBuildInfo(w http.ResponseWriter, r *http.Request) {
 		GitSha:    response.GitSHA,
 	}
 
-	writeJSON(w, http.StatusOK, payload)
+	_ = httpserver.WriteJSON(w, http.StatusOK, payload)
 }
 
 // GetHealth handles GET /v1/health.
@@ -39,19 +38,5 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		Status: response.Status,
 	}
 
-	writeJSON(w, http.StatusOK, payload)
-}
-
-func writeJSON(w http.ResponseWriter, statusCode int, payload any) {
-	var buffer bytes.Buffer
-	encoder := json.NewEncoder(&buffer)
-	err := encoder.Encode(payload)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	_, _ = w.Write(buffer.Bytes())
+	_ = httpserver.WriteJSON(w, http.StatusOK, payload)
 }

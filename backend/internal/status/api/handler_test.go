@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apphttp "github.com/svdx9/conjugate-cc/backend/internal/http"
+	httpserver "github.com/svdx9/conjugate-cc/backend/internal/http"
 	statusservice "github.com/svdx9/conjugate-cc/backend/internal/status/service"
 )
 
@@ -18,7 +18,7 @@ func TestHandlerServesStatusEndpoints(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := statusservice.New("git-sha-123", "2026-03-02T18:00:00Z")
 	handler := NewHandler(service)
-	router := apphttp.NewRouter(logger, handler)
+	router := httpserver.NewRouter(logger, handler)
 
 	testCases := []struct {
 		name           string

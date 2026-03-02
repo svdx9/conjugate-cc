@@ -1,4 +1,4 @@
-package apphttp
+package httpserver
 
 import (
 	"context"
