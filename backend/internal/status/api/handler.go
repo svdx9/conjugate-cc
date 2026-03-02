@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -42,12 +43,15 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeJSON(w http.ResponseWriter, statusCode int, payload any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-
-	encoder := json.NewEncoder(w)
+	var buffer bytes.Buffer
+	encoder := json.NewEncoder(&buffer)
 	err := encoder.Encode(payload)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	_, _ = w.Write(buffer.Bytes())
 }
