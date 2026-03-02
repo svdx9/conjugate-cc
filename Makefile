@@ -16,10 +16,10 @@ GIT_SHA ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf "unknown")
 BUILD_TIME ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS := -X main.serviceGitSHA=$(GIT_SHA) -X main.serviceBuildTime=$(BUILD_TIME)
 
-GOLANGCI_LINT_VERSION ?= v1.64.8
-GOFUMPT_VERSION ?= v0.7.0
-OAPI_CODEGEN_VERSION ?= v2.5.1
-AIR_VERSION ?= v1.63.0
+GOLANGCI_LINT_VERSION ?= v2.10.1
+GOFUMPT_VERSION ?= v0.9.2
+OAPI_CODEGEN_VERSION ?= v2.6.0
+AIR_VERSION ?= v1.64.5
 
 .PHONY: backend-dev backend-run build debug-build format generate go-cache-dir lint test tools-dir tools-install install-air install-gofumpt install-golangci-lint install-oapi-codegen require-backend-module
 
