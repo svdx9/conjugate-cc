@@ -1,0 +1,76 @@
+SHELL := /bin/sh
+
+GO ?= go
+BACKEND_DIR := backend
+BACKEND_APP_DIR := ./cmd/api
+BACKEND_BINARY_DIR := $(BACKEND_DIR)/bin
+BACKEND_BINARY_NAME := conjugate-api
+TOOLS_DIR := $(BACKEND_DIR)/tools
+TOOLS_BIN := $(abspath $(TOOLS_DIR)/bin)
+GO_BUILD_CACHE := $(abspath .cache/go-build)
+GO_ENV := GOTOOLCHAIN=local GOCACHE=$(GO_BUILD_CACHE)
+OPENAPI_CONFIG := ../docs/schema/v1/config.yaml
+OPENAPI_SPEC := ../docs/schema/v1/conjugate.yaml
+
+GIT_SHA ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf "unknown")
+BUILD_TIME ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+LDFLAGS := -X main.serviceGitSHA=$(GIT_SHA) -X main.serviceBuildTime=$(BUILD_TIME)
+
+GOLANGCI_LINT_VERSION ?= v2.8.0
+GOFUMPT_VERSION ?= v0.9.2
+OAPI_CODEGEN_VERSION ?= v2.6.0
+AIR_VERSION ?= v1.64.5
+
+.PHONY: backend-dev backend-run build debug-build format generate go-cache-dir lint test tools-dir tools-install install-air install-gofumpt install-golangci-lint install-oapi-codegen require-backend-module
+
+go-cache-dir:
+	mkdir -p $(GO_BUILD_CACHE)
+
+tools-dir:
+	mkdir -p $(TOOLS_BIN)
+
+install-gofumpt: tools-dir go-cache-dir
+	cd $(BACKEND_DIR) && $(GO_ENV) GOBIN=$(TOOLS_BIN) $(GO) install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
+
+install-golangci-lint: tools-dir go-cache-dir
+	cd $(BACKEND_DIR) && $(GO_ENV) GOBIN=$(TOOLS_BIN) $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+
+install-oapi-codegen: tools-dir go-cache-dir
+	cd $(BACKEND_DIR) && $(GO_ENV) GOBIN=$(TOOLS_BIN) $(GO) install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@$(OAPI_CODEGEN_VERSION)
+
+install-air: tools-dir go-cache-dir
+	cd $(BACKEND_DIR) && $(GO_ENV) GOBIN=$(TOOLS_BIN) $(GO) install github.com/air-verse/air@$(AIR_VERSION)
+
+tools-install: install-gofumpt install-golangci-lint install-oapi-codegen install-air
+
+require-backend-module:
+	@if [ ! -f "$(BACKEND_DIR)/go.mod" ]; then \
+		printf '%s\n' "backend/go.mod is not present yet. Complete TASK-1.2 before running backend Make targets."; \
+		exit 1; \
+	fi
+
+generate: install-oapi-codegen require-backend-module
+	cd $(BACKEND_DIR) && GOCACHE=$(GO_BUILD_CACHE) $(TOOLS_BIN)/oapi-codegen --config $(OPENAPI_CONFIG) $(OPENAPI_SPEC)
+
+format: install-gofumpt require-backend-module
+	cd $(BACKEND_DIR) && $(TOOLS_BIN)/gofumpt -w .
+
+lint: install-golangci-lint require-backend-module
+	cd $(BACKEND_DIR) && $(GO_ENV) $(TOOLS_BIN)/golangci-lint run ./...
+
+test: require-backend-module
+	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) test ./...
+
+build: generate
+	mkdir -p $(BACKEND_BINARY_DIR)
+	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) build -ldflags "$(LDFLAGS)" -o $(abspath $(BACKEND_BINARY_DIR))/$(BACKEND_BINARY_NAME) $(BACKEND_APP_DIR)
+
+debug-build: generate
+	mkdir -p $(BACKEND_BINARY_DIR)
+	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) build -gcflags "all=-N -l" -ldflags "$(LDFLAGS)" -o $(abspath $(BACKEND_BINARY_DIR))/$(BACKEND_BINARY_NAME)-debug $(BACKEND_APP_DIR)
+
+backend-run: generate
+	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) run -ldflags "$(LDFLAGS)" $(BACKEND_APP_DIR)
+
+backend-dev: install-air generate
+	cd $(BACKEND_DIR) && GOCACHE=$(GO_BUILD_CACHE) $(TOOLS_BIN)/air -c .air.toml
