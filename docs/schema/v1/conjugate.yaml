@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: Conjugate CC API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /v1/health:
+    get:
+      operationId: getHealth
+      summary: Return the backend health status
+      responses:
+        "200":
+          description: Backend is alive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/build-info:
+    get:
+      operationId: getBuildInfo
+      summary: Return backend build metadata
+      responses:
+        "200":
+          description: Build metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildInfoResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: ok
+    BuildInfoResponse:
+      type: object
+      required:
+        - gitSha
+        - buildTime
+      properties:
+        gitSha:
+          type: string
+          example: abc1234
+        buildTime:
+          type: string
+          example: 2026-03-02T18:00:00Z
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: internal_error
+        message:
+          type: string
+          example: something went wrong

@@ -1,0 +1,10 @@
+.DS_Store
+.cache/
+
+# Backend build outputs and repo-local tooling
+/backend/bin/
+/backend/tools/bin/
+
+# Frontend local dependencies and build outputs
+/frontend/node_modules/
+/frontend/dist/
