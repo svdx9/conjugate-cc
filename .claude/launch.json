@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "backend-dev",
+      "name": "dev",
       "runtimeExecutable": "make",
-      "runtimeArgs": ["backend-dev"],
+      "runtimeArgs": ["dev"],
       "port": 8080
     }
   ]
