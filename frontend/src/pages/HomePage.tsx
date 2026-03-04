@@ -14,13 +14,13 @@ export function HomePage() {
           </h1>
           <p class="text-base text-muted max-w-sm mx-auto mb-8">
             Master verb conjugations through focused, repeating drills. Build
-            confidence and fluency one form at a time.
+            confidence and fluency one verb at a time.
           </p>
           <a
             href="/drills"
             class="font-sans font-medium text-base text-sage no-underline transition-transform duration-200 ease-out hover:-translate-y-px hover:scale-[1.03]"
           >
-            Start Drilling
+            Start
           </a>
         </div>
       </main>
