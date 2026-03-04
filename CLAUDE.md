@@ -1,4 +1,4 @@
-# agents (repo root)
+# claude (repo root)
 
 ## interaction protocol (mandatory)
 
@@ -13,32 +13,29 @@ when information is missing, ambiguous, or there are multiple plausible implemen
 
 - if a yes/no question is genuinely impossible:
   - ask a yes/no question that selects the default path, and state the default explicitly.
-    example: “no = use default X, yes = you will provide Y”
+    example: "no = use default X, yes = you will provide Y"
 
 - do not continue coding while waiting for an answer when a blocking question is open.
 - if no clarification is needed, do not ask questions.
 
 
 rules:
-- always use apply_patch for edits (no full-file rewrites unless asked).
 - prefer minimal diffs.
-- if working under web/*, obey web/AGENTS.md in addition to this file.
-- if rules conflict, prefer the more specific (deeper path) AGENTS.md.
+- if working under web/*, obey web/CLAUDE.md in addition to this file.
+- if rules conflict, prefer the more specific (deeper path) CLAUDE.md.
 
 # skills
-- this repo pins codex skills in `.agents/skills`.
-- for this repo, prefer and use repo-pinned skills over globally installed skills when both exist.
-- do not use machine-local skills for required behavior unless explicitly allowed in this file.
+
 - required skill:
-  - security best practices: `.agents/skills/security-best-practices/SKILL.md`
+  - security best practices: @.agents/skills/security-best-practices/SKILL.md
 - trigger rule:
   - when a task changes authentication, authorization, password handling, session/cookie handling, input validation, injection prevention, or security logging, load and follow the security skill before coding.
 
-## golang backend skill (mandatory shim)
+## golang backend skill (mandatory)
 
 all golang backend implementation rules are defined in:
 
-.agents/skills/go-backend/SKILL.md
+@.agents/skills/go-backend/SKILL.md
 
 this skill is an enforcement contract, not guidance.
 
@@ -57,7 +54,7 @@ a task requires loading the golang backend skill if it:
 
 if any of the above are true, the agent MUST load:
 
-.agents/skills/go-backend/SKILL.md
+@.agents/skills/go-backend/SKILL.md
 
 the agent must explicitly state that the golang backend skill was loaded before implementation.
 

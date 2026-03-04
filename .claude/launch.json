@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend-dev",
+      "runtimeExecutable": "make",
+      "runtimeArgs": ["backend-dev"],
+      "port": 8080
+    }
+  ]
+}
