@@ -78,8 +78,9 @@ Pill/badge:   rounded-full
 ### Input / Form Field
 ```tsx
 <div class="flex flex-col gap-1.5">
-  <label class="text-sm font-medium text-zinc-700">Label</label>
+  <label for="example-input" class="text-sm font-medium text-zinc-700">Label</label>
   <input
+    id="example-input"
     class="w-full px-3 py-2 text-sm border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
     placeholder="..."
   />
