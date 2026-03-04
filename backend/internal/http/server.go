@@ -35,7 +35,7 @@ func NewRouter(logger *slog.Logger, handler apiv1.ServerInterface) http.Handler 
 
 // NewServer constructs the HTTP server with deterministic defaults.
 func NewServer(cfg config.Config, logger *slog.Logger, handler http.Handler) *Server {
-	httpServer := &http.Server{
+	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:              cfg.ListenAddress(),
 		Handler:           handler,
 		ReadHeaderTimeout: cfg.ReadHeaderTimeout,

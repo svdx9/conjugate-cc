@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	serviceGitSHA    = "dev"
-	serviceBuildTime = "unknown"
+	serviceGitSHA    = "dev"     //nolint:gochecknoglobals // set via ldflags at build time
+	serviceBuildTime = "unknown" //nolint:gochecknoglobals // set via ldflags at build time
 )
 
 func main() {
@@ -46,7 +46,7 @@ func main() {
 }
 
 func newLogger(cfg config.Config) *slog.Logger {
-	options := &slog.HandlerOptions{Level: cfg.LogLevel}
+	options := &slog.HandlerOptions{Level: cfg.LogLevel} //nolint:exhaustruct
 	handler := slog.NewTextHandler(os.Stdout, options)
 	return slog.New(handler)
 }
