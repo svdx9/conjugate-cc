@@ -1,88 +1,153 @@
-:root {
-  color-scheme: light;
-  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #102033;
-  background:
-    radial-gradient(circle at top, rgba(121, 198, 255, 0.38), transparent 42%),
-    linear-gradient(180deg, #f7fbff 0%, #deedf8 100%);
+/* === reset === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-* {
-  box-sizing: border-box;
+/* === design tokens === */
+:root {
+  --color-bg: #f7fbff;
+  --color-text: #102033;
+  --color-accent: #2d5b86;
+  --color-highlight: #79c6ff;
+  --color-surface: #ffffff;
+  --font-sans: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+}
+
+/* === base === */
+html,
+body {
+  height: 100%;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
 }
 
-button {
-  font: inherit;
-}
-
-#root {
-  min-height: 100vh;
-}
-
+/* === app shell === */
 .app-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
 }
 
-.app-shell__panel {
-  width: min(100%, 40rem);
-  padding: 2.5rem;
-  border: 1px solid rgba(16, 32, 51, 0.12);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 24px 60px rgba(17, 45, 78, 0.12);
+/* === nav (mobile first) === */
+.nav {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-highlight);
+  padding: 0.75rem 1rem;
 }
 
-.app-shell__eyebrow {
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
+.nav__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+}
+
+.nav__link {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.25rem 0;
+}
+
+.nav__link--brand {
   font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.nav__link:hover,
+.nav__link:focus {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.nav__link:focus-visible {
+  outline: 3px solid var(--color-highlight);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (min-width: 640px) {
+  .nav {
+    padding: 1rem 2rem;
+  }
+
+  .nav__list {
+    gap: 2rem;
+  }
+}
+
+/* === hero (mobile first) === */
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.hero__content {
+  max-width: 36rem;
+  width: 100%;
+  text-align: center;
+}
+
+.hero__eyebrow {
+  font-size: 0.8rem;
   text-transform: uppercase;
-  color: #2d5b86;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
 }
 
-.app-shell h1 {
-  margin: 0;
-  font-size: clamp(2.5rem, 7vw, 4.5rem);
-  line-height: 0.98;
+.hero__title {
+  font-size: clamp(2rem, 10vw, 3.5rem);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+  margin-bottom: 1rem;
 }
 
-.app-shell__body {
-  margin: 1rem 0 1.5rem;
-  max-width: 28rem;
-  font-size: 1.1rem;
+.hero__description {
+  font-size: clamp(1rem, 3.5vw, 1.125rem);
+  color: var(--color-text);
+  opacity: 0.75;
+  margin-bottom: 2rem;
 }
 
-.app-shell__action {
-  border: 0;
-  border-radius: 999px;
-  padding: 0.85rem 1.3rem;
-  background: #102033;
-  color: #f7fbff;
+.hero__cta {
+  display: inline-block;
+  background-color: var(--color-accent);
+  color: #fff;
+  text-decoration: none;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
 }
 
-.app-shell__action:focus-visible {
-  outline: 3px solid #79c6ff;
+.hero__cta:hover {
+  background-color: var(--color-text);
+}
+
+.hero__cta:focus-visible {
+  outline: 3px solid var(--color-highlight);
   outline-offset: 3px;
 }
 
-@media (max-width: 640px) {
-  .app-shell {
-    padding: 1rem;
-  }
-
-  .app-shell__panel {
-    padding: 1.5rem;
+@media (min-width: 640px) {
+  .hero {
+    padding: 4rem 2rem;
   }
 }
