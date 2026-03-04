@@ -60,7 +60,7 @@ Pill/badge:   rounded-full
 ### Button
 ```tsx
 // Primary
-<button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+<button type="button" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
   Label
 </button>
 
