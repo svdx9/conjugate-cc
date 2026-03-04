@@ -26,12 +26,12 @@
   --animate-rise: rise 0.4s ease both;
 
   /* Typography — eyebrow label */
-  --font-size-eyebrow: 0.65rem;
-  --tracking-eyebrow:  0.34em;
+  --text-eyebrow:  0.65rem;
+  --tracking-eyebrow: 0.34em;
 
   /* Typography — hero title */
-  --font-size-hero:    2.6rem;
-  --font-size-hero-lg: 5rem;
+  --text-hero:    2.6rem;
+  --text-hero-lg: 5rem;
 }
 
 @keyframes rise {
