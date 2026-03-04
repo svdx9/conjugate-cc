@@ -1,5 +1,16 @@
 # claude (repo root)
 
+## worktree discipline (mandatory)
+
+NEVER write, edit, or delete code files on the current branch directly.
+
+Before touching any code:
+1. Create a new git worktree: use the EnterWorktree tool (Claude Code) or `git worktree add` (CLI)
+2. All implementation work happens inside that worktree on its own branch
+3. When done, open a PR from the worktree branch into main
+
+This applies to every task, no exceptions. Planning, reading, and backlog updates do not require a worktree.
+
 ## interaction protocol (mandatory)
 
 when information is missing, ambiguous, or there are multiple plausible implementations:
@@ -75,6 +86,7 @@ if any of the above are true, the agent MUST load:
 @.claude/skills/go-backend/SKILL.md
 
 the agent must explicitly state that the golang backend skill was loaded before implementation.
+
 
 <!-- BACKLOG.MD MCP GUIDELINES START -->
 
