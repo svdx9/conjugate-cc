@@ -1,10 +1,9 @@
 root = "."
-tmp_dir = "tmp"
+tmp_dir = "bin"
 
 [build]
-cmd = "make -C .. generate && go build -o ./tmp/conjugate-api ./cmd/api"
-bin = "./tmp/conjugate-api"
+cmd = "make -C .. build-dev"
+bin = "./bin/conjugate-api"
 delay = 200
-exclude_dir = ["bin", "tmp", "tools"]
+exclude_dir = ["bin", "tools", "internal/api"]
 include_ext = ["go", "yaml"]
-

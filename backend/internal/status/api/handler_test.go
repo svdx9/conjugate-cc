@@ -17,7 +17,7 @@ func TestHandlerServesStatusEndpoints(t *testing.T) {
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := statusservice.New("git-sha-123", "2026-03-02T18:00:00Z")
-	handler := NewHandler(service)
+	handler := NewHandler(logger, service)
 	router := httpserver.NewRouter(logger, handler)
 
 	testCases := []struct {
@@ -57,7 +57,12 @@ func TestHandlerServesStatusEndpoints(t *testing.T) {
 			router.ServeHTTP(responseRecorder, request)
 
 			response := responseRecorder.Result()
-			defer response.Body.Close()
+			defer func() {
+				err := response.Body.Close()
+				if err != nil {
+					t.Errorf("close response body: %v", err)
+				}
+			}()
 
 			if response.StatusCode != testCase.expectedStatus {
 				t.Fatalf("status code = %d, want %d", response.StatusCode, testCase.expectedStatus)

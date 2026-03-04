@@ -1,8 +1,9 @@
 package api
 
 import (
-	"net/http"
 	"log/slog"
+	"net/http"
+
 	apiv1 "github.com/svdx9/conjugate-cc/backend/internal/api/v1"
 	httpserver "github.com/svdx9/conjugate-cc/backend/internal/http"
 	statusservice "github.com/svdx9/conjugate-cc/backend/internal/status/service"
@@ -10,7 +11,7 @@ import (
 
 // Handler adapts the status service to the generated API surface.
 type Handler struct {
-	logger *slog.Logger
+	logger  *slog.Logger
 	service *statusservice.Service
 }
 

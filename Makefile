@@ -21,7 +21,7 @@ GOFUMPT_VERSION ?= v0.9.2
 OAPI_CODEGEN_VERSION ?= v2.6.0
 AIR_VERSION ?= v1.64.5
 
-.PHONY: backend-dev backend-run build debug-build format generate go-cache-dir lint test tools-dir tools-install install-air install-gofumpt install-golangci-lint install-oapi-codegen require-backend-module
+.PHONY: dev build-dev tidy backend-run build debug-build format generate go-cache-dir lint test tools-dir tools-install install-air install-gofumpt install-golangci-lint install-oapi-codegen
 
 go-cache-dir:
 	mkdir -p $(GO_BUILD_CACHE)
@@ -43,22 +43,16 @@ install-air: tools-dir go-cache-dir
 
 tools-install: install-gofumpt install-golangci-lint install-oapi-codegen install-air
 
-require-backend-module:
-	@if [ ! -f "$(BACKEND_DIR)/go.mod" ]; then \
-		printf '%s\n' "backend/go.mod is not present yet. Complete TASK-1.2 before running backend Make targets."; \
-		exit 1; \
-	fi
-
-generate: install-oapi-codegen require-backend-module
+generate: install-oapi-codegen
 	cd $(BACKEND_DIR) && GOCACHE=$(GO_BUILD_CACHE) $(TOOLS_BIN)/oapi-codegen --config $(OPENAPI_CONFIG) $(OPENAPI_SPEC)
 
-format: install-gofumpt require-backend-module
+format: install-gofumpt
 	cd $(BACKEND_DIR) && $(TOOLS_BIN)/gofumpt -w .
 
-lint: install-golangci-lint require-backend-module
+lint: install-golangci-lint
 	cd $(BACKEND_DIR) && $(GO_ENV) $(TOOLS_BIN)/golangci-lint run ./...
 
-test: require-backend-module
+test:
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) test ./...
 
 build: generate
@@ -72,5 +66,13 @@ debug-build: generate
 backend-run: generate
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) run -ldflags "$(LDFLAGS)" $(BACKEND_APP_DIR)
 
-backend-dev: install-air generate
-	cd $(BACKEND_DIR) && GOCACHE=$(GO_BUILD_CACHE) $(TOOLS_BIN)/air -c .air.toml
+tidy:
+	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) mod tidy
+
+build-dev: generate format tidy lint test
+	@echo "Building $(BACKEND_BINARY_NAME) for development"
+	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) build -ldflags "-s -w" -o bin/$(BACKEND_BINARY_NAME) $(BACKEND_APP_DIR)
+
+dev: install-air
+	@echo "Starting development server with live reload"
+	cd $(BACKEND_DIR) && HOST=$${HOST:-localhost} PORT=$${PORT:-8080} $(TOOLS_BIN)/air -c .air.toml
