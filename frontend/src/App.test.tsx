@@ -20,6 +20,6 @@ describe("App", () => {
   });
 
   it("renders the Start Drilling CTA", () => {
-    expect(screen.getByRole("link", { name: "Start Drilling" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Start" })).toBeInTheDocument();
   });
 });
