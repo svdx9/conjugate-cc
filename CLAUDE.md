@@ -32,7 +32,7 @@ rules:
 # skills
 
 - required skill:
-  - security best practices: @.agents/skills/security-best-practices/SKILL.md
+  - security best practices: @.claude/skills/security-best-practices/SKILL.md
 - trigger rule:
   - when a task changes authentication, authorization, password handling, session/cookie handling, input validation, injection prevention, or security logging, load and follow the security skill before coding.
 
@@ -40,7 +40,7 @@ rules:
 
 all golang backend implementation rules are defined in:
 
-@.agents/skills/go-backend/SKILL.md
+@.claude/skills/go-backend/SKILL.md
 
 this skill is an enforcement contract, not guidance.
 
@@ -59,7 +59,7 @@ a task requires loading the golang backend skill if it:
 
 if any of the above are true, the agent MUST load:
 
-@.agents/skills/go-backend/SKILL.md
+@.claude/skills/go-backend/SKILL.md
 
 the agent must explicitly state that the golang backend skill was loaded before implementation.
 
