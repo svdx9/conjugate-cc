@@ -1,0 +1,43 @@
+name: Lint
+
+on:
+  pull_request:
+    paths:
+      - "backend/**/*.go"
+      - "backend/go.mod"
+      - "backend/go.sum"
+      - "backend/.golangci.yml"
+      - "backend/.golangci.yaml"
+      - "backend/.golangci.toml"
+      - ".github/workflows/lint.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**/*.go"
+      - "backend/go.mod"
+      - "backend/go.sum"
+      - "backend/.golangci.yml"
+      - "backend/.golangci.yaml"
+      - "backend/.golangci.toml"
+      - ".github/workflows/lint.yml"
+
+jobs:
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.8.0
+          working-directory: backend

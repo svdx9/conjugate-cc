@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  pull_request:
+    paths:
+      - "backend/**/*.go"
+      - "backend/go.mod"
+      - "backend/go.sum"
+      - ".github/workflows/test.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**/*.go"
+      - "backend/go.mod"
+      - "backend/go.sum"
+      - ".github/workflows/test.yml"
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: false
+
+      - name: Cache Go build cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/go-build
+          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/**/*.go') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
+
+      - name: Run tests
+        run: make test
