@@ -29,6 +29,18 @@ rules:
 - after editing any Go file, run `make format`.
 - before committing, run `make test`.
 
+## worktree naming (mandatory)
+
+Always pass a descriptive `name` to EnterWorktree — never use the random default.
+
+Format: `task-<id>-<short-slug>` (kebab-case, matches the backlog task)
+
+Examples:
+- `task-4-add-ci` → worktree `.claude/worktrees/task-4-add-ci`, branch `claude/task-4-add-ci`
+- `task-1-scaffold` → worktree `.claude/worktrees/task-1-scaffold`, branch `claude/task-1-scaffold`
+
+If the work has no backlog task, use a short descriptive slug (e.g. `fix-air-config`).
+
 # skills
 
 - required skill:
