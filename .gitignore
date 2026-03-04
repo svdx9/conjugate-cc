@@ -3,7 +3,8 @@
 .claude/settings.local.json
 
 # Backend build outputs and repo-local tooling
-/backend/bin/
+/backend/bin/*
+!/backend/bin/.gitkeep
 /backend/tools/bin/
 
 # Frontend local dependencies and build outputs
