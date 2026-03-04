@@ -24,6 +24,11 @@ rules:
 - if working under web/*, obey web/CLAUDE.md in addition to this file.
 - if rules conflict, prefer the more specific (deeper path) CLAUDE.md.
 
+## mandatory workflow steps
+
+- after editing any Go file, run `make format`.
+- before committing, run `make test`.
+
 # skills
 
 - required skill:
