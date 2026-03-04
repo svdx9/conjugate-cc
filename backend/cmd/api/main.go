@@ -46,7 +46,7 @@ func main() {
 }
 
 func newLogger(cfg config.Config) *slog.Logger {
-	options := &slog.HandlerOptions{Level: cfg.LogLevel}
+	options := &slog.HandlerOptions{Level: cfg.LogLevel} //nolint:exhaustruct
 	handler := slog.NewTextHandler(os.Stdout, options)
 	return slog.New(handler)
 }
