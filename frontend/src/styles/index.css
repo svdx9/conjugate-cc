@@ -28,6 +28,10 @@
   /* Typography — eyebrow label */
   --font-size-eyebrow: 0.65rem;
   --tracking-eyebrow:  0.34em;
+
+  /* Typography — hero title */
+  --font-size-hero:    2.6rem;
+  --font-size-hero-lg: 5rem;
 }
 
 @keyframes rise {

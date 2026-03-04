@@ -9,7 +9,7 @@ export function HomePage() {
           <p class="text-eyebrow font-bold uppercase tracking-eyebrow text-muted mb-2">
             Conjugation drill application
           </p>
-          <h1 class="font-serif text-[2.6rem] sm:text-[5rem] tracking-[0.015em] text-ink mt-1.5 mb-4 leading-tight">
+          <h1 class="font-serif text-hero sm:text-hero-lg tracking-[0.015em] text-ink mt-1.5 mb-4 leading-tight">
             conjugate.cc
           </h1>
           <p class="text-base text-muted max-w-sm mx-auto mb-8">
