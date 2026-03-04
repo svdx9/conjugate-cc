@@ -18,8 +18,8 @@ linters:
   settings:
     exhaustruct:
       allow-empty: true
-      exclude:
-        - '.*/conjugator\.VerbFormParameters'
+      include:
+        - 'github\.com/svdx9/conjugate-cc/backend/.*'
     misspell:
       ignore-rules:
         - participe

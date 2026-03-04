@@ -26,6 +26,15 @@ const (
 	defaultIdleTimeout       = 120 * time.Second
 )
 
+var (
+	ErrEnvEmpty            = errors.New("ENV must not be empty")
+	ErrInvalidPort         = errors.New("PORT must be between 1 and 65535")
+	ErrInvalidReadHeader   = errors.New("HTTP_READ_HEADER_TIMEOUT must be positive")
+	ErrInvalidReadTimeout  = errors.New("HTTP_READ_TIMEOUT must be positive")
+	ErrInvalidWriteTimeout = errors.New("HTTP_WRITE_TIMEOUT must be positive")
+	ErrInvalidIdleTimeout  = errors.New("HTTP_IDLE_TIMEOUT must be positive")
+)
+
 // Config contains typed backend runtime settings.
 type Config struct {
 	Environment       string
@@ -90,27 +99,27 @@ func Load() (Config, error) {
 // Validate enforces startup constraints on the parsed config.
 func (c Config) Validate() error {
 	if c.Environment == "" {
-		return errors.New("ENV must not be empty")
+		return ErrEnvEmpty
 	}
 
 	if c.Port < 1 || c.Port > 65535 {
-		return fmt.Errorf("PORT must be between 1 and 65535, got %d", c.Port)
+		return fmt.Errorf("%w: got %d", ErrInvalidPort, c.Port)
 	}
 
 	if c.ReadHeaderTimeout <= 0 {
-		return fmt.Errorf("HTTP_READ_HEADER_TIMEOUT must be positive, got %s", c.ReadHeaderTimeout)
+		return fmt.Errorf("%w: got %s", ErrInvalidReadHeader, c.ReadHeaderTimeout)
 	}
 
 	if c.ReadTimeout <= 0 {
-		return fmt.Errorf("HTTP_READ_TIMEOUT must be positive, got %s", c.ReadTimeout)
+		return fmt.Errorf("%w: got %s", ErrInvalidReadTimeout, c.ReadTimeout)
 	}
 
 	if c.WriteTimeout <= 0 {
-		return fmt.Errorf("HTTP_WRITE_TIMEOUT must be positive, got %s", c.WriteTimeout)
+		return fmt.Errorf("%w: got %s", ErrInvalidWriteTimeout, c.WriteTimeout)
 	}
 
 	if c.IdleTimeout <= 0 {
-		return fmt.Errorf("HTTP_IDLE_TIMEOUT must be positive, got %s", c.IdleTimeout)
+		return fmt.Errorf("%w: got %s", ErrInvalidIdleTimeout, c.IdleTimeout)
 	}
 
 	return nil
