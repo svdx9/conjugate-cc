@@ -6,7 +6,7 @@ export function HomePage() {
       <Nav />
       <main class="flex-1 flex items-center justify-center px-4 py-12 sm:py-20">
         <div class="max-w-[36rem] w-full text-center animate-rise">
-          <p class="text-[0.65rem] font-bold uppercase tracking-[0.34em] text-muted mb-2">
+          <p class="text-eyebrow font-bold uppercase tracking-eyebrow text-muted mb-2">
             Conjugation drill application
           </p>
           <h1 class="font-serif text-[2.6rem] sm:text-[5rem] tracking-[0.015em] text-ink mt-1.5 mb-4 leading-tight">
