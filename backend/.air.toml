@@ -2,7 +2,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "HOST=${HOST:-localhost} PORT=${PORT:-8080} make -C .. build-dev"
+cmd = "make -C .. build-dev"
 bin = "./tmp/conjugate-api"
 delay = 200
 exclude_dir = ["bin", "tmp", "tools", "internal/api"]

@@ -69,7 +69,7 @@ backend-run: generate
 tidy:
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) mod tidy
 
-build-dev: generate tidy lint test
+build-dev: generate format tidy lint test
 	@echo "Building $(BACKEND_BINARY_NAME) for development"
 	mkdir -p $(BACKEND_DIR)/tmp
 	cd $(BACKEND_DIR) && $(GO_ENV) $(GO) build -ldflags "-s -w" -o tmp/$(BACKEND_BINARY_NAME) $(BACKEND_APP_DIR)
