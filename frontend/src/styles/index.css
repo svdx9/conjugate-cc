@@ -28,6 +28,7 @@
   /* Typography — eyebrow label */
   --text-eyebrow:  0.65rem;
   --tracking-eyebrow: 0.34em;
+  --tracking-hero-title: 0.015em;
 
   /* Typography — hero title */
   --text-hero:    2.6rem;
