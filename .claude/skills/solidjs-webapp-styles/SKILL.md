@@ -65,7 +65,7 @@ Pill/badge:   rounded-full
 </button>
 
 // Secondary / ghost
-<button class="px-4 py-2 border border-zinc-300 hover:bg-zinc-50 text-zinc-700 text-sm font-medium rounded-lg transition-colors">
+<button type="button" class="px-4 py-2 border border-zinc-300 hover:bg-zinc-50 text-zinc-700 text-sm font-medium rounded-lg transition-colors">
   Label
 </button>
 
