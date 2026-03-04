@@ -23,7 +23,7 @@ rules:
 - prefer minimal diffs.
 - if working under web/*, obey web/CLAUDE.md in addition to this file.
 - if rules conflict, prefer the more specific (deeper path) CLAUDE.md.
-- never edit files outside the session's working directory, even to unblock other work.
+- never edit files outside the current worktree, even to unblock other work.
 
 ## mandatory workflow steps
 
