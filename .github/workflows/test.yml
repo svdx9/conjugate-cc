@@ -28,15 +28,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: backend/go.mod
-          cache: false
-
-      - name: Cache Go build cache
-        uses: actions/cache@v4
-        with:
-          path: .cache/go-build
-          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/**/*.go') }}
-          restore-keys: |
-            ${{ runner.os }}-go-build-
+          cache: true
 
       - name: Run tests
-        run: make test
+        run: go test ./...
+        working-directory: backend

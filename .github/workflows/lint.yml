@@ -7,8 +7,6 @@ on:
       - "backend/go.mod"
       - "backend/go.sum"
       - "backend/.golangci.yml"
-      - "backend/.golangci.yaml"
-      - "backend/.golangci.toml"
       - ".github/workflows/lint.yml"
   push:
     branches:
@@ -18,8 +16,6 @@ on:
       - "backend/go.mod"
       - "backend/go.sum"
       - "backend/.golangci.yml"
-      - "backend/.golangci.yaml"
-      - "backend/.golangci.toml"
       - ".github/workflows/lint.yml"
 
 jobs:
