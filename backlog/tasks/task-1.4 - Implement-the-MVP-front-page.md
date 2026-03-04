@@ -23,7 +23,7 @@ parent_task_id: TASK-1
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Build the first user-visible page for the conjugation drill application. The page should explain the product purpose, present a clear entry point for the future drill experience, and work well on common desktop and mobile widths.
 
-THe navigation element will be at the top of the page and will be horizontal with the landing page as first link element, then drills, then 'verbs'
+The navigation element will be at the top of the page and will be horizontal with the landing page as first link element, then drills, then 'verbs'
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
