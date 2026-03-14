@@ -5,9 +5,9 @@ TOOLS_DIR := tools
 TOOLS_BIN := $(abspath $(TOOLS_DIR)/bin)
 
 # Versions
-GOLANGCI_LINT_VERSION := v1.55.2
+GOLANGCI_LINT_VERSION := v1.57.2
 GOFUMPT_VERSION := latest
-AIR_VERSION := latest
+AIR_VERSION := v1.52.3
 MIGRATE_VERSION := v4.16.2
 OAPI_CODEGEN_VERSION := v2.1.0
 
@@ -42,7 +42,7 @@ tools-dir:
 	mkdir -p $(TOOLS_BIN)
 
 .PHONY: tools-install
-tools-install: tools-dir $(GOLANGCI_LINT) $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN)
+tools-install: tools-dir $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN)
 
 $(GOLANGCI_LINT):
 	GOBIN=$(TOOLS_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
@@ -51,7 +51,7 @@ $(GOFUMPT):
 	GOBIN=$(TOOLS_BIN) go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
 
 $(AIR):
-	GOBIN=$(TOOLS_BIN) go install github.com/cosmtrek/air@$(AIR_VERSION)
+	GOBIN=$(TOOLS_BIN) go install github.com/air-verse/air@$(AIR_VERSION)
 
 $(MIGRATE):
 	GOBIN=$(TOOLS_BIN) go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$(MIGRATE_VERSION)
