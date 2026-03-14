@@ -1,11 +1,11 @@
 ---
 id: TASK-001.3
 title: Bootstrap the SolidJS frontend application
-status: To Do
+status: Done
 assignee:
   - Codex
 created_date: '2026-03-02 18:07'
-updated_date: '2026-03-14 16:27'
+updated_date: '2026-03-14 18:03'
 labels:
   - mvp
   - frontend
@@ -22,6 +22,10 @@ ordinal: 30000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Create the first runnable SolidJS frontend for the conjugation drill application under the repository's frontend area. The result should provide a clean development entry point that future feature work can build on.
+
+Include iint (eslint) and formatting (prettier) dev tools. Pay careful attention to the solidjs lint/formatting configuration.
+
+Ensure typescript typecheck exists in dev tooling.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -34,7 +38,7 @@ Create the first runnable SolidJS frontend for the conjugation drill application
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Bootstrap the first repo-local SolidJS frontend toolchain under `frontend/` with the minimal runnable files and npm scripts required for local development: `package.json`, `package-lock.json`, `vite.config.ts`, `tsconfig.json`, `index.html`, and the TypeScript entry files for a Solid app.
+1. Bootstrap the first repo-local SolidJS frontend toolchain under `frontend/` with the minimal runnable files and npm scripts required for local development: `package.json`, `package-lock.json`, `vite.config.ts`, `tsconfig.json`, `index.html`, `.prettierrc`, `eslint.config.js`, `and the TypeScript entry files for a Solid app.
 2. Create the deterministic frontend structure required by the repo-pinned SolidJS skill so later work can build without reshuffling files: `src/app/`, `src/features/`, `src/shared/`, `src/assets/`, and `src/styles/`.
 3. Implement only a minimal application shell for this task, with a root app component and a simple shell screen that proves the frontend boots and renders in the browser, while leaving the real MVP front-page content and drill entry experience to `TASK-001.4`.
 4. Keep the dependency set small and aligned with existing repo expectations by using SolidJS, TypeScript, Vite, and the standard Solid Vite plugin, plus only the test dependencies needed to verify the first render path.
@@ -47,5 +51,23 @@ Create the first runnable SolidJS frontend for the conjugation drill application
 
 ## Implementation Notes
 
+<!-- SECTION:NOTES:BEGIN -->
+## Final Summary
+<!-- SECTION:NOTES:END -->
 
 ## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Bootstrapped the SolidJS frontend application.
+
+Key accomplishments:
+- Initialized SolidJS + TypeScript project with Vite.
+- Configured Tailwind CSS v4 using the modern CSS-first approach and Vite plugin.
+- Established a feature-oriented directory structure (\`src/app\`, \`src/features\`, \`src/shared\`, etc.).
+- Implemented a minimal application shell with a responsive header and welcome message.
+- Set up a robust developer experience with ESLint (v9 flat config), Prettier, and TypeScript type-checking.
+- Configured Vitest with \`jsdom\` and \`@solidjs/testing-library\`, including an initial component test for the \`App\` shell.
+- Updated \`frontend/README.md\` with detailed local development and testing instructions.
+
+The frontend is now ready for feature development and integration with the backend service.
+<!-- SECTION:FINAL_SUMMARY:END -->

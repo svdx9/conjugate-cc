@@ -30,6 +30,7 @@ jobs:
               - 'backend/**/*.go'
               - 'backend/go.mod'
               - 'backend/go.sum'
+              - 'docs/schema/**/*.yaml'
               - '.github/workflows/*backend*.yml'
       - name: Debug Output
         run: 'echo "Frontend changed: ${{ steps.filter.outputs.frontend }}"'
@@ -55,5 +56,7 @@ jobs:
       - name: Check Results
         run: |
           if [[ "${{ needs.call-backend.result }}" == "failure" ]] || [[ "${{ needs.call-frontend.result }}" == "failure" ]]; then
+            echo "One or more dependent jobs failed."
             exit 1
           fi
+          echo "All dependent jobs passed or were skipped."
