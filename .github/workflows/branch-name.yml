@@ -1,4 +1,4 @@
-name: "Assert Branch Naming"
+name: "branch naming"
 
 on:
   pull_request:
