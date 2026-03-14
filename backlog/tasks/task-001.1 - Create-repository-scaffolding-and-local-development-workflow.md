@@ -1,11 +1,11 @@
 ---
 id: TASK-001.1
 title: Create repository scaffolding and local development workflow
-status: To Do
+status: Done
 assignee:
   - Codex
 created_date: '2026-03-02 18:07'
-updated_date: '2026-03-14 16:27'
+updated_date: '2026-03-14 17:39'
 labels:
   - mvp
   - setup
@@ -30,11 +30,10 @@ This task should leave the repo organized for follow-on backend and frontend imp
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The repository contains an agreed baseline structure for backend and frontend code, plus any root-level files needed for local development.
-- [ ] #2 The project root contains a Makefile for backend workflows with invocable targets for test, lint, build, debug-build, and format.
-- [ ] #3 The Makefile backend build targets pass the service git SHA and build time into the backend application entrypoint at build time.
-- [ ] #4 Project documentation explains the intended app structure and how a contributor should install dependencies and start the project locally, including use of the Makefile.
-- [ ] #5 The task includes a verification step showing the documented local workflow and Makefile commands match the repository layout and commands.
+- [x] #1 The repository contains an agreed baseline structure for backend and frontend code, plus any root-level files needed for local development.
+- [x] #2 The backend contains a Makefile for backend workflows with invocable targets for test, lint, build, debug-build, and format.
+- [x] #3 Project documentation explains the intended app structure and how a contributor should install dependencies and start the project locally, including use of the Makefile.
+- [x] #4 The task includes a verification step showing the documented local workflow and Makefile commands match the repository layout and commands.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -50,5 +49,24 @@ This task should leave the repo organized for follow-on backend and frontend imp
 
 ## Implementation Notes
 
+<!-- SECTION:NOTES:BEGIN -->
+## Final Summary
+<!-- SECTION:NOTES:END -->
 
 ## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Established the baseline repository structure and local development workflow.
+
+Key changes:
+- Created root `.gitignore` to handle Go and Node.js artifacts.
+- Created root `README.md` with project overview and Getting Started guide.
+- Created `backend/Makefile` following the project's Go backend skill:
+  - Implemented targets for `test`, `lint`, `build`, `debug-build`, and `format`.
+  - Added a `tools-install` target that installs pinned versions of `golangci-lint`, `gofumpt`, `air`, `migrate`, and `oapi-codegen` to `backend/tools/bin`.
+  - Configured build targets to pass `GitSHA` and `BuildTime` via `-ldflags` into the application entrypoint.
+- Created `backend/README.md` and `frontend/README.md` with component-specific documentation.
+- Ensured backend commands are explicitly executed from the `backend/` directory.
+
+The repository is now ready for component-specific bootstrapping in follow-on tasks.
+<!-- SECTION:FINAL_SUMMARY:END -->
