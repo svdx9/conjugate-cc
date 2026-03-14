@@ -4,8 +4,11 @@ The frontend is a SolidJS application for practicing verb conjugations.
 
 ## Repository Layout (relative to /frontend)
 
-- `src/`: Source code.
-- `public/`: Static assets.
+- `src/app/`: Root application components and shell.
+- `src/features/`: Feature-specific logic and components.
+- `src/shared/`: Reusable components, hooks, and utilities.
+- `src/assets/`: Static assets (images, icons).
+- `src/styles/`: Global styles and Tailwind CSS configuration.
 
 ## Prerequisites
 
@@ -26,7 +29,15 @@ npm install
 npm run dev
 ```
 
-The application uses Vite for building and development.
+The application uses Vite and Tailwind CSS v4.
+
+### Testing
+
+```bash
+npm test
+```
+
+Tests are powered by Vitest and `@solidjs/testing-library`.
 
 ### Linting and Formatting
 
@@ -34,3 +45,5 @@ The application uses Vite for building and development.
 npm run lint
 npm run format
 ```
+
+The project uses ESLint and Prettier for code quality and consistency.
