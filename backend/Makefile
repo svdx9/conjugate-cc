@@ -42,7 +42,7 @@ tools-dir:
 	mkdir -p $(TOOLS_BIN)
 
 .PHONY: tools-install
-tools-install: tools-dir $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN)
+tools-install: tools-dir $(GOLANGCI_LINT) $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN)
 
 $(GOLANGCI_LINT):
 	GOBIN=$(TOOLS_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
