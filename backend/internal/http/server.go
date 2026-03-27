@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/svdx9/conjugate-cc/backend/internal/api/v1"
 	"github.com/svdx9/conjugate-cc/backend/internal/status"
 )
