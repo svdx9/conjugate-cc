@@ -2,12 +2,17 @@
 .vscode/
 .idea/
 
+# llms
+.claude/*
+
 # Backend
 backend/bin/
 backend/tools/bin/
 backend/vendor/
+backend/.claude/*
 
 # Frontend
+frontend/.claude/*
 frontend/node_modules/
 frontend/dist/
 frontend/.env.local
@@ -19,3 +24,5 @@ frontend/.env.local
 
 # OS specific
 .DS_Store
+.claude/*
+.gitignore
