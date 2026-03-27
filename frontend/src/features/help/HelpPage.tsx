@@ -1,13 +1,12 @@
 import { Component } from 'solid-js';
+import PageShell from '../../shared/PageShell';
 
 const HelpPage: Component = () => {
   return (
-    <main class="pt-16 sm:pt-20 lg:pt-24">
-      <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
-        <h1 class="text-4xl font-bold">Help</h1>
-        <p class="mt-4 text-lg">Help and support resources coming soon.</p>
-      </div>
-    </main>
+    <PageShell>
+      <h1 class="text-4xl font-bold">Help</h1>
+      <p class="mt-4 text-lg">Help and support resources coming soon.</p>
+    </PageShell>
   );
 };
 
