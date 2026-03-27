@@ -18,6 +18,7 @@ type Handler struct {
 // NewHandler creates a new status handler.
 func NewHandler(logger *slog.Logger, gitSHA, buildTime string) *Handler {
 	return &Handler{
+		logger:    logger,
 		gitSHA:    gitSHA,
 		buildTime: buildTime,
 	}
