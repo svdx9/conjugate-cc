@@ -5,11 +5,11 @@ TOOLS_DIR := tools
 TOOLS_BIN := $(abspath $(TOOLS_DIR)/bin)
 
 # Versions
-GOLANGCI_LINT_VERSION := v1.64.1
+AIR_VERSION := v1.63.0
 GOFUMPT_VERSION := latest
-AIR_VERSION := v1.52.3
-MIGRATE_VERSION := v4.16.2
-OAPI_CODEGEN_VERSION := v2.1.0
+GOLANGCI_LINT_VERSION := v2.8.0
+MIGRATE_VERSION := v4.19.1
+OAPI_CODEGEN_VERSION := v2.5.1
 
 # Binaries
 GOLANGCI_LINT := $(TOOLS_BIN)/golangci-lint
@@ -45,7 +45,7 @@ tools-dir:
 tools-install: tools-dir $(GOLANGCI_LINT) $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN)
 
 $(GOLANGCI_LINT):
-	GOBIN=$(TOOLS_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+	GOBIN=$(TOOLS_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
 $(GOFUMPT):
 	GOBIN=$(TOOLS_BIN) go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
