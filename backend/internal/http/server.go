@@ -12,6 +12,8 @@ import (
 func NewRouter(statusHandler *status.Handler) http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(middleware.Recoverer)
+
 	// Mount the generated handlers
 	api.HandlerFromMux(statusHandler, r)
 
