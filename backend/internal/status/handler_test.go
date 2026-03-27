@@ -11,6 +11,7 @@ import (
 )
 
 func TestHandler_GetStatus(t *testing.T) {
+	t.Parallel()
 	h := NewHandler(slog.Default(), "sha", "time")
 	req := httptest.NewRequest(http.MethodGet, "/v1/status", nil)
 	w := httptest.NewRecorder()
@@ -22,7 +23,8 @@ func TestHandler_GetStatus(t *testing.T) {
 	}
 
 	var resp api.Status
-	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+	err := json.NewDecoder(w.Body).Decode(&resp)
+	if err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 
@@ -32,6 +34,7 @@ func TestHandler_GetStatus(t *testing.T) {
 }
 
 func TestHandler_GetMetadata(t *testing.T) {
+	t.Parallel()
 	gitSHA := "d32e693"
 	buildTime := "2026-03-14T17:33:30Z"
 	h := NewHandler(slog.Default(), gitSHA, buildTime)
@@ -45,7 +48,8 @@ func TestHandler_GetMetadata(t *testing.T) {
 	}
 
 	var resp api.Metadata
-	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+	err := json.NewDecoder(w.Body).Decode(&resp)
+	if err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 

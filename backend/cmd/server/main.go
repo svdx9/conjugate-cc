@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -16,6 +18,7 @@ import (
 )
 
 // Injected at build time via -ldflags
+//nolint:gochecknoglobals
 var (
 	GitSHA    = "unknown"
 	BuildTime = "unknown"
@@ -42,8 +45,9 @@ func main() {
 	statusHandler := status.NewHandler(logger, GitSHA, BuildTime)
 	router := internalhttp.NewRouter(statusHandler)
 
+	//nolint:exhaustruct
 	server := &http.Server{
-		Addr:         ":" + cfg.Port,
+		Addr:         net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -53,7 +57,8 @@ func main() {
 	// Graceful shutdown setup
 	serverErr := make(chan error, 1)
 	go func() {
-		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		err := server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErr <- err
 		}
 	}()
@@ -71,7 +76,8 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		if err := server.Shutdown(ctx); err != nil {
+		err := server.Shutdown(ctx)
+		if err != nil {
 			logger.Error("graceful shutdown failed", "error", err)
 			_ = server.Close()
 			os.Exit(1)
