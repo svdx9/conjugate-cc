@@ -31,7 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	slog.Info("starting conjugate-cc backend",
+	logger.Info("starting conjugate-cc backend",
 		"port", cfg.Port,
 		"env", cfg.Env,
 		"git_sha", GitSHA,
@@ -63,19 +63,19 @@ func main() {
 
 	select {
 	case err := <-serverErr:
-		slog.Error("server error", "error", err)
+		logger.Error("server error", "error", err)
 		os.Exit(1)
 	case sig := <-shutdown:
-		slog.Info("shutting down server", "signal", sig.String())
+		logger.Info("shutting down server", "signal", sig.String())
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		if err := server.Shutdown(ctx); err != nil {
-			slog.Error("graceful shutdown failed", "error", err)
+			logger.Error("graceful shutdown failed", "error", err)
 			_ = server.Close()
 			os.Exit(1)
 		}
-		slog.Info("server exited gracefully")
+		logger.Info("server exited gracefully")
 	}
 }
