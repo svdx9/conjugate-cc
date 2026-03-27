@@ -11,7 +11,7 @@ import Footer from './Footer';
 
 const Layout: Component<{ children?: JSX.Element }> = (props) => {
   return (
-    <div class="flex min-h-screen flex-col bg-surface text-text-primary transition-colors dark:bg-surface-dark dark:text-text-primary-dark">
+    <div class="bg-surface text-text-primary dark:bg-surface-dark dark:text-text-primary-dark flex min-h-screen flex-col transition-colors">
       <Navigation />
       <main class="flex-1">{props.children}</main>
       <Footer />

@@ -12,9 +12,9 @@ const Navigation: Component = () => {
   ];
 
   return (
-    <header class="sticky top-0 z-50 bg-surface transition-colors dark:bg-surface-dark">
+    <header class="bg-surface dark:bg-surface-dark sticky top-0 z-50 transition-colors">
       <nav class="px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 items-center justify-between border-b border-border px-2 dark:border-border-dark">
+        <div class="border-border dark:border-border-dark flex h-16 items-center justify-between border-b px-2">
           <A href="/" class="text-2xl font-bold transition-colors">
             conjugate.cc
           </A>
