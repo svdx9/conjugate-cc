@@ -43,5 +43,7 @@ func (h *Handler) GetMetadata(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(resp)
-	slog.Error("failed to encode response", "error", err)
+	if err != nil {
+		slog.Error("failed to encode response", "error", err)
+	}
 }
