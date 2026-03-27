@@ -4,6 +4,9 @@
 
 # llms
 .claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/conjugate-design-system/
 
 # Backend
 backend/bin/
@@ -24,5 +27,4 @@ frontend/.env.local
 
 # OS specific
 .DS_Store
-.claude/*
 .gitignore
