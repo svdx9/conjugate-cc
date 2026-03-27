@@ -39,7 +39,7 @@ func main() {
 	)
 
 	// Dependency injection
-	statusHandler := status.NewHandler(GitSHA, BuildTime)
+	statusHandler := status.NewHandler(logger, GitSHA, BuildTime)
 	router := internalhttp.NewRouter(statusHandler)
 
 	server := &http.Server{

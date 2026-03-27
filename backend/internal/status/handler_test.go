@@ -2,6 +2,7 @@ package status
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestHandler_GetStatus(t *testing.T) {
-	h := NewHandler("sha", "time")
+	h := NewHandler(slog.Default(), "sha", "time")
 	req := httptest.NewRequest(http.MethodGet, "/v1/status", nil)
 	w := httptest.NewRecorder()
 
@@ -33,7 +34,7 @@ func TestHandler_GetStatus(t *testing.T) {
 func TestHandler_GetMetadata(t *testing.T) {
 	gitSHA := "d32e693"
 	buildTime := "2026-03-14T17:33:30Z"
-	h := NewHandler(gitSHA, buildTime)
+	h := NewHandler(slog.Default(), gitSHA, buildTime)
 	req := httptest.NewRequest(http.MethodGet, "/v1/metadata", nil)
 	w := httptest.NewRecorder()
 

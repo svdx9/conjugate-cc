@@ -2,6 +2,7 @@ package status
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/svdx9/conjugate-cc/backend/internal/api/v1"
@@ -9,12 +10,13 @@ import (
 
 // Handler implements the api.ServerInterface.
 type Handler struct {
+	logger    *slog.Logger
 	gitSHA    string
 	buildTime string
 }
 
 // NewHandler creates a new status handler.
-func NewHandler(gitSHA, buildTime string) *Handler {
+func NewHandler(logger *slog.Logger, gitSHA, buildTime string) *Handler {
 	return &Handler{
 		gitSHA:    gitSHA,
 		buildTime: buildTime,
@@ -39,5 +41,6 @@ func (h *Handler) GetMetadata(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp)
+	err := json.NewEncoder(w).Encode(resp)
+	slog.Error("failed to encode response", "error", err)
 }
