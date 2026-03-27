@@ -62,9 +62,7 @@ func Load() (*Config, error) {
 // Validate ensures all required configuration is present and valid.
 func (c *Config) Validate() error {
 	if c.Port < 0 || c.Port > 65535 {
-		if c.Port != 0 {
-			return fmt.Errorf("%w: %d", errPortOutOfRange, c.Port)
-		}
+		return fmt.Errorf("%w: %d", errPortOutOfRange, c.Port)
 	}
 	// check that host is a valid IP
 	ip := net.ParseIP(c.Host)
