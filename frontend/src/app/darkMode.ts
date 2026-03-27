@@ -4,7 +4,10 @@ const getInitialDarkMode = () => {
   if (typeof window === 'undefined') return false;
   try {
     return localStorage.getItem('darkMode') === 'true';
-  } catch {
+  } catch (e) {
+    if (import.meta.env.DEV) {
+      console.warn('Failed to access localStorage for dark mode preference:', e);
+    }
     return false;
   }
 };
@@ -24,8 +27,11 @@ export const toggleDarkMode = () => {
   applyDarkClass(newValue);
   try {
     localStorage.setItem('darkMode', String(newValue));
-  } catch {
+  } catch (e) {
     // localStorage might not be available in tests
+    if (import.meta.env.DEV) {
+      console.warn('Failed to access localStorage for dark mode preference:', e);
+    }
   }
 };
 
