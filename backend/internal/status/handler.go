@@ -31,7 +31,10 @@ func (h *Handler) GetStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp)
+	err := json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		slog.Error("failed to encode response", "error", err)
+	}
 }
 
 // GetMetadata handles GET /v1/metadata.
