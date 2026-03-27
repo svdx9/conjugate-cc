@@ -11,7 +11,7 @@ The backend is a Go service providing the conjugation engine and API.
 
 ## Prerequisites
 
-- Go v1.22+
+- Go v1.25
 - Make
 
 ## Getting Started

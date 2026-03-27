@@ -11,7 +11,7 @@ A language learning application for practicing verb conjugations.
 
 ## Prerequisites
 
-- **Go**: v1.22+
+- **Go**: v1.25.7
 - **Node.js**: v20+
 - **npm**: (or pnpm/yarn)
 - **Make**: (GNU Make)
