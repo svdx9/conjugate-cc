@@ -1,5 +1,16 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-surface: #ffffff;
+  --color-surface-dark: #111111;
+  --color-text-primary: #000000;
+  --color-text-primary-dark: #ffffff;
+  --color-border: #00000026;
+  --color-border-dark: #ffffff26;
+  --color-highlight: #ebc61d;
+  --color-btn-bg: #f8f8f8;
+  --color-btn-text: #374151;
 }

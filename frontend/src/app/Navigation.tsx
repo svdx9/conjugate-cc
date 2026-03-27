@@ -1,6 +1,6 @@
 import { Component, For } from 'solid-js';
 import { A } from '@solidjs/router';
-import { isDarkMode, toggleDarkMode } from './darkMode';
+import { toggleDarkMode, isDarkMode } from './darkMode';
 
 const Navigation: Component = () => {
   const navLinks = [
@@ -12,26 +12,10 @@ const Navigation: Component = () => {
   ];
 
   return (
-    <header
-      class="sticky top-0 z-50 transition-colors"
-      style={{
-        'background-color': isDarkMode() ? '#111111' : '#ffffff',
-        'color-scheme': isDarkMode() ? 'dark' : 'light',
-      }}
-    >
+    <header class="sticky top-0 z-50 bg-surface transition-colors dark:bg-surface-dark">
       <nav class="px-4 sm:px-6 lg:px-8">
-        <div
-          class="flex px-2 h-16 items-center justify-between"
-          style={{
-            'border-bottom': 'light-dark(1px solid #00000026, 1px solid #ffffff26)',
-          }}
-        >
-
-          <A
-            href="/"
-            class="text-2xl font-bold transition-colors"
-            style={{ color: isDarkMode() ? '#ffffff' : '#000000' }}
-          >
+        <div class="flex h-16 items-center justify-between border-b border-border px-2 dark:border-border-dark">
+          <A href="/" class="text-2xl font-bold transition-colors">
             conjugate.cc
           </A>
 
@@ -43,7 +27,6 @@ const Navigation: Component = () => {
                     <A
                       href={link.href}
                       class="inline-flex h-10 items-center px-4 text-sm font-medium transition-colors"
-                      style={{ color: isDarkMode() ? '#ffffff' : '#000000' }}
                     >
                       {link.label}
                     </A>
@@ -54,7 +37,6 @@ const Navigation: Component = () => {
             <button
               onClick={toggleDarkMode}
               class="text-lg transition-colors"
-              style={{ color: isDarkMode() ? '#ffffff' : '#000000' }}
               aria-label="Toggle dark mode"
             >
               {isDarkMode() ? '○' : '◐'}

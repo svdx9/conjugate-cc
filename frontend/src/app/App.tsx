@@ -1,4 +1,4 @@
-import { Component, JSX, createMemo } from 'solid-js';
+import { Component, JSX } from 'solid-js';
 import { Route } from '@solidjs/router';
 import LandingPage from '../features/landing/LandingPage';
 import DrillsPage from '../features/drills/DrillsPage';
@@ -8,20 +8,10 @@ import ContactPage from '../features/contact/ContactPage';
 import CookiePolicyPage from '../features/legal/CookiePolicyPage';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import { isDarkMode } from './darkMode';
 
 const Layout: Component<{ children?: JSX.Element }> = (props) => {
-  const bgColor = createMemo(() => (isDarkMode() ? '#111111' : '#ffffff'));
-  const textColor = createMemo(() => (isDarkMode() ? '#ffffff' : '#000000'));
-
   return (
-    <div
-      class="flex min-h-screen flex-col transition-colors"
-      style={{
-        'background-color': bgColor(),
-        color: textColor(),
-      }}
-    >
+    <div class="flex min-h-screen flex-col bg-surface text-text-primary transition-colors dark:bg-surface-dark dark:text-text-primary-dark">
       <Navigation />
       <main class="flex-1">{props.children}</main>
       <Footer />
