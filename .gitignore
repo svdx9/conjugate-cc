@@ -1,0 +1,29 @@
+# IDEs
+.vscode/
+.idea/
+
+# llms
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/conjugate-design-system/
+
+# Backend
+backend/bin/
+backend/tools/bin/
+backend/vendor/
+backend/.claude/*
+
+# Frontend
+frontend/.claude/*
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Build artifacts
+*.exe
+*.test
+*.prof
+
+# OS specific
+.DS_Store
