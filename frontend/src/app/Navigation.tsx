@@ -1,4 +1,4 @@
-import { Component, For, createMemo } from 'solid-js';
+import { Component, For } from 'solid-js';
 import { A } from '@solidjs/router';
 import { isDarkMode, toggleDarkMode } from './darkMode';
 
@@ -7,10 +7,9 @@ const Navigation: Component = () => {
     { label: 'Home', href: '/' },
     { label: 'Drills', href: '/drills' },
     { label: 'Verbs', href: '/verbs' },
+    { label: 'Contact', href: '/contact' },
     { label: 'Help', href: '/help' },
   ];
-
-  const textColor = createMemo(() => (isDarkMode() ? '#ffffff' : '#000000'));
 
   return (
     <header
@@ -31,7 +30,7 @@ const Navigation: Component = () => {
           <A
             href="/"
             class="text-2xl font-bold transition-colors"
-            style={{ color: textColor() }}
+            style={{ color: isDarkMode() ? '#ffffff' : '#000000' }}
           >
             conjugate.cc
           </A>
@@ -44,7 +43,7 @@ const Navigation: Component = () => {
                     <A
                       href={link.href}
                       class="inline-flex h-10 items-center px-4 text-sm font-medium transition-colors"
-                      style={{ color: textColor() }}
+                      style={{ color: isDarkMode() ? '#ffffff' : '#000000' }}
                     >
                       {link.label}
                     </A>
@@ -55,7 +54,7 @@ const Navigation: Component = () => {
             <button
               onClick={toggleDarkMode}
               class="text-lg transition-colors"
-              style={{ color: textColor() }}
+              style={{ color: isDarkMode() ? '#ffffff' : '#000000' }}
               aria-label="Toggle dark mode"
             >
               {isDarkMode() ? '○' : '◐'}
