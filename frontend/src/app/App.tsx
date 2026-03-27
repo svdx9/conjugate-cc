@@ -21,56 +21,14 @@ const Layout: Component<{ children?: JSX.Element }> = (props) => {
 
 const App: Component = () => {
   return (
-    <>
-      <Route
-        path="/"
-        component={() => (
-          <Layout>
-            <LandingPage />
-          </Layout>
-        )}
-      />
-      <Route
-        path="/drills"
-        component={() => (
-          <Layout>
-            <DrillsPage />
-          </Layout>
-        )}
-      />
-      <Route
-        path="/verbs"
-        component={() => (
-          <Layout>
-            <VerbsPage />
-          </Layout>
-        )}
-      />
-      <Route
-        path="/help"
-        component={() => (
-          <Layout>
-            <HelpPage />
-          </Layout>
-        )}
-      />
-      <Route
-        path="/contact"
-        component={() => (
-          <Layout>
-            <ContactPage />
-          </Layout>
-        )}
-      />
-      <Route
-        path="/cookie-policy"
-        component={() => (
-          <Layout>
-            <CookiePolicyPage />
-          </Layout>
-        )}
-      />
-    </>
+    <Route path="/" component={Layout}>
+      <Route path="/" component={LandingPage} />
+      <Route path="/drills" component={DrillsPage} />
+      <Route path="/verbs" component={VerbsPage} />
+      <Route path="/help" component={HelpPage} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/cookie-policy" component={CookiePolicyPage} />
+    </Route>
   );
 };
 
