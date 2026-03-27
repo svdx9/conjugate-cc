@@ -18,6 +18,7 @@ import (
 )
 
 // Injected at build time via -ldflags
+//
 //nolint:gochecknoglobals
 var (
 	GitSHA    = "unknown"
@@ -25,7 +26,8 @@ var (
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	handler := slog.NewTextHandler(os.Stdout, nil)
+	logger := slog.New(handler)
 	slog.SetDefault(logger)
 
 	cfg, err := config.Load()
@@ -47,11 +49,13 @@ func main() {
 
 	//nolint:exhaustruct
 	server := &http.Server{
-		Addr:         net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-		Handler:      router,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
+		Handler:           router,
+		ErrorLog:          slog.NewLogLogger(handler, slog.LevelError),
+		ReadTimeout:       5 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	// Graceful shutdown setup
