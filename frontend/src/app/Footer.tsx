@@ -7,7 +7,7 @@ const Footer: Component = () => {
 
   return (
     <footer
-      class="border-t py-8 transition-colors"
+      class="py-8 transition-colors"
       style={{
         'background-color': isDarkMode() ? '#111111' : '#ffffff',
         'border-color': isDarkMode() ? '#ffffff26' : '#000000',
