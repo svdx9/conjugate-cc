@@ -19,6 +19,31 @@ A language learning application for practicing verb conjugations.
 
 ## Local Development
 
+### Quick Start
+
+Start both the backend and frontend with a single command:
+
+```bash
+make dev-all
+```
+
+This starts:
+- Backend (Go) on http://localhost:8080
+- Frontend (SolidJS + Vite) on http://localhost:3000
+
+Open http://localhost:3000 in your browser. The footer shows a green indicator when connected to the backend, along with the git SHA and build time.
+
+### Verification
+
+Verify the backend is running:
+
+```bash
+curl http://localhost:8080/v1/status
+# Expected: {"status":"ok"}
+```
+
+Check the frontend footer - it should show a green indicator when the backend is running.
+
 ### Backend
 
 The backend uses a `Makefile` for common tasks. You can run these from the `backend/` directory:
