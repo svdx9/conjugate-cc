@@ -1,10 +1,10 @@
 ---
 id: TASK-001.5
 title: Wire the frontend and backend into a single local MVP workflow
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-03-02 18:07'
-updated_date: '2026-03-14 16:26'
+updated_date: '2026-03-29 00:00'
 labels:
   - mvp
   - integration
@@ -27,9 +27,9 @@ Connect the initial frontend and backend so the repository behaves like one MVP 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A contributor can follow repository documentation to start the backend and frontend together and view the MVP front page locally.
-- [ ] #2 The MVP front page demonstrates live integration with the backend through a minimal user-visible signal such as status, readiness, or configuration data.
-- [ ] #3 The integration path has a repeatable verification step that confirms the local stack is working end to end.
+- [x] #1 A contributor can follow repository documentation to start the backend and frontend together and view the MVP front page locally.
+- [x] #2 The MVP front page demonstrates live integration with the backend through a minimal user-visible signal such as status, readiness, or configuration data.
+- [x] #3 The integration path has a repeatable verification step that confirms the local stack is working end to end.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -37,80 +37,138 @@ Connect the initial frontend and backend so the repository behaves like one MVP 
 <!-- SECTION:PLAN:BEGIN -->
 ### Context
 
-- Backend: Go + chi, runs on port 8080, exposes `GET /v1/health → {"status":"ok"}` and `GET /v1/build-info → {"gitSha":"...","buildTime":"..."}`
-- Frontend: SolidJS + Vite, runs on port 5173, currently has no API calls or proxy config
-- Root Makefile has `make dev` (backend via air) but no frontend target
-- README documents both processes separately; no single "start everything" command
+The frontend (SolidJS + Vite, port 3000) and backend (Go + chi, port 8080) run independently with no integration. A contributor must start each separately and has no way to confirm the stack works end-to-end. This task connects them so the front page shows a live backend signal and a single command starts everything.
+
+### Corrected Facts (vs original backlog plan)
+
+| Original plan says | Actual |
+|--------------------|--------|
+| Schema at docs/schema/v1/conjugate.yaml | docs/schema/v1/api.yaml |
+| Endpoints /v1/health, /v1/build-info | /v1/status, /v1/metadata |
+| Root Makefile exists | Only backend/Makefile exists |
+| Footer at components/Footer.tsx | src/app/Footer.tsx |
+| Dev server port 5173 | Port 3000 |
+| Create DevFooter component | Modify existing Footer component |
 
 ### Approach
 
-Use the **Vite dev-server proxy** to forward `/v1/*` requests from the browser (port 5173) to the backend (port 8080). This eliminates CORS entirely in development and means the frontend uses simple relative URLs. No backend changes required.
+Per the user's context: add backend status to the existing Footer (not a separate DevFooter). Use a sync poller with createSignal + setInterval for health checks, and openapi-fetch + openapi-typescript for type-safe API calls.
 
-Use **`openapi-typescript`** (dev dependency) to generate TypeScript types from `docs/schema/v1/conjugate.yaml`, and **`openapi-fetch`** (runtime dependency) to make type-safe requests against those types. Generated output is committed and kept in sync via a `make generate` step, mirroring the backend's existing codegen discipline.
+### Steps
 
-Add a `<DevFooter>` component rendered only when `import.meta.env.DEV` is true. It uses the generated client to fetch `/v1/health` and `/v1/build-info` and displays git SHA, build time, and API status as a single horizontal bar. This keeps the production UI completely unaffected.
+#### 1. Add Vite dev-server proxy
 
-Mount `<DevFooter>` in `App.tsx` so it appears on every page during development.
+File: `frontend/vite.config.ts`
 
-Add `make dev-all` and `make frontend-generate` root targets.
+Add server.proxy block to forward /v1 requests to http://localhost:8080:
+```ts
+server: {
+  port: 3000,
+  proxy: {
+    '/v1': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+  },
+},
+```
 
-### Files to Change
+#### 2. Install frontend dependencies
 
-#### 1. `frontend/package.json`
-Add dependencies:
-- `openapi-fetch` (runtime) — type-safe fetch client
-- `openapi-typescript` (devDependency) — generates types from schema
-Add script: `"generate": "openapi-typescript ../docs/schema/v1/conjugate.yaml -o src/api/v1.d.ts"`
+```bash
+cd frontend
+npm install openapi-fetch
+npm install -D openapi-typescript
+```
 
-#### 2. `frontend/src/api/v1.d.ts` (generated, committed)
-TypeScript types generated from `docs/schema/v1/conjugate.yaml` via `openapi-typescript`. Never edited by hand.
+Add generate script to frontend/package.json:
+```json
+"generate": "openapi-typescript ../docs/schema/v1/api.yaml -o src/api/v1.d.ts"
+```
 
-#### 3. `frontend/src/api/client.ts` (new file)
-Initialises and exports a single `openapi-fetch` client instance typed against `v1.d.ts`:
+#### 3. Generate TypeScript types
+
+File (generated, committed): `frontend/src/api/v1.d.ts`
+
+Run `npm run generate` to produce types from the OpenAPI schema.
+
+#### 4. Create API client
+
+File (new): `frontend/src/api/client.ts`
 ```ts
 import createClient from "openapi-fetch";
-import type { paths } from "./v1.d.ts";
+import type { paths } from "./v1";
 export const api = createClient<paths>({ baseUrl: "" });
 ```
 
-#### 4. `frontend/vite.config.ts`
-Add a `server.proxy` block forwarding `/v1` to `http://localhost:8080`.
+#### 5. Update Footer with backend status indicator
 
-#### 5. `frontend/src/components/DevFooter.tsx` (new file)
-- Guarded by `import.meta.env.DEV` — returns `null` in production
-- Uses `api` client to fetch `/v1/build-info` and `/v1/health` via `createResource`
-- Renders a single horizontal bar: `status: ok  backend ver: abc1234  backend build time: 2026-03-10T12:00:00Z`
-- Styled to be visually distinct from app content (muted, monospace, small text)
+File: `frontend/src/app/Footer.tsx`
 
-#### 6. `frontend/src/App.tsx`
-Mount `<Show when={import.meta.env.DEV}><DevFooter /></Show>` at the bottom of the app shell.
+Add a health poller using the pattern from user context:
+- createSignal<boolean>(false) for backendAvailable
+- setInterval every 30s calling /v1/status via the typed client
+- Green/red dot indicator showing backend status
+- When backend is available, also fetch /v1/metadata to show git SHA and build time
+- Guard the status indicator behind import.meta.env.DEV so production footer stays clean
 
-#### 7. `Makefile` (root)
-- Add `frontend-generate` target: runs `npm run generate` in `frontend/`
-- Update `generate` target to also run `frontend-generate`
-- Add `frontend-dev` and `dev-all` targets (`make -j2 dev frontend-dev`)
+Styling follows the design system: small monospace text, muted, using existing tokens (text-highlight for connected, standard text for disconnected).
 
-#### 8. `README.md`
-- Add a **Quick start** section: `make dev-all`
-- Keep individual commands for reference
-- Add a **Verification** section: `curl http://localhost:8080/v1/health` + browser dev footer check
+#### 6. Create root Makefile
+
+File (new): `Makefile` (project root)
+
+Targets:
+- `frontend-generate`: runs `npm run generate --prefix frontend`
+- `generate`: runs backend generate + frontend-generate
+- `frontend-dev`: runs `npm run dev --prefix frontend`
+- `dev`: runs `make -C backend build && make -C backend air/dev` (backend)
+- `dev-all`: runs backend dev + frontend dev in parallel (`make -j2 dev frontend-dev`)
+
+#### 7. Update README.md
+
+- Add Quick Start section with `make dev-all`
+- Add Verification section: `curl http://localhost:8080/v1/status` + check footer indicator in browser
+- Keep existing individual commands for reference
+
+#### 8. Update backlog task file
+
+Set status to "In Progress" in this task file.
+
+### Files to Modify/Create
+
+| File | Action |
+|------|--------|
+| frontend/vite.config.ts | Edit — add proxy |
+| frontend/package.json | Edit — add deps + generate script |
+| frontend/src/api/v1.d.ts | Generate (committed) |
+| frontend/src/api/client.ts | Create |
+| frontend/src/app/Footer.tsx | Edit — add status indicator |
+| Makefile | Create (root) |
+| README.md | Edit |
+| backlog/tasks/task-001.5...md | Edit — status to In Progress |
 
 ### Acceptance Criteria Mapping
 
 | AC | How satisfied |
 |----|--------------|
-| #1 Contributor can start both parts and view front page | `make dev-all` + README quick-start section |
-| #2 Front page shows live backend signal | Dev footer shows API status, git SHA, build time |
-| #3 Repeatable verification step | `curl` command + browser dev footer check in README |
+| #1 Contributor can start both and view front page | `make dev-all` + README quick-start |
+| #2 Front page shows live backend signal | Footer status indicator (green/red + SHA + build time) |
+| #3 Repeatable verification step | curl + browser footer check documented in README |
 
-### Out of Scope
-- CORS middleware (not needed with Vite proxy)
-- Production reverse-proxy config
-- Any new backend endpoints
+### Verification
+
+1. `cd frontend && npm install && npm run generate` — types file created without errors
+2. `make dev-all` from root — both servers start
+3. Open http://localhost:3000 — landing page loads, footer shows green indicator with git SHA
+4. Stop backend — footer indicator turns red within 30s
+5. `curl http://localhost:8080/v1/status` returns `{"status":"ok"}`
+6. `cd backend && make test && make lint` — no errors (no backend changes expected)
+7. `cd frontend && npm run lint && npm test` — no errors
 <!-- SECTION:PLAN:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Frontend and backend wired into a single local MVP workflow via PR #15. Completed before the task finalization convention was established in PR #24.
+Frontend and backend are wired together for local development. The Vite dev server proxies `/v1` to the Go backend on port 8080. A typed API client (`openapi-fetch` + generated types from the OpenAPI schema) hits `/v1/status` and `/v1/metadata` every 30 seconds. The result is surfaced in the footer as a green/red dot with git SHA and build time, visible only in DEV mode. A root `Makefile` adds `make dev-all` to start both servers in parallel. The README quick-start and verification steps document the full workflow. The footer layout was also updated to match the navbar width and structure (indicator on left, links on right).
 <!-- SECTION:FINAL_SUMMARY:END -->
