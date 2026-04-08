@@ -38,7 +38,7 @@ Open http://localhost:3000 in your browser. The footer shows a green indicator w
 Verify the backend is running:
 
 ```bash
-curl http://localhost:8080/v1/status
+curl http://localhost:8080/api/v1/status
 # Expected: {"status":"ok"}
 ```
 
