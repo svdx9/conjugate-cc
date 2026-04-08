@@ -7,7 +7,6 @@ const Navigation: Component = () => {
     { label: 'Home', href: '/' },
     { label: 'Drills', href: '/drills' },
     { label: 'Verbs', href: '/verbs' },
-    { label: 'Contact', href: '/contact' },
     { label: 'Help', href: '/help' },
   ];
 
