@@ -1,0 +1,22 @@
+# .air.toml - development config for air
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "HOST=${HOST:-localhost} PORT=${PORT:-8081} make debug-build"
+bin = "bin/server-debug"
+full_bin = "HOST=${HOST:-localhost} PORT=${PORT:-8081} bin/server-debug"
+delay = 500
+include_ext = ["go", "html", "templ", "tpl", "ts", "css"]
+exclude_dir = ["tools", "bin", "tmp", ".git"]
+exclude_regex = [".*_templ.go"]
+stop_on_error = true
+
+[log]
+time = true
+
+[proxy]
+enabled = true
+app_port = 8081
+proxy_port = 8080
+live_reload = true

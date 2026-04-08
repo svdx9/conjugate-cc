@@ -88,3 +88,7 @@ format: tools-install
 .PHONY: clean
 clean:
 	rm -rf bin/ $(TOOLS_BIN)
+
+.PHONY: dev
+dev: $(AIR)
+	$(AIR) -c .air.toml
