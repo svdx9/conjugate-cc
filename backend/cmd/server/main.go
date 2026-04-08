@@ -30,7 +30,7 @@ func main() {
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 
-	cfg, err := config.Load()
+	cfg, err := config.FromEnv()
 	if err != nil {
 		slog.Error("failed to load config", "error", err)
 		os.Exit(1)
