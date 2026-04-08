@@ -29,12 +29,6 @@ export function initBackendStatusPolling(intervalMs: number = 30000): void {
         const statusData = statusResponse.data;
         if (statusData?.status === 'ok') {
           setBackendAvailable(true);
-          const metadataResponse = await api.GET('/v1/metadata');
-          const metadata = metadataResponse.data;
-          if (metadata) {
-            setGitSha(metadata.git_sha);
-            setBuildTime(metadata.build_time);
-          }
         } else {
           setBackendAvailable(false);
         }
@@ -46,7 +40,23 @@ export function initBackendStatusPolling(intervalMs: number = 30000): void {
       }
     }
 
+    async function fetchMetadata(): Promise<void> {
+      try {
+        const metadataResponse = await api.GET('/v1/metadata');
+        const metadata = metadataResponse.data;
+        if (metadata) {
+          setGitSha(metadata.git_sha);
+          setBuildTime(metadata.build_time);
+        }
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error('[backend] metadata fetch failed:', err);
+        }
+      }
+    }
+
     void checkBackend();
+    void fetchMetadata();
     const timer = setInterval(() => void checkBackend(), intervalMs);
     onCleanup(() => clearInterval(timer));
   });
