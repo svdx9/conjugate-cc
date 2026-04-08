@@ -15,8 +15,10 @@ func NewRouter(statusHandler *status.Handler) http.Handler {
 
 	r.Use(middleware.Recoverer)
 
-	// Mount the generated handlers
-	api.HandlerFromMux(statusHandler, r)
+	// Mount the generated handlers at /api prefix
+	r.Route("/api", func(r chi.Router) {
+		api.HandlerFromMux(statusHandler, r)
+	})
 
 	return r
 }

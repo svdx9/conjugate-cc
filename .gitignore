@@ -27,3 +27,4 @@ frontend/.env.local
 
 # OS specific
 .DS_Store
+backend/server
