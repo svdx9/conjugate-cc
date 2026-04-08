@@ -10,14 +10,17 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
+    "generate": "openapi-typescript ../docs/schema/v1/api.yaml -o src/api/v1.d.ts"
   },
   "dependencies": {
     "solid-js": "^1.9.3",
-    "@solidjs/router": "^0.15.3"
+    "@solidjs/router": "^0.15.3",
+    "openapi-fetch": "^0.13.0"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
+    "openapi-typescript": "^7.6.0",
     "vite": "^6.0.7",
     "vite-plugin-solid": "^2.11.0",
     "@tailwindcss/vite": "^4.0.0",

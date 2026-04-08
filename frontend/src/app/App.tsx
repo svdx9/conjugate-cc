@@ -8,8 +8,10 @@ import ContactPage from '../features/contact/ContactPage';
 import CookiePolicyPage from '../features/legal/CookiePolicyPage';
 import Navigation from './Navigation';
 import Footer from './Footer';
+import { initBackendStatusPolling } from '../store/backend';
 
 const Layout: Component<{ children?: JSX.Element }> = (props) => {
+  initBackendStatusPolling();
   return (
     <div class="bg-surface text-text-primary dark:bg-surface-dark dark:text-text-primary-dark flex min-h-screen flex-col transition-colors">
       <Navigation />
