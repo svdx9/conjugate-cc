@@ -60,12 +60,12 @@ Per the user's context: add backend status to the existing Footer (not a separat
 
 File: `frontend/vite.config.ts`
 
-Add server.proxy block to forward /v1 requests to http://localhost:8080:
+Add server.proxy block to forward /api requests to http://localhost:8080:
 ```ts
 server: {
   port: 3000,
   proxy: {
-    '/v1': {
+    '/api': {
       target: 'http://localhost:8080',
       changeOrigin: true,
     },
@@ -128,7 +128,7 @@ Targets:
 #### 7. Update README.md
 
 - Add Quick Start section with `make dev-all`
-- Add Verification section: `curl http://localhost:8080/v1/status` + check footer indicator in browser
+- Add Verification section: `curl http://localhost:8080/api/v1/status` + check footer indicator in browser
 - Keep existing individual commands for reference
 
 #### 8. Update backlog task file
@@ -162,7 +162,7 @@ Set status to "In Progress" in this task file.
 2. `make dev-all` from root — both servers start
 3. Open http://localhost:3000 — landing page loads, footer shows green indicator with git SHA
 4. Stop backend — footer indicator turns red within 30s
-5. `curl http://localhost:8080/v1/status` returns `{"status":"ok"}`
+5. `curl http://localhost:8080/api/v1/status` returns `{"status":"ok"}`
 6. `cd backend && make test && make lint` — no errors (no backend changes expected)
 7. `cd frontend && npm run lint && npm test` — no errors
 <!-- SECTION:PLAN:END -->
