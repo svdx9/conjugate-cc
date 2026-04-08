@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
@@ -63,7 +64,7 @@ func main() {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			serverErr <- err
+			serverErr <- fmt.Errorf("server failed on %s:%d: %w", cfg.Host, cfg.Port, err)
 		}
 	}()
 

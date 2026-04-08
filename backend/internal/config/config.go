@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -27,7 +26,6 @@ const (
 
 var (
 	ErrPortOutOfRange = errors.New("port out of range")
-	ErrInvalidHost    = errors.New("invalid host")
 )
 
 func getEnvOrDefault(key, defaultVal string) string {
@@ -61,34 +59,19 @@ type Config struct {
 func FromEnv() (Config, error) {
 	port, err := getEnvOrDefaultInt(portKey, defaultPort)
 	if err != nil {
-		return Config{}, fmt.Errorf("%w: %w", ErrPortOutOfRange, err)
+		return Config{}, err
 	}
 	if port < 0 || port > 65535 {
 		return Config{}, fmt.Errorf("%w: %d", ErrPortOutOfRange, port)
 	}
 
-	host := getEnvOrDefault(hostKey, defaultHost)
-	err = validateHost(host)
-	if err != nil {
-		return Config{}, fmt.Errorf("%w: %w", ErrInvalidHost, err)
-	}
-
 	cfg := Config{
 		Port: port,
 		Env:  getEnvOrDefault(envKey, defaultEnv),
-		Host: host,
+		Host: getEnvOrDefault(hostKey, defaultHost),
 	}
 
 	return cfg, nil
 }
 
-func validateHost(host string) error {
-	if ip := net.ParseIP(host); ip != nil {
-		return nil
-	}
-	_, err := net.LookupHost(host)
-	if err != nil {
-		return ErrInvalidHost
-	}
-	return nil
-}
+
