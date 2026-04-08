@@ -1,11 +1,11 @@
 ---
 id: TASK-001.4
 title: Implement the MVP front page
-status: To Do
+status: Done
 assignee:
   - claude
 created_date: '2026-03-02 18:07'
-updated_date: '2026-03-14 16:27'
+updated_date: '2026-03-29 17:51'
 labels:
   - mvp
   - frontend
@@ -16,7 +16,7 @@ references:
   - README.md
   - AGENTS.md
 parent_task_id: TASK-001
-ordinal: 28000
+ordinal: 32000
 ---
 
 ## Description
