@@ -14,6 +14,6 @@ jobs:
         uses: deepakputhraya/action-branch-name@master
         with:
           # Regex for: type/description (e.g., feat/my-feature)
-          regex: '^(feat|fix|choret)\/[a-z0-9-]+$'
+          regex: '^(feat|fix|chore|doc)\/[a-z0-9-]+$'
           allowed_prefixes: "feat/,fix/,chore/"
           ignore: "main,develop"
