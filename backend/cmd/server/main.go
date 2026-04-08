@@ -64,7 +64,7 @@ func main() {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			serverErr <- fmt.Errorf("server failed on %s:%d: %w", cfg.Host, cfg.Port, err)
+			serverErr <- fmt.Errorf("server failed on %s: %w", server.Addr, err)
 		}
 	}()
 

@@ -1,18 +1,15 @@
 package config
 
 import (
-	"os"
 	"testing"
 )
 
 func TestFromEnv(t *testing.T) {
-	t.Parallel()
 	t.Run("default values", func(t *testing.T) {
-		t.Parallel()
 		// Clear environment variables
-		_ = os.Unsetenv("PORT")
-		_ = os.Unsetenv("HOST")
-		_ = os.Unsetenv("ENV")
+		t.Setenv("PORT", "")
+		t.Setenv("HOST", "")
+		t.Setenv("ENV", "")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -33,15 +30,9 @@ func TestFromEnv(t *testing.T) {
 	})
 
 	t.Run("custom values", func(t *testing.T) {
-		t.Parallel()
-		_ = os.Setenv("PORT", "3000")
-		_ = os.Setenv("HOST", "localhost")
-		_ = os.Setenv("ENV", "production")
-		defer func() {
-			_ = os.Unsetenv("PORT")
-			_ = os.Unsetenv("HOST")
-			_ = os.Unsetenv("ENV")
-		}()
+		t.Setenv("PORT", "3000")
+		t.Setenv("HOST", "localhost")
+		t.Setenv("ENV", "production")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -62,9 +53,7 @@ func TestFromEnv(t *testing.T) {
 	})
 
 	t.Run("invalid port", func(t *testing.T) {
-		t.Parallel()
-		_ = os.Setenv("PORT", "invalid")
-		defer func() { _ = os.Unsetenv("PORT") }()
+		t.Setenv("PORT", "invalid")
 
 		_, err := FromEnv()
 		if err == nil {
@@ -78,9 +67,7 @@ func TestFromEnv(t *testing.T) {
 	})
 
 	t.Run("port out of range", func(t *testing.T) {
-		t.Parallel()
-		_ = os.Setenv("PORT", "70000")
-		defer func() { _ = os.Unsetenv("PORT") }()
+		t.Setenv("PORT", "70000")
 
 		_, err := FromEnv()
 		if err == nil {
@@ -94,9 +81,7 @@ func TestFromEnv(t *testing.T) {
 	})
 
 	t.Run("invalid host", func(t *testing.T) {
-		t.Parallel()
-		_ = os.Setenv("HOST", "invalid host!")
-		defer func() { _ = os.Unsetenv("HOST") }()
+		t.Setenv("HOST", "invalid host!")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -110,9 +95,7 @@ func TestFromEnv(t *testing.T) {
 	})
 
 	t.Run("valid IP host", func(t *testing.T) {
-		t.Parallel()
-		_ = os.Setenv("HOST", "192.168.1.1")
-		defer func() { _ = os.Unsetenv("HOST") }()
+		t.Setenv("HOST", "192.168.1.1")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -125,9 +108,7 @@ func TestFromEnv(t *testing.T) {
 	})
 
 	t.Run("valid hostname", func(t *testing.T) {
-		t.Parallel()
-		_ = os.Setenv("HOST", "example.com")
-		defer func() { _ = os.Unsetenv("HOST") }()
+		t.Setenv("HOST", "example.com")
 
 		cfg, err := FromEnv()
 		if err != nil {
