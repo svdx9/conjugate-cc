@@ -29,6 +29,106 @@ paths:
               schema:
                 $ref: '#/components/schemas/Metadata'
 
+  /v1/auth/magiclink/request:
+    post:
+      summary: Request magic link
+      operationId: RequestMagicLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MagicLinkRequest'
+      responses:
+        '202':
+          description: Magic link request accepted
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /v1/auth/magiclink/verify:
+    get:
+      summary: Verify magic link token (show confirmation page)
+      operationId: GetMagicLinkVerify
+      parameters:
+        - name: token
+          in: query
+          description: Magic link verification token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: HTML confirmation page
+          content:
+            text/html:
+              schema:
+                type: string
+        '400':
+          description: Missing token parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: Token not found, already used, or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Verify magic link token (create session)
+      operationId: PostMagicLinkVerify
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+      responses:
+        '302':
+          description: Redirect to home page with session cookie
+          headers:
+            Location:
+              schema:
+                type: string
+                example: /
+            Set-Cookie:
+              schema:
+                type: string
+                example: session=abc123; Path=/; HttpOnly; Secure; SameSite=Lax
+        '401':
+          description: Invalid, expired, or already used token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/auth/session:
+    delete:
+      summary: Logout (invalidate session)
+      operationId: DeleteSession
+      security:
+        - sessionCookie: []
+      responses:
+        '204':
+          description: Session invalidated successfully
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     Status:
@@ -52,3 +152,63 @@ components:
       required:
         - git_sha
         - build_time
+
+    MagicLinkRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+      required:
+        - email
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: invalid_token
+        message:
+          type: string
+          example: The provided token is invalid or has expired
+        details:
+          type: object
+          additionalProperties: true
+      required:
+        - code
+        - message
+
+    ValidationError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: validation_error
+        message:
+          type: string
+          example: Validation failed
+        field_errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: email
+              message:
+                type: string
+                example: must be a valid email address
+            required:
+              - field
+              - message
+      required:
+        - code
+        - message
+        - field_errors
+
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
