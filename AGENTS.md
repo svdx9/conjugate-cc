@@ -27,3 +27,40 @@ You MUST read the overview resource to understand the complete workflow. The inf
 </CRITICAL_INSTRUCTION>
 
 <!-- BACKLOG.MD MCP GUIDELINES END -->
+
+---
+
+## SKILLS
+
+skills are located in .claude/skills
+
+## TECHNOLOGY STACK CONTEXT (for agents)
+
+**Frontend:**
+- Framework: SolidJS 1.9.3 (NOT React)
+- Language: TypeScript
+- Styling: Tailwind CSS 4.0.0
+- Build Tool: Vite 6.0.7
+- State Management: SolidJS signals (`createSignal()`)
+- Testing: Vitest + @solidjs/testing-library
+- API Client: openapi-fetch
+
+**Backend:**
+- Language: Go 1.25.7
+- HTTP Server: Standard library net/http
+- API: OpenAPI-based REST endpoints
+- Testing: Standard library testing package
+
+**Key Implementation Details:**
+- Frontend components use `.tsx` extension
+- Backend uses Go modules (go.mod)
+- API specification in `docs/schema/v1/api.yaml`
+- Frontend API client generated from OpenAPI spec
+- State management via SolidJS reactivity primitives
+
+**Testing Approach:**
+- Frontend: Vitest unit + component tests
+- Backend: Go standard library tests
+- Integration: Manual + curl verification
+
+Last updated: 2026-04-09
