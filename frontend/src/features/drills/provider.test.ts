@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { drillProvider } from './provider';
-
-// Helper function to check if result is an error
-function isError(result: unknown): result is { ok: false; error: string; code: string } {
-  return typeof result === 'object' && result !== null && 'ok' in result && !result.ok;
-}
+import { isError } from '../../shared/types';
 
 describe('StubDrillProvider', () => {
   it('should return être present tense data', () => {

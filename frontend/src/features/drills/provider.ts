@@ -3,30 +3,7 @@
 // and the future conjugation engine must implement
 
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
-
-/**
- * Standard Result type for operations that may fail.
- * Uses a Discriminated Union (ok: true | false) to ensure that the
- * success path (data) and error path never overlap.
- */
-export type Result<T> =
-  | { 
-      ok: true; 
-      data: T; 
-    }
-  | { 
-      ok: false; 
-      error: string; 
-      code: 'INVALID_VERB' | 'INVALID_TENSE' | 'INVALID_PRONOUN' | 'NOT_FOUND';
-      details?: Record<string, unknown>;
-    };
-
-/**
- * Type guard for error checking.
- */
-export function isError<T>(result: Result<T>): result is Extract<Result<T>, { ok: false }> {
-  return !result.ok;
-}
+import { Result } from '../../shared/types';
 
 export interface DrillProvider {
   /**
