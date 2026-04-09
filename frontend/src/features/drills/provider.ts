@@ -4,31 +4,47 @@
 
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
 
-export type DrillError = {
-  error: string;
-  code: 'INVALID_VERB' | 'INVALID_TENSE' | 'INVALID_PRONOUN' | 'NOT_FOUND';
-  details?: Record<string, unknown>;
-};
+/**
+ * Standard Result type for operations that may fail.
+ * Uses a Discriminated Union (ok: true | false) to ensure that the
+ * success path (data) and error path never overlap.
+ */
+export type Result<T> =
+  | { 
+      ok: true; 
+      data: T; 
+    }
+  | { 
+      ok: false; 
+      error: string; 
+      code: 'INVALID_VERB' | 'INVALID_TENSE' | 'INVALID_PRONOUN' | 'NOT_FOUND';
+      details?: Record<string, unknown>;
+    };
 
-export type DrillResult<T> = T | DrillError;
+/**
+ * Type guard for error checking.
+ */
+export function isError<T>(result: Result<T>): result is Extract<Result<T>, { ok: false }> {
+  return !result.ok;
+}
 
 export interface DrillProvider {
   /**
    * Get drill data for a specific verb and tense
    * @param verb - The infinitive form of the verb (e.g., "être", "avoir")
    * @param tense - The tense to conjugate in (e.g., "present", "imparfait")
-   * @returns DrillData containing all conjugations for the specified verb/tense combination, or DrillError if not found
+   * @returns Result<DrillData> with either data or error
    */
-  getDrillData(verb: string, tense: string): DrillResult<DrillData>;
+  getDrillData(verb: string, tense: string): Result<DrillData>;
   
   /**
    * Get a specific drill item for a verb, tense, and pronoun
    * @param verb - The infinitive form of the verb (e.g., "être", "avoir")
    * @param tense - The tense to conjugate in (e.g., "present", "imparfait")
    * @param pronoun - Pronoun to get specific conjugation (e.g., "je", "tu")
-   * @returns DrillItem for the specified verb/tense/pronoun combination, or DrillError if not found
+   * @returns Result<DrillItem> with either data or error
    */
-  getDrillItem(verb: string, tense: string, pronoun: Pronoun): DrillResult<DrillItem>;
+  getDrillItem(verb: string, tense: string, pronoun: Pronoun): Result<DrillItem>;
 }
 
 // Verb conjugation data stored as JSON object
@@ -87,10 +103,11 @@ const verbData: Record<string, Record<string, DrillData>> = {
 // This will be replaced by a real conjugation engine in the future
 class StubDrillProvider implements DrillProvider {
   
-  getDrillData(verb: string, tense: string): DrillResult<DrillData> {
+  getDrillData(verb: string, tense: string): Result<DrillData> {
     // Validate inputs
     if (!verb || typeof verb !== 'string' || verb.trim() === '') {
       return {
+        ok: false,
         error: 'Invalid verb: verb must be a non-empty string',
         code: 'INVALID_VERB'
       };
@@ -98,6 +115,7 @@ class StubDrillProvider implements DrillProvider {
     
     if (!tense || typeof tense !== 'string' || tense.trim() === '') {
       return {
+        ok: false,
         error: 'Invalid tense: tense must be a non-empty string',
         code: 'INVALID_TENSE'
       };
@@ -111,6 +129,7 @@ class StubDrillProvider implements DrillProvider {
     // Check if verb exists in our data (case-sensitive for accents)
     if (!verbData[normalizedVerb]) {
       return {
+        ok: false,
         error: `Verb "${normalizedVerb}" not found in conjugation data`,
         code: 'NOT_FOUND',
         details: { availableVerbs: Object.keys(verbData) }
@@ -120,6 +139,7 @@ class StubDrillProvider implements DrillProvider {
     // Check if tense exists for this verb
     if (!verbData[normalizedVerb][normalizedTense]) {
       return {
+        ok: false,
         error: `Tense "${normalizedTense}" not found for verb "${normalizedVerb}"`,
         code: 'NOT_FOUND',
         details: { availableTenses: Object.keys(verbData[normalizedVerb]) }
@@ -127,13 +147,17 @@ class StubDrillProvider implements DrillProvider {
     }
     
     // Return the found data
-    return verbData[normalizedVerb][normalizedTense];
+    return {
+      ok: true,
+      data: verbData[normalizedVerb][normalizedTense]
+    };
   }
   
-  getDrillItem(verb: string, tense: string, pronoun: Pronoun): DrillResult<DrillItem> {
+  getDrillItem(verb: string, tense: string, pronoun: Pronoun): Result<DrillItem> {
     // Validate inputs
     if (!verb || typeof verb !== 'string' || verb.trim() === '') {
       return {
+        ok: false,
         error: 'Invalid verb: verb must be a non-empty string',
         code: 'INVALID_VERB'
       };
@@ -141,6 +165,7 @@ class StubDrillProvider implements DrillProvider {
     
     if (!tense || typeof tense !== 'string' || tense.trim() === '') {
       return {
+        ok: false,
         error: 'Invalid tense: tense must be a non-empty string',
         code: 'INVALID_TENSE'
       };
@@ -156,16 +181,20 @@ class StubDrillProvider implements DrillProvider {
     const drillDataResult = this.getDrillData(normalizedVerb, normalizedTense);
     
     // If getDrillData returned an error, propagate it
-    if ('error' in drillDataResult) {
+    if (!drillDataResult.ok) {
       return drillDataResult;
     }
     
     // Find the specific item for the pronoun
-    const item = drillDataResult.items.find(item => item.prompt.pronoun === normalizedPronoun);
+    const item = drillDataResult.data.items.find(item => item.prompt.pronoun === normalizedPronoun);
     if (item) {
-      return item;
+      return {
+        ok: true,
+        data: item
+      };
     } else {
       return {
+        ok: false,
         error: `No conjugation found for verb "${normalizedVerb}" in tense "${normalizedTense}" with pronoun "${normalizedPronoun}"`,
         code: 'NOT_FOUND'
       };

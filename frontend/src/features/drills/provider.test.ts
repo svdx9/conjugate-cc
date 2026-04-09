@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { drillProvider } from './provider';
 
 // Helper function to check if result is an error
-function isError(result: unknown): result is { error: string; code: string } {
-  return typeof result === 'object' && result !== null && 'error' in result;
+function isError(result: unknown): result is { ok: false; error: string; code: string } {
+  return typeof result === 'object' && result !== null && 'ok' in result && !result.ok;
 }
 
 describe('StubDrillProvider', () => {
@@ -14,10 +14,10 @@ describe('StubDrillProvider', () => {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
     
-    expect(result.verb).toBe('être');
-    expect(result.tense).toBe('present');
-    expect(result.items.length).toBe(8);
-    expect(result.items[0].expectedAnswer.text).toBe('suis');
+    expect(result.data.verb).toBe('être');
+    expect(result.data.tense).toBe('present');
+    expect(result.data.items.length).toBe(8);
+    expect(result.data.items[0].expectedAnswer.text).toBe('suis');
   });
 
   it('should return avoir present tense data', () => {
@@ -27,10 +27,10 @@ describe('StubDrillProvider', () => {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
     
-    expect(result.verb).toBe('avoir');
-    expect(result.tense).toBe('present');
-    expect(result.items.length).toBe(8);
-    expect(result.items[0].expectedAnswer.text).toBe('ai');
+    expect(result.data.verb).toBe('avoir');
+    expect(result.data.tense).toBe('present');
+    expect(result.data.items.length).toBe(8);
+    expect(result.data.items[0].expectedAnswer.text).toBe('ai');
   });
 
   it('should return se laver present tense data with reflexive flag', () => {
@@ -40,11 +40,11 @@ describe('StubDrillProvider', () => {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
     
-    expect(result.verb).toBe('se laver');
-    expect(result.tense).toBe('present');
-    expect(result.items.length).toBe(8);
-    expect(result.items[0].expectedAnswer.text).toBe('me lave');
-    expect(result.items[0].expectedAnswer.isReflexive).toBe(true);
+    expect(result.data.verb).toBe('se laver');
+    expect(result.data.tense).toBe('present');
+    expect(result.data.items.length).toBe(8);
+    expect(result.data.items[0].expectedAnswer.text).toBe('me lave');
+    expect(result.data.items[0].expectedAnswer.isReflexive).toBe(true);
   });
 
   it('should handle case variations for ASCII characters', () => {
@@ -54,8 +54,8 @@ describe('StubDrillProvider', () => {
     // Both should return errors since we don't lowercase verbs (to preserve accents)
     // This test now verifies that the system properly handles the exact verb matching
     if (!isError(result1)) {
-      expect(result1.verb).toBe('avoir');
-      expect(result1.tense).toBe('present');
+      expect(result1.data.verb).toBe('avoir');
+      expect(result1.data.tense).toBe('present');
     }
     
     // AVOIR (uppercase) should return an error since we don't have that exact key
@@ -84,10 +84,10 @@ describe('StubDrillProvider', () => {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
     
-    expect(result.prompt.infinitive).toBe('être');
-    expect(result.prompt.tense).toBe('present');
-    expect(result.prompt.pronoun).toBe('je');
-    expect(result.expectedAnswer.text).toBe('suis');
+    expect(result.data.prompt.infinitive).toBe('être');
+    expect(result.data.prompt.tense).toBe('present');
+    expect(result.data.prompt.pronoun).toBe('je');
+    expect(result.data.expectedAnswer.text).toBe('suis');
   });
 
   it('should return all pronouns when no pronoun specified', () => {
@@ -97,9 +97,9 @@ describe('StubDrillProvider', () => {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
     
-    expect(result.verb).toBe('avoir');
-    expect(result.tense).toBe('present');
-    expect(result.items.length).toBe(8);
+    expect(result.data.verb).toBe('avoir');
+    expect(result.data.tense).toBe('present');
+    expect(result.data.items.length).toBe(8);
   });
 
   it('should return error for invalid verb', () => {
@@ -130,8 +130,8 @@ describe('StubDrillProvider', () => {
     
     if (!isError(result)) {
       // This should succeed since 'je' exists in our être present data
-      expect(result.prompt.pronoun).toBe('je');
-      expect(result.expectedAnswer.text).toBe('suis');
+      expect(result.data.prompt.pronoun).toBe('je');
+      expect(result.data.expectedAnswer.text).toBe('suis');
     } else {
       expect.fail('Unexpected error for valid pronoun');
     }
