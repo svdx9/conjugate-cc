@@ -156,7 +156,17 @@ class StubDrillProvider implements DrillProvider {
     }
     
     const { normalizedVerb, normalizedTense } = validationResult.data;
-    const normalizedPronoun = pronoun.toLowerCase().trim() as Pronoun;
+    const normalizedPronoun = pronoun.toLowerCase().trim();
+    
+    // Validate pronoun at runtime to ensure type safety
+    const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles'];
+    if (!validPronouns.includes(normalizedPronoun as Pronoun)) {
+      return {
+        ok: false,
+        error: `Invalid pronoun: "${normalizedPronoun}" is not a valid pronoun`,
+        code: 'INVALID_INPUT'
+      };
+    }
     
     // Get the drill data for this verb/tense combination
     const drillDataResult = this.getDrillData(normalizedVerb, normalizedTense);
