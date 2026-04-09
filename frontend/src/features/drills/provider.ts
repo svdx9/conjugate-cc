@@ -80,7 +80,12 @@ const verbData: Record<string, Record<string, DrillData>> = {
 // This will be replaced by a real conjugation engine in the future
 class StubDrillProvider implements DrillProvider {
   
-  getDrillData(verb: string, tense: string): Result<DrillData> {
+  /**
+   * Validates verb and tense inputs.
+   * Returns Result<{normalizedVerb: string, normalizedTense: string}> on success,
+   * or error if validation fails.
+   */
+  private validateInputs(verb: string, tense: string): Result<{normalizedVerb: string, normalizedTense: string}> {
     // Validate inputs
     if (!verb || typeof verb !== 'string' || verb.trim() === '') {
       return {
@@ -102,6 +107,20 @@ class StubDrillProvider implements DrillProvider {
     // Note: We trim but don't lowercase to preserve accents like "être"
     const normalizedVerb = verb.trim();
     const normalizedTense = tense.toLowerCase().trim();
+    
+    return {
+      ok: true,
+      data: { normalizedVerb, normalizedTense }
+    };
+  }
+  
+  getDrillData(verb: string, tense: string): Result<DrillData> {
+    const validationResult = this.validateInputs(verb, tense);
+    if (!validationResult.ok) {
+      return validationResult;
+    }
+    
+    const { normalizedVerb, normalizedTense } = validationResult.data;
     
     // Check if verb exists in our data (case-sensitive for accents)
     if (!verbData[normalizedVerb]) {
@@ -131,27 +150,12 @@ class StubDrillProvider implements DrillProvider {
   }
   
   getDrillItem(verb: string, tense: string, pronoun: Pronoun): Result<DrillItem> {
-    // Validate inputs
-    if (!verb || typeof verb !== 'string' || verb.trim() === '') {
-      return {
-        ok: false,
-        error: 'Invalid verb: verb must be a non-empty string',
-        code: 'INVALID_VERB'
-      };
+    const validationResult = this.validateInputs(verb, tense);
+    if (!validationResult.ok) {
+      return validationResult;
     }
     
-    if (!tense || typeof tense !== 'string' || tense.trim() === '') {
-      return {
-        ok: false,
-        error: 'Invalid tense: tense must be a non-empty string',
-        code: 'INVALID_TENSE'
-      };
-    }
-    
-    // Normalize inputs
-    // Note: We trim but don't lowercase verbs to preserve accents like "être"
-    const normalizedVerb = verb.trim();
-    const normalizedTense = tense.toLowerCase().trim();
+    const { normalizedVerb, normalizedTense } = validationResult.data;
     const normalizedPronoun = pronoun.toLowerCase().trim() as Pronoun;
     
     // Get the drill data for this verb/tense combination

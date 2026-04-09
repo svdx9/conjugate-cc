@@ -63,3 +63,4 @@ export function success<T>(data: T): Result<T> {
 export function error<T>(error: string, code: string, details?: Record<string, unknown>): Result<T> {
   return { ok: false, error, code, details };
 }
+
