@@ -3,7 +3,7 @@
 // and the future conjugation engine must implement
 
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
-import { Result } from '../../shared/types';
+import { Result, error, success } from '../../shared/types';
 
 const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles'];
 
@@ -90,30 +90,19 @@ class StubDrillProvider implements DrillProvider {
   private validateInputs(verb: string, tense: string): Result<{ normalizedVerb: string, normalizedTense: string }> {
     // Validate inputs
     if (!verb || typeof verb !== 'string' || verb.trim() === '') {
-      return {
-        ok: false,
-        error: 'Invalid verb: verb must be a non-empty string',
-        code: 'INVALID_VERB'
-      };
+      return error('Invalid verb: verb must be a non-empty string', 'INVALID_VERB');
     }
 
     if (!tense || typeof tense !== 'string' || tense.trim() === '') {
-      return {
-        ok: false,
-        error: 'Invalid tense: tense must be a non-empty string',
-        code: 'INVALID_TENSE'
-      };
+      return error('Invalid tense: tense must be a non-empty string', 'INVALID_TENSE');
     }
 
     // Normalize verb and tense for lookup
-    // Note: We trim but don't lowercase to preserve accents like "être"
-    const normalizedVerb = verb.trim();
+    // toLowerCase() correctly handles accented characters (e.g., "ÊTRE" → "être")
+    const normalizedVerb = verb.trim().toLowerCase();
     const normalizedTense = tense.trim().toLowerCase();
 
-    return {
-      ok: true,
-      data: { normalizedVerb, normalizedTense }
-    };
+    return success({ normalizedVerb, normalizedTense });
   }
 
   getDrillData(verb: string, tense: string): Result<DrillData> {
@@ -124,31 +113,18 @@ class StubDrillProvider implements DrillProvider {
 
     const { normalizedVerb, normalizedTense } = validationResult.data;
 
-    // Check if verb exists in our data (case-sensitive for accents)
+    // Check if verb exists in our data
     if (!verbData[normalizedVerb]) {
-      return {
-        ok: false,
-        error: `Verb "${normalizedVerb}" not found in conjugation data`,
-        code: 'NOT_FOUND',
-        details: { availableVerbs: Object.keys(verbData) }
-      };
+      return error(`Verb "${normalizedVerb}" not found in conjugation data`, 'NOT_FOUND', { availableVerbs: Object.keys(verbData) });
     }
 
     // Check if tense exists for this verb
     if (!verbData[normalizedVerb][normalizedTense]) {
-      return {
-        ok: false,
-        error: `Tense "${normalizedTense}" not found for verb "${normalizedVerb}"`,
-        code: 'NOT_FOUND',
-        details: { availableTenses: Object.keys(verbData[normalizedVerb]) }
-      };
+      return error(`Tense "${normalizedTense}" not found for verb "${normalizedVerb}"`, 'NOT_FOUND', { availableTenses: Object.keys(verbData[normalizedVerb]) });
     }
 
     // Return the found data
-    return {
-      ok: true,
-      data: verbData[normalizedVerb][normalizedTense]
-    };
+    return success(verbData[normalizedVerb][normalizedTense]);
   }
 
   /**
@@ -161,17 +137,10 @@ class StubDrillProvider implements DrillProvider {
 
     // Validate pronoun at runtime to ensure type safety
     if (!validPronouns.includes(normalizedPronoun as Pronoun)) {
-      return {
-        ok: false,
-        error: `Invalid pronoun: "${normalizedPronoun}" is not a valid pronoun`,
-        code: 'INVALID_INPUT'
-      };
+      return error(`Invalid pronoun: "${normalizedPronoun}" is not a valid pronoun`, 'INVALID_INPUT');
     }
 
-    return {
-      ok: true,
-      data: normalizedPronoun as Pronoun
-    };
+    return success(normalizedPronoun as Pronoun);
   }
 
   getDrillItem(verb: string, tense: string, pronoun: Pronoun): Result<DrillItem> {
