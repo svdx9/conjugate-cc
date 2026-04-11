@@ -46,15 +46,14 @@ describe('StubDrillProvider', () => {
   it('should handle case variations for ASCII characters', () => {
     const result1 = drillProvider.getDrillData('avoir', 'present');
     const result2 = drillProvider.getDrillData('AVOIR', 'present');
-    
-    // Both should return errors since we don't lowercase verbs (to preserve accents)
-    // This test now verifies that the system properly handles the exact verb matching
+
+    // Test exact verb matching - lowercase 'avoir' should succeed
     if (!isError(result1)) {
       expect(result1.data.verb).toBe('avoir');
       expect(result1.data.tense).toBe('present');
     }
-    
-    // AVOIR (uppercase) should return an error since we don't have that exact key
+
+    // Test exact verb matching - uppercase 'AVOIR' should fail since we preserve case for accents
     if (!isError(result2)) {
       expect.fail('Expected error for uppercase AVOIR but got data');
     } else {
@@ -119,11 +118,10 @@ describe('StubDrillProvider', () => {
   });
 
   it('should return error for missing pronoun conjugation', () => {
-    // This test verifies that we get an error when a pronoun exists in the type system
-    // but doesn\'t have a conjugation in our data (shouldn\'t happen with our current data)
-    // We'll test with a pronoun that should exist but might not in edge cases
+    // Test that we get an error when a pronoun exists in the type system
+    // but doesn't have a conjugation in our data
     const result = drillProvider.getDrillItem('être', 'present', 'je');
-    
+
     if (!isError(result)) {
       // This should succeed since 'je' exists in our être present data
       expect(result.data.prompt.pronoun).toBe('je');

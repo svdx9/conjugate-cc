@@ -5,6 +5,8 @@
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
 import { Result } from '../../shared/types';
 
+const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles'];
+
 export interface DrillProvider {
   /**
    * Get drill data for a specific verb and tense
@@ -13,7 +15,7 @@ export interface DrillProvider {
    * @returns Result<DrillData> with either data or error
    */
   getDrillData(verb: string, tense: string): Result<DrillData>;
-  
+
   /**
    * Get a specific drill item for a verb, tense, and pronoun
    * @param verb - The infinitive form of the verb (e.g., "être", "avoir")
@@ -79,13 +81,13 @@ const verbData: Record<string, Record<string, DrillData>> = {
 // Stub implementation with hardcoded conjugation data
 // This will be replaced by a real conjugation engine in the future
 class StubDrillProvider implements DrillProvider {
-  
+
   /**
    * Validates verb and tense inputs.
    * Returns Result<{normalizedVerb: string, normalizedTense: string}> on success,
    * or error if validation fails.
    */
-  private validateInputs(verb: string, tense: string): Result<{normalizedVerb: string, normalizedTense: string}> {
+  private validateInputs(verb: string, tense: string): Result<{ normalizedVerb: string, normalizedTense: string }> {
     // Validate inputs
     if (!verb || typeof verb !== 'string' || verb.trim() === '') {
       return {
@@ -94,7 +96,7 @@ class StubDrillProvider implements DrillProvider {
         code: 'INVALID_VERB'
       };
     }
-    
+
     if (!tense || typeof tense !== 'string' || tense.trim() === '') {
       return {
         ok: false,
@@ -102,26 +104,26 @@ class StubDrillProvider implements DrillProvider {
         code: 'INVALID_TENSE'
       };
     }
-    
+
     // Normalize verb and tense for lookup
     // Note: We trim but don't lowercase to preserve accents like "être"
     const normalizedVerb = verb.trim();
-    const normalizedTense = tense.toLowerCase().trim();
-    
+    const normalizedTense = tense.trim().toLowerCase();
+
     return {
       ok: true,
       data: { normalizedVerb, normalizedTense }
     };
   }
-  
+
   getDrillData(verb: string, tense: string): Result<DrillData> {
     const validationResult = this.validateInputs(verb, tense);
     if (!validationResult.ok) {
       return validationResult;
     }
-    
+
     const { normalizedVerb, normalizedTense } = validationResult.data;
-    
+
     // Check if verb exists in our data (case-sensitive for accents)
     if (!verbData[normalizedVerb]) {
       return {
@@ -131,7 +133,7 @@ class StubDrillProvider implements DrillProvider {
         details: { availableVerbs: Object.keys(verbData) }
       };
     }
-    
+
     // Check if tense exists for this verb
     if (!verbData[normalizedVerb][normalizedTense]) {
       return {
@@ -141,25 +143,23 @@ class StubDrillProvider implements DrillProvider {
         details: { availableTenses: Object.keys(verbData[normalizedVerb]) }
       };
     }
-    
+
     // Return the found data
     return {
       ok: true,
       data: verbData[normalizedVerb][normalizedTense]
     };
   }
-  
-  getDrillItem(verb: string, tense: string, pronoun: Pronoun): Result<DrillItem> {
-    const validationResult = this.validateInputs(verb, tense);
-    if (!validationResult.ok) {
-      return validationResult;
-    }
-    
-    const { normalizedVerb, normalizedTense } = validationResult.data;
+
+  /**
+  * Validates pronoun input and normalizes it
+  * @param pronoun - The pronoun to validate
+  * @returns Result<Pronoun> with normalized pronoun or error
+  */
+  private validatePronoun(pronoun: Pronoun): Result<Pronoun> {
     const normalizedPronoun = pronoun.toLowerCase().trim();
-    
+
     // Validate pronoun at runtime to ensure type safety
-    const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles'];
     if (!validPronouns.includes(normalizedPronoun as Pronoun)) {
       return {
         ok: false,
@@ -167,15 +167,37 @@ class StubDrillProvider implements DrillProvider {
         code: 'INVALID_INPUT'
       };
     }
-    
+
+    return {
+      ok: true,
+      data: normalizedPronoun as Pronoun
+    };
+  }
+
+  getDrillItem(verb: string, tense: string, pronoun: Pronoun): Result<DrillItem> {
+    const validationResult = this.validateInputs(verb, tense);
+    if (!validationResult.ok) {
+      return validationResult;
+    }
+
+    const { normalizedVerb, normalizedTense } = validationResult.data;
+
+    // Validate pronoun
+    const pronounValidation = this.validatePronoun(pronoun);
+    if (!pronounValidation.ok) {
+      return pronounValidation;
+    }
+
+    const normalizedPronoun = pronounValidation.data;
+
     // Get the drill data for this verb/tense combination
     const drillDataResult = this.getDrillData(normalizedVerb, normalizedTense);
-    
+
     // If getDrillData returned an error, propagate it
     if (!drillDataResult.ok) {
       return drillDataResult;
     }
-    
+
     // Find the specific item for the pronoun
     const item = drillDataResult.data.items.find(item => item.prompt.pronoun === normalizedPronoun);
     if (item) {
