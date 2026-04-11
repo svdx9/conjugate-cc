@@ -53,11 +53,12 @@ describe('StubDrillProvider', () => {
       expect(result1.data.tense).toBe('present');
     }
 
-    // Test exact verb matching - uppercase 'AVOIR' should fail since we preserve case for accents
+    // Test case variations - 'AVOIR' (uppercase) should now succeed
+    // since toLowerCase() correctly handles all characters including ASCII
     if (!isError(result2)) {
-      expect.fail('Expected error for uppercase AVOIR but got data');
+      expect(result2.data.verb).toBe('avoir');
     } else {
-      expect(result2.code).toBe('NOT_FOUND');
+      expect.fail('Expected success for uppercase AVOIR but got error');
     }
   });
 
@@ -117,9 +118,8 @@ describe('StubDrillProvider', () => {
     expect(result.code).toBe('INVALID_TENSE');
   });
 
-  it('should return error for missing pronoun conjugation', () => {
-    // Test that we get an error when a pronoun exists in the type system
-    // but doesn't have a conjugation in our data
+  it('should return item for valid pronoun', () => {
+    // Test that we get an item when a valid pronoun exists in our data
     const result = drillProvider.getDrillItem('être', 'present', 'je');
 
     if (!isError(result)) {
