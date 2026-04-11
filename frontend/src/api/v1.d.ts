@@ -62,10 +62,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Verify magic link token (show confirmation page) */
+        /** Validate magic link token (read-only, does not consume) */
         get: operations["GetMagicLinkVerify"];
         put?: never;
-        /** Verify magic link token (create session) */
+        /** Confirm sign-in (consume token, create session) */
         post: operations["PostMagicLinkVerify"];
         delete?: never;
         options?: never;
@@ -105,6 +105,29 @@ export interface components {
             build_time: string;
         };
         MagicLinkRequest: {
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+        };
+        MagicLinkVerifyResponse: {
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+        };
+        MagicLinkConfirmRequest: {
+            /** @example abc123def456 */
+            token: string;
+        };
+        MagicLinkConfirmResponse: {
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            user_id: string;
             /**
              * Format: email
              * @example user@example.com
@@ -224,13 +247,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description HTML confirmation page */
+            /** @description Token is valid; returns associated email for confirmation UI */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/html": string;
+                    "application/json": components["schemas"]["MagicLinkVerifyResponse"];
                 };
             };
             /** @description Missing token parameter */
@@ -262,20 +285,19 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/x-www-form-urlencoded": {
-                    token: string;
-                };
+                "application/json": components["schemas"]["MagicLinkConfirmRequest"];
             };
         };
         responses: {
-            /** @description Redirect to home page with session cookie */
-            302: {
+            /** @description Session created successfully */
+            200: {
                 headers: {
-                    Location?: string;
                     "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MagicLinkConfirmResponse"];
+                };
             };
             /** @description Invalid, expired, or already used token */
             401: {

@@ -31,8 +31,24 @@ type ErrorResponse struct {
 	Message string                  `json:"message"`
 }
 
+// MagicLinkConfirmRequest defines model for MagicLinkConfirmRequest.
+type MagicLinkConfirmRequest struct {
+	Token string `json:"token"`
+}
+
+// MagicLinkConfirmResponse defines model for MagicLinkConfirmResponse.
+type MagicLinkConfirmResponse struct {
+	Email  openapi_types.Email `json:"email"`
+	UserId openapi_types.UUID  `json:"user_id"`
+}
+
 // MagicLinkRequest defines model for MagicLinkRequest.
 type MagicLinkRequest struct {
+	Email openapi_types.Email `json:"email"`
+}
+
+// MagicLinkVerifyResponse defines model for MagicLinkVerifyResponse.
+type MagicLinkVerifyResponse struct {
 	Email openapi_types.Email `json:"email"`
 }
 
@@ -63,26 +79,21 @@ type GetMagicLinkVerifyParams struct {
 	Token string `form:"token" json:"token"`
 }
 
-// PostMagicLinkVerifyFormdataBody defines parameters for PostMagicLinkVerify.
-type PostMagicLinkVerifyFormdataBody struct {
-	Token string `form:"token" json:"token"`
-}
-
 // RequestMagicLinkJSONRequestBody defines body for RequestMagicLink for application/json ContentType.
 type RequestMagicLinkJSONRequestBody = MagicLinkRequest
 
-// PostMagicLinkVerifyFormdataRequestBody defines body for PostMagicLinkVerify for application/x-www-form-urlencoded ContentType.
-type PostMagicLinkVerifyFormdataRequestBody PostMagicLinkVerifyFormdataBody
+// PostMagicLinkVerifyJSONRequestBody defines body for PostMagicLinkVerify for application/json ContentType.
+type PostMagicLinkVerifyJSONRequestBody = MagicLinkConfirmRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Request magic link
 	// (POST /v1/auth/magiclink/request)
 	RequestMagicLink(w http.ResponseWriter, r *http.Request)
-	// Verify magic link token (show confirmation page)
+	// Validate magic link token (read-only, does not consume)
 	// (GET /v1/auth/magiclink/verify)
 	GetMagicLinkVerify(w http.ResponseWriter, r *http.Request, params GetMagicLinkVerifyParams)
-	// Verify magic link token (create session)
+	// Confirm sign-in (consume token, create session)
 	// (POST /v1/auth/magiclink/verify)
 	PostMagicLinkVerify(w http.ResponseWriter, r *http.Request)
 	// Logout (invalidate session)
@@ -106,13 +117,13 @@ func (_ Unimplemented) RequestMagicLink(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Verify magic link token (show confirmation page)
+// Validate magic link token (read-only, does not consume)
 // (GET /v1/auth/magiclink/verify)
 func (_ Unimplemented) GetMagicLinkVerify(w http.ResponseWriter, r *http.Request, params GetMagicLinkVerifyParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Verify magic link token (create session)
+// Confirm sign-in (consume token, create session)
 // (POST /v1/auth/magiclink/verify)
 func (_ Unimplemented) PostMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -393,26 +404,27 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xXbU/kNhD+K5bbD3dS9v10VYOQenetCiq0iEX3oQghY89uzCZ2sCcL0Wn/e2XH2Ww2",
-	"gaVvfIJ1ZjzPPPN4xv5Guc5yrUChpfE3ankCGfP//mKMNpdgc60suIXc6BwMSvCfuRZ+FZ5YlqdAYyrV",
-	"mqVS3KJegaIRxTJ3yxaNVEu6iagAZDL13kwIiVIrll7s7IqmgK2fvrsHjs4vA2vZci/aVQIkN3otBQji",
-	"QxJpScBAtCEJswSecmlAdMFsImrgofAf4+sqmSbQTQ+Ic7aU/Eyq1SU8FGCxywhkTKZtkIUF81P4OeQ6",
-	"oxFdaJMxpHEwP4SssuoFBMgEQ9YFclfIVNyizPYom46nHwfj2WDy4WryQzybxbPxn311Wkq8tQlrO4vZ",
-	"FD7+ODsIuHaOdmH04Z8jw8J20dvtehNcrw7GDW59kb46STAnN6/p12h5vXW5Be/TQ9NCQiqqz34XiZD1",
-	"5OPN2rs/U/pnlJ4VFskdEEYqbXtvwoQwYO1BXqrwL2s7LDBjWPksjIZFsmAy/funao+xLpBNRC3wwkgs",
-	"564PBT2AtVKrL1qvpIckFY0pr35GVLHMQ6isGkwsl79BSTduV6kW2nkKsNzI3OVAY/rp4pQstCGYAPmi",
-	"1X2xZAhDzskazB3hYcXlK4xMU8LyPJXcrwxdHImel5brp4tTGtE1GFvFmAzHw7GjVOegWC5pTGfDyXBM",
-	"I5ozTHyCo/VkxApMRplrMalUq5HZ6TG6+usk5WOfChrT0IS2TYlWzIPFz1qUlaYVgvKuO8BH99bhqhu9",
-	"++97Awsa0+9GzSQYhTEw6jS9TbvGrmH7hWpK+HSm42mXa78RcbmRgJMwziFHEI6dD9Ppf4Z5/7R7yG00",
-	"O1KGYBNRW2QZM2VDLsm2oL1BT53WYOTC072Enir9Ck2Fvlamru6GZYDgmsb1Czz5vQMFpJ6pXvsPBZiy",
-	"kX79rV2WaIeu/WN60ynZeI9+hCccJZilbd73N+owe3J1fuaOzkK6KeeQ5+7ouxJ3YvzzErevJj0wzqW1",
-	"Ui3DvWDLuMcxeUMcVz6+0kgWulAiIiw1wERJCgsicreU+obSVmAllh0Bhkze2UQ/dvl97xLrbxQX2vZo",
-	"8HW94mnw+Pg4cBeWQWFSUK6fizY77VFXKbFHJ+25UJn19P+DvWXW11suQUgDHAlqkugMPCXkUWJCwlQg",
-	"22mRABNQjeszXaXZTqiZd6Pe+TYHHDSjqM8vxDxmd3wynR2RC4bJ8eiInCDmf6i0PCJzN+TgiMxZBnOJ",
-	"cHzGnnqCbfypmbydWk+ry3NUi9ILdFexoQ29UqvcAEOoa/C+3UPree2rmQJCV7o/+/X5drDvtawPXSUE",
-	"2/oVwBAEsQXnYO2iSNOSvjWjv2skLl1Q6CLU5zxccnz/37veXN+47tywe6aXukDyrkmpS2i28xJ4dg7V",
-	"Ngdb/7+4LdQxepiYg1lLDsQ/CkjWWO4m+7n70eXXvAieyy68Jf7H3EKEFzKTliTAUkzKvaxO/CrhCfCV",
-	"P9Z/BQAA//+2R2PbdQ8AAA==",
+	"H4sIAAAAAAAC/7xXbW/bNhD+KwS3Dy0g2/JL3NVBgbXdsAZLt6DO+mFBENDk2WIskQpJGREK//eBFGW9",
+	"OsmAJJ8SUzzec88dnzv+wFQmqRQgjMaLH1jTCBLi/v1dKam+gU6l0GAXUiVTUIaD+0wlc6twT5I0BrzA",
+	"XOxIzNmNkVsQOMAmT+2yNoqLDd4HmIEhPHbWhDFuuBQkvqidalQGBzu5ugVqrF0CWpNNy9tlBChVcscZ",
+	"MORcIq6Rx4CkQhHRCO5TroB1wewDrOAucx8XV0UwlaPrHhBfyYbTcy62n6VYc5V8g7sMtOkSU4TfwEpW",
+	"dDyZMljPTuaPYinsnwbhWHIgITxuYsg0qF/9zyGVCQ7wWqqEGLzw23syZo1uOGuedHISwi+zMBzA5P1q",
+	"MBuz2YC8G88Hs9l8fnIym4VhGNZPzzL+eAZKT4EH82D8R7l/nrhb0J4A6Dsovs5fOh9PxwWGMGJIF8gq",
+	"4zG7MTxp3aZJOJkPwulgPLscv1tMp4tp+G9fQWy4udERaRqz6QTm76ePAi6NgzqMPvxLQ0ymu+j1Yb1y",
+	"LreP+vVmfZ6+W7UgVomc3D1F5nYHkxtwNj00rTnErPjsTuEGkp543Lbm6UevYq8IJpk2aAWIoEL2nDUi",
+	"jCnQ+lFeCvcPy55fIEqR/CiMikW0Jjz+/4LbYqwLZB9gDTRT3ORL26J8PYDWXIrPUm65g8QFXmBa/Ayw",
+	"IImDUOyqMJGU/wk53ttTuVhLa8lAU8VTGwNe4I8XZ2gtFTIRoM9S3GYbYmBIKdqBWiHqV2y8TPE4RiRN",
+	"Y07dytD64cbx0jD9eHGGA7wDpQsf42E4DC2lMgVBUo4XeDocD610psRELsDRbjwimYlGiVWamIvtSNW0",
+	"TxZ/bUk532cML7AXx4M24YJ50OaTZHlR08KAcKY14KNbLUU1A9j/flawxgv806gaEkZ+Qhh1xHjfzLHt",
+	"5W6h0EQXziScdLl2ByEbG/I4EaEUUgPMsjObTJ4Nc/u2O8hNNLVSBr8nwDpLEqLyilyUHEC7DT152rmW",
+	"YBFtoCdLf4BpdQ+Xd0USMGBF4+oBntzZngJUjluu9u8yUHlV+uW3ZlqCGl3ta3rdSVn4/CXTapc9abgs",
+	"Bzqna6dIgcmU0IhoLSknBkqts7eUFuNQQcc/Z65qnhF2cxDuAfuVa83Fxk+hhyQ6HONXxFGQJqRBa5kJ",
+	"FiASKyAsR5kGFtiZuJyHm0Xtax5qVe1jeWPtB1LEeYCYBO0Op1LoLIG3Nr5+CbqQuqe6X1SFWlP5k8Qo",
+	"fEEYx7O0LNoRogpcHeuMUtB6ncWxZSkCwqCYGpZgBlVvq5BUjde3tg/FA+MUXRATfRidoi/GpH+LOD9F",
+	"S9s14RQtSQJLbuDDObnv6c57d2fGr1erZ8VDLShL0pVnvV69rjUr1dOLNN+IARfoja/FYnPgOUWelrdN",
+	"bS7nANeBYjDQLdzf3PryMDC0CmbW7V5lNv3Ds5vR1yb2L2mQDReEsR7Ky+6HJ9dXWmPT1bVV/Yrkc7mR",
+	"mUFvqpC6hCa1F8bR/lbuecmLV/rovWhqxykg99hASbWzHuyn7kcbX/XSOBadf6O8YGzewwORcY0iILGJ",
+	"8lZUX9wqohHQrbvd/wUAAP//QeJyc+gRAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

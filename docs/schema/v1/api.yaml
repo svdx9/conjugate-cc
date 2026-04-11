@@ -51,7 +51,7 @@ paths:
 
   /v1/auth/magiclink/verify:
     get:
-      summary: Verify magic link token (show confirmation page)
+      summary: Validate magic link token (read-only, does not consume)
       operationId: GetMagicLinkVerify
       parameters:
         - name: token
@@ -62,11 +62,11 @@ paths:
             type: string
       responses:
         '200':
-          description: HTML confirmation page
+          description: Token is valid; returns associated email for confirmation UI
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/MagicLinkVerifyResponse'
         '400':
           description: Missing token parameter
           content:
@@ -79,33 +79,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-    
+
     post:
-      summary: Verify magic link token (create session)
+      summary: Confirm sign-in (consume token, create session)
       operationId: PostMagicLinkVerify
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              type: object
-              properties:
-                token:
-                  type: string
-              required:
-                - token
+              $ref: '#/components/schemas/MagicLinkConfirmRequest'
       responses:
-        '302':
-          description: Redirect to home page with session cookie
+        '200':
+          description: Session created successfully
           headers:
-            Location:
-              schema:
-                type: string
-                example: /
             Set-Cookie:
               schema:
                 type: string
                 example: session=abc123; Path=/; HttpOnly; Secure; SameSite=Lax
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagicLinkConfirmResponse'
         '401':
           description: Invalid, expired, or already used token
           content:
@@ -161,6 +156,40 @@ components:
           format: email
           example: user@example.com
       required:
+        - email
+
+    MagicLinkVerifyResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+      required:
+        - email
+
+    MagicLinkConfirmRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          example: abc123def456
+      required:
+        - token
+
+    MagicLinkConfirmResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+      required:
+        - user_id
         - email
 
     ErrorResponse:
