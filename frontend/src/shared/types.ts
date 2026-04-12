@@ -60,7 +60,7 @@ export function success<T>(data: T): Result<T> {
  * Utility function to create error results.
  * Usage: return error('Something went wrong', 'NOT_FOUND')
  */
-export function error<T>(error: string, code: string, details?: Record<string, unknown>): Result<T> {
-  return { ok: false, error, code, details };
+export function error<T>(message: string, code: string, details?: Record<string, unknown>): Result<T> {
+  return { ok: false, error: message, code, details };
 }
 

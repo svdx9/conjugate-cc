@@ -2,7 +2,7 @@
 
 export type Pronoun = 'je' | 'tu' | 'il' | 'elle' | 'nous' | 'vous' | 'ils' | 'elles';
 
-export type Tense = 'present' | 'imparfait' | 'passe_compose' | 'futur_simple';
+export type Tense = 'présent' | 'imparfait' | 'passé_composé' | 'futur';
 
 export type DrillPrompt = {
   infinitive: string;
