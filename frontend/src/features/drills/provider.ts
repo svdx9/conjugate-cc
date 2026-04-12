@@ -49,7 +49,7 @@ const verbData: Record<string, Record<string, DrillData>> = {
           expectedAnswer: { text: 'est' },
         },
         {
-          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'elle' },
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'on' },
           expectedAnswer: { text: 'est' },
         },
         {
@@ -62,10 +62,6 @@ const verbData: Record<string, Record<string, DrillData>> = {
         },
         {
           prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'ils' },
-          expectedAnswer: { text: 'sont' },
-        },
-        {
-          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'elles' },
           expectedAnswer: { text: 'sont' },
         },
       ],
@@ -89,10 +85,6 @@ const verbData: Record<string, Record<string, DrillData>> = {
           expectedAnswer: { text: 'a' },
         },
         {
-          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'elle' },
-          expectedAnswer: { text: 'a' },
-        },
-        {
           prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'nous' },
           expectedAnswer: { text: 'avons' },
         },
@@ -102,10 +94,6 @@ const verbData: Record<string, Record<string, DrillData>> = {
         },
         {
           prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'ils' },
-          expectedAnswer: { text: 'ont' },
-        },
-        {
-          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'elles' },
           expectedAnswer: { text: 'ont' },
         },
       ],
@@ -129,10 +117,6 @@ const verbData: Record<string, Record<string, DrillData>> = {
           expectedAnswer: { text: 'se lave', isReflexive: true },
         },
         {
-          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'elle' },
-          expectedAnswer: { text: 'se lave', isReflexive: true },
-        },
-        {
           prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'nous' },
           expectedAnswer: { text: 'nous lavons', isReflexive: true },
         },
@@ -142,10 +126,6 @@ const verbData: Record<string, Record<string, DrillData>> = {
         },
         {
           prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'ils' },
-          expectedAnswer: { text: 'se lavent', isReflexive: true },
-        },
-        {
-          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'elles' },
           expectedAnswer: { text: 'se lavent', isReflexive: true },
         },
       ],
@@ -254,10 +234,30 @@ class StubDrillProvider implements DrillProvider {
     }
 
     const normalizedPronoun = pronounValidation.data;
-    const item = drillDataResult.data.items.find((i) => i.prompt.pronoun === normalizedPronoun);
+
+    const seekPronoun = (() => {
+      switch (normalizedPronoun) {
+        case 'elle':
+          return 'il';
+        case 'elles':
+          return 'ils';
+        case 'on':
+          return 'il';
+        default:
+          return normalizedPronoun;
+      }
+    })();
+
+    const item = drillDataResult.data.items.find((i) => i.prompt.pronoun === seekPronoun);
 
     if (item) {
-      return success(item);
+      return success({
+        ...item,
+        prompt: {
+          ...item.prompt,
+          pronoun: normalizedPronoun,
+        },
+      });
     }
 
     return error(
