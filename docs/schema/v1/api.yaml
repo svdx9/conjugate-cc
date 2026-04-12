@@ -34,12 +34,7 @@ paths:
       summary: Request magic link
       operationId: RequestMagicLink
       parameters:
-        - name: X-Requested-With
-          in: header
-          required: true
-          schema:
-            type: string
-            enum: [XMLHttpRequest]
+        - $ref: '#/components/parameters/XRequestedWith'
       requestBody:
         required: true
         content:
@@ -91,12 +86,7 @@ paths:
       summary: Confirm sign-in (consume token, create session)
       operationId: PostMagicLinkVerify
       parameters:
-        - name: X-Requested-With
-          in: header
-          required: true
-          schema:
-            type: string
-            enum: [XMLHttpRequest]
+        - $ref: '#/components/parameters/XRequestedWith'
       requestBody:
         required: true
         content:
@@ -127,12 +117,7 @@ paths:
       summary: Logout (invalidate session)
       operationId: DeleteSession
       parameters:
-        - name: X-Requested-With
-          in: header
-          required: true
-          schema:
-            type: string
-            enum: [XMLHttpRequest]
+        - $ref: '#/components/parameters/XRequestedWith'
       security:
         - sessionCookie: []
       responses:
@@ -146,6 +131,15 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 components:
+  parameters:
+    XRequestedWith:
+      name: X-Requested-With
+      in: header
+      required: true
+      schema:
+        type: string
+        enum: [XMLHttpRequest]
+
   schemas:
     Status:
       type: object
