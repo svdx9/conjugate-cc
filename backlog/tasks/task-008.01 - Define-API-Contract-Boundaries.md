@@ -1,10 +1,10 @@
 ---
 id: TASK-008.01
 title: Define API Contract Boundaries
-status: Done
+status: In Progress
 assignee: []
 created_date: '2026-04-09 15:50'
-updated_date: '2026-04-09 16:13'
+updated_date: '2026-04-12 05:28'
 labels: []
 dependencies: []
 parent_task_id: TASK-008
@@ -16,6 +16,21 @@ priority: high
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Update the backend and frontend schemas to define the API contract boundaries for user sign-in and magic link authentication.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 All 4 auth endpoints present in OpenAPI spec with correct methods, paths, and response shapes
+- [ ] #2 GET and POST /magiclink/verify are distinct operations in the spec
+- [ ] #3 All endpoints return application/json only (no text/html)
+- [ ] #4 POST /verify returns 200 with JSON body (not 302 redirect)
+- [ ] #5 Error response models (ErrorResponse, ValidationError) defined and reused
+- [ ] #6 sessionCookie security scheme defined and applied to DELETE /session
+- [ ] #7 make generate succeeds and produces updated api.gen.go
+- [ ] #8 Frontend npm run generate succeeds and produces updated v1.d.ts
+- [ ] #9 Generated code is committed
+- [ ] #10 Backend compiles without errors
+- [ ] #11 Frontend typechecks without errors
+<!-- AC:END -->
 
 ## Implementation Notes
 

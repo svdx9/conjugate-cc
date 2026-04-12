@@ -4,12 +4,13 @@ title: Implement production email delivery (Amazon SES)
 status: To Do
 assignee: []
 created_date: '2026-04-11 17:54'
+updated_date: '2026-04-12 05:29'
 labels:
   - backend
   - email
   - authentication
 dependencies:
-  - TASK-008.02
+  - TASK-008.08
 parent_task_id: TASK-008
 priority: medium
 ---
