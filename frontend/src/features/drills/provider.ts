@@ -5,7 +5,7 @@
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
 import { Result, error, success } from '../../shared/types';
 
-const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles'];
+export const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles'];
 
 // List of valid tenses - not an exclusive list, future tense support may expand
 const validTenses: Tense[] = ['présent', 'imparfait', 'passé_composé', 'futur'];
@@ -199,8 +199,40 @@ class StubDrillProvider implements DrillProvider {
       );
     }
 
-    // Return the found data
-    return success(verbData[normalizedVerb][normalizedTense]);
+    const baseData = verbData[normalizedVerb][normalizedTense];
+
+    const basePronouns = new Set(baseData.items.map((item) => item.prompt.pronoun));
+
+    const synthesizedItems = [...baseData.items];
+
+    for (const item of baseData.items) {
+      if (item.prompt.pronoun === 'il') {
+        if (!basePronouns.has('elle')) {
+          synthesizedItems.push({
+            prompt: { ...item.prompt, pronoun: 'elle' as Pronoun },
+            expectedAnswer: { ...item.expectedAnswer },
+          });
+        }
+        if (!basePronouns.has('on')) {
+          synthesizedItems.push({
+            prompt: { ...item.prompt, pronoun: 'on' as Pronoun },
+            expectedAnswer: { ...item.expectedAnswer },
+          });
+        }
+      } else if (item.prompt.pronoun === 'ils') {
+        if (!basePronouns.has('elles')) {
+          synthesizedItems.push({
+            prompt: { ...item.prompt, pronoun: 'elles' as Pronoun },
+            expectedAnswer: { ...item.expectedAnswer },
+          });
+        }
+      }
+    }
+
+    return success({
+      ...baseData,
+      items: synthesizedItems,
+    });
   }
 
   /**
@@ -234,30 +266,12 @@ class StubDrillProvider implements DrillProvider {
     }
 
     const normalizedPronoun = pronounValidation.data;
-
-    const seekPronoun = (() => {
-      switch (normalizedPronoun) {
-        case 'elle':
-          return 'il';
-        case 'elles':
-          return 'ils';
-        case 'on':
-          return 'il';
-        default:
-          return normalizedPronoun;
-      }
-    })();
-
-    const item = drillDataResult.data.items.find((i) => i.prompt.pronoun === seekPronoun);
+    const item = drillDataResult.data.items.find(
+      (i) => i.prompt.pronoun === normalizedPronoun,
+    );
 
     if (item) {
-      return success({
-        ...item,
-        prompt: {
-          ...item.prompt,
-          pronoun: normalizedPronoun,
-        },
-      });
+      return success(item);
     }
 
     return error(

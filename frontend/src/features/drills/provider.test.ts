@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { drillProvider } from './provider';
+import { drillProvider, validPronouns } from './provider';
 import { isError } from '../../shared/types';
 import { Tense } from './types';
+
+const numPronouns = validPronouns.length;
 
 describe('StubDrillProvider', () => {
   it('should return être present tense data', () => {
@@ -13,7 +15,7 @@ describe('StubDrillProvider', () => {
 
     expect(result.data.verb).toBe('être');
     expect(result.data.tense).toBe('présent');
-    expect(result.data.items.length).toBe(8);
+    expect(result.data.items.length).toBe(numPronouns);
     expect(result.data.items[0].expectedAnswer.text).toBe('suis');
   });
 
@@ -26,7 +28,7 @@ describe('StubDrillProvider', () => {
 
     expect(result.data.verb).toBe('avoir');
     expect(result.data.tense).toBe('présent');
-    expect(result.data.items.length).toBe(8);
+    expect(result.data.items.length).toBe(numPronouns);
     expect(result.data.items[0].expectedAnswer.text).toBe('ai');
   });
 
@@ -39,7 +41,7 @@ describe('StubDrillProvider', () => {
 
     expect(result.data.verb).toBe('se laver');
     expect(result.data.tense).toBe('présent');
-    expect(result.data.items.length).toBe(8);
+    expect(result.data.items.length).toBe(numPronouns);
     expect(result.data.items[0].expectedAnswer.text).toBe('me lave');
     expect(result.data.items[0].expectedAnswer.isReflexive).toBe(true);
   });
@@ -60,6 +62,16 @@ describe('StubDrillProvider', () => {
       expect(result2.data.verb).toBe('avoir');
     } else {
       expect.fail('Expected success for uppercase AVOIR but got error');
+    }
+  });
+
+  it('should handle case variations including accented characters', () => {
+    const result = drillProvider.getDrillData('ÊTRE', 'présent');
+
+    if (!isError(result)) {
+      expect(result.data.verb).toBe('être');
+    } else {
+      expect.fail('Expected success for uppercase ÊTRE but got error');
     }
   });
 
@@ -96,7 +108,7 @@ describe('StubDrillProvider', () => {
 
     expect(result.data.verb).toBe('avoir');
     expect(result.data.tense).toBe('présent');
-    expect(result.data.items.length).toBe(8);
+    expect(result.data.items.length).toBe(numPronouns);
   });
 
   it('should return error for invalid verb', () => {
