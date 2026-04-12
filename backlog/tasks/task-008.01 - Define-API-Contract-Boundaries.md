@@ -1,10 +1,10 @@
 ---
 id: TASK-008.01
 title: Define API Contract Boundaries
-status: In Progress
+status: Completed
 assignee: []
 created_date: '2026-04-09 15:50'
-updated_date: '2026-04-12 05:28'
+updated_date: '2026-04-12 16:52'
 labels: []
 dependencies: []
 parent_task_id: TASK-008
@@ -19,17 +19,17 @@ Update the backend and frontend schemas to define the API contract boundaries fo
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 All 4 auth endpoints present in OpenAPI spec with correct methods, paths, and response shapes
-- [ ] #2 GET and POST /magiclink/verify are distinct operations in the spec
-- [ ] #3 All endpoints return application/json only (no text/html)
-- [ ] #4 POST /verify returns 200 with JSON body (not 302 redirect)
-- [ ] #5 Error response models (ErrorResponse, ValidationError) defined and reused
-- [ ] #6 sessionCookie security scheme defined and applied to DELETE /session
-- [ ] #7 make generate succeeds and produces updated api.gen.go
-- [ ] #8 Frontend npm run generate succeeds and produces updated v1.d.ts
-- [ ] #9 Generated code is committed
-- [ ] #10 Backend compiles without errors
-- [ ] #11 Frontend typechecks without errors
+- [x] #1 All 4 auth endpoints present in OpenAPI spec with correct methods, paths, and response shapes
+- [x] #2 GET and POST /magiclink/verify are distinct operations in the spec
+- [x] #3 All endpoints return application/json only (no text/html)
+- [x] #4 POST /verify returns 200 with JSON body (not 302 redirect)
+- [x] #5 Error response models (ErrorResponse, ValidationError) defined and reused
+- [x] #6 sessionCookie security scheme defined and applied to DELETE /session
+- [x] #7 make generate succeeds and produces updated api.gen.go
+- [x] #8 Frontend npm run generate succeeds and produces updated v1.d.ts
+- [x] #9 Generated code is committed
+- [x] #10 Backend compiles without errors
+- [x] #11 Frontend typechecks without errors
 <!-- AC:END -->
 
 ## Implementation Notes
