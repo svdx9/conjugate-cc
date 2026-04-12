@@ -24,6 +24,26 @@ const (
 	SessionCookieScopes = "sessionCookie.Scopes"
 )
 
+// Defines values for XRequestedWith.
+const (
+	XRequestedWithXMLHttpRequest XRequestedWith = "XMLHttpRequest"
+)
+
+// Defines values for RequestMagicLinkParamsXRequestedWith.
+const (
+	RequestMagicLinkParamsXRequestedWithXMLHttpRequest RequestMagicLinkParamsXRequestedWith = "XMLHttpRequest"
+)
+
+// Defines values for PostMagicLinkVerifyParamsXRequestedWith.
+const (
+	PostMagicLinkVerifyParamsXRequestedWithXMLHttpRequest PostMagicLinkVerifyParamsXRequestedWith = "XMLHttpRequest"
+)
+
+// Defines values for DeleteSessionParamsXRequestedWith.
+const (
+	DeleteSessionParamsXRequestedWithXMLHttpRequest DeleteSessionParamsXRequestedWith = "XMLHttpRequest"
+)
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Code    string                  `json:"code"`
@@ -73,11 +93,38 @@ type ValidationError struct {
 	Message string `json:"message"`
 }
 
+// XRequestedWith defines model for XRequestedWith.
+type XRequestedWith string
+
+// RequestMagicLinkParams defines parameters for RequestMagicLink.
+type RequestMagicLinkParams struct {
+	XRequestedWith RequestMagicLinkParamsXRequestedWith `json:"X-Requested-With"`
+}
+
+// RequestMagicLinkParamsXRequestedWith defines parameters for RequestMagicLink.
+type RequestMagicLinkParamsXRequestedWith string
+
 // GetMagicLinkVerifyParams defines parameters for GetMagicLinkVerify.
 type GetMagicLinkVerifyParams struct {
 	// Token Magic link verification token
 	Token string `form:"token" json:"token"`
 }
+
+// PostMagicLinkVerifyParams defines parameters for PostMagicLinkVerify.
+type PostMagicLinkVerifyParams struct {
+	XRequestedWith PostMagicLinkVerifyParamsXRequestedWith `json:"X-Requested-With"`
+}
+
+// PostMagicLinkVerifyParamsXRequestedWith defines parameters for PostMagicLinkVerify.
+type PostMagicLinkVerifyParamsXRequestedWith string
+
+// DeleteSessionParams defines parameters for DeleteSession.
+type DeleteSessionParams struct {
+	XRequestedWith DeleteSessionParamsXRequestedWith `json:"X-Requested-With"`
+}
+
+// DeleteSessionParamsXRequestedWith defines parameters for DeleteSession.
+type DeleteSessionParamsXRequestedWith string
 
 // RequestMagicLinkJSONRequestBody defines body for RequestMagicLink for application/json ContentType.
 type RequestMagicLinkJSONRequestBody = MagicLinkRequest
@@ -89,16 +136,16 @@ type PostMagicLinkVerifyJSONRequestBody = MagicLinkConfirmRequest
 type ServerInterface interface {
 	// Request magic link
 	// (POST /v1/auth/magiclink/request)
-	RequestMagicLink(w http.ResponseWriter, r *http.Request)
+	RequestMagicLink(w http.ResponseWriter, r *http.Request, params RequestMagicLinkParams)
 	// Validate magic link token (read-only, does not consume)
 	// (GET /v1/auth/magiclink/verify)
 	GetMagicLinkVerify(w http.ResponseWriter, r *http.Request, params GetMagicLinkVerifyParams)
 	// Confirm sign-in (consume token, create session)
 	// (POST /v1/auth/magiclink/verify)
-	PostMagicLinkVerify(w http.ResponseWriter, r *http.Request)
+	PostMagicLinkVerify(w http.ResponseWriter, r *http.Request, params PostMagicLinkVerifyParams)
 	// Logout (invalidate session)
 	// (DELETE /v1/auth/session)
-	DeleteSession(w http.ResponseWriter, r *http.Request)
+	DeleteSession(w http.ResponseWriter, r *http.Request, params DeleteSessionParams)
 	// Build metadata
 	// (GET /v1/metadata)
 	GetMetadata(w http.ResponseWriter, r *http.Request)
@@ -113,7 +160,7 @@ type Unimplemented struct{}
 
 // Request magic link
 // (POST /v1/auth/magiclink/request)
-func (_ Unimplemented) RequestMagicLink(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) RequestMagicLink(w http.ResponseWriter, r *http.Request, params RequestMagicLinkParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -125,13 +172,13 @@ func (_ Unimplemented) GetMagicLinkVerify(w http.ResponseWriter, r *http.Request
 
 // Confirm sign-in (consume token, create session)
 // (POST /v1/auth/magiclink/verify)
-func (_ Unimplemented) PostMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) PostMagicLinkVerify(w http.ResponseWriter, r *http.Request, params PostMagicLinkVerifyParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Logout (invalidate session)
 // (DELETE /v1/auth/session)
-func (_ Unimplemented) DeleteSession(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) DeleteSession(w http.ResponseWriter, r *http.Request, params DeleteSessionParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -159,8 +206,38 @@ type MiddlewareFunc func(http.Handler) http.Handler
 // RequestMagicLink operation middleware
 func (siw *ServerInterfaceWrapper) RequestMagicLink(w http.ResponseWriter, r *http.Request) {
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params RequestMagicLinkParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "X-Requested-With" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Requested-With")]; found {
+		var XRequestedWith RequestMagicLinkParamsXRequestedWith
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Requested-With", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Requested-With", valueList[0], &XRequestedWith, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Requested-With", Err: err})
+			return
+		}
+
+		params.XRequestedWith = XRequestedWith
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Requested-With is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Requested-With", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.RequestMagicLink(w, r)
+		siw.Handler.RequestMagicLink(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -207,8 +284,38 @@ func (siw *ServerInterfaceWrapper) GetMagicLinkVerify(w http.ResponseWriter, r *
 // PostMagicLinkVerify operation middleware
 func (siw *ServerInterfaceWrapper) PostMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostMagicLinkVerifyParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "X-Requested-With" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Requested-With")]; found {
+		var XRequestedWith PostMagicLinkVerifyParamsXRequestedWith
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Requested-With", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Requested-With", valueList[0], &XRequestedWith, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Requested-With", Err: err})
+			return
+		}
+
+		params.XRequestedWith = XRequestedWith
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Requested-With is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Requested-With", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostMagicLinkVerify(w, r)
+		siw.Handler.PostMagicLinkVerify(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -221,14 +328,44 @@ func (siw *ServerInterfaceWrapper) PostMagicLinkVerify(w http.ResponseWriter, r 
 // DeleteSession operation middleware
 func (siw *ServerInterfaceWrapper) DeleteSession(w http.ResponseWriter, r *http.Request) {
 
+	var err error
+
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, SessionCookieScopes, []string{})
 
 	r = r.WithContext(ctx)
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params DeleteSessionParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "X-Requested-With" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Requested-With")]; found {
+		var XRequestedWith DeleteSessionParamsXRequestedWith
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Requested-With", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Requested-With", valueList[0], &XRequestedWith, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Requested-With", Err: err})
+			return
+		}
+
+		params.XRequestedWith = XRequestedWith
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Requested-With is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Requested-With", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteSession(w, r)
+		siw.Handler.DeleteSession(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -404,27 +541,28 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xXbW/bNhD+KwS3Dy0g2/JL3NVBgbXdsAZLt6DO+mFBENDk2WIskQpJGREK//eBFGW9",
-	"OsmAJJ8SUzzec88dnzv+wFQmqRQgjMaLH1jTCBLi/v1dKam+gU6l0GAXUiVTUIaD+0wlc6twT5I0BrzA",
-	"XOxIzNmNkVsQOMAmT+2yNoqLDd4HmIEhPHbWhDFuuBQkvqidalQGBzu5ugVqrF0CWpNNy9tlBChVcscZ",
-	"MORcIq6Rx4CkQhHRCO5TroB1wewDrOAucx8XV0UwlaPrHhBfyYbTcy62n6VYc5V8g7sMtOkSU4TfwEpW",
-	"dDyZMljPTuaPYinsnwbhWHIgITxuYsg0qF/9zyGVCQ7wWqqEGLzw23syZo1uOGuedHISwi+zMBzA5P1q",
-	"MBuz2YC8G88Hs9l8fnIym4VhGNZPzzL+eAZKT4EH82D8R7l/nrhb0J4A6Dsovs5fOh9PxwWGMGJIF8gq",
-	"4zG7MTxp3aZJOJkPwulgPLscv1tMp4tp+G9fQWy4udERaRqz6QTm76ePAi6NgzqMPvxLQ0ymu+j1Yb1y",
-	"LreP+vVmfZ6+W7UgVomc3D1F5nYHkxtwNj00rTnErPjsTuEGkp543Lbm6UevYq8IJpk2aAWIoEL2nDUi",
-	"jCnQ+lFeCvcPy55fIEqR/CiMikW0Jjz+/4LbYqwLZB9gDTRT3ORL26J8PYDWXIrPUm65g8QFXmBa/Ayw",
-	"IImDUOyqMJGU/wk53ttTuVhLa8lAU8VTGwNe4I8XZ2gtFTIRoM9S3GYbYmBIKdqBWiHqV2y8TPE4RiRN",
-	"Y07dytD64cbx0jD9eHGGA7wDpQsf42E4DC2lMgVBUo4XeDocD610psRELsDRbjwimYlGiVWamIvtSNW0",
-	"TxZ/bUk532cML7AXx4M24YJ50OaTZHlR08KAcKY14KNbLUU1A9j/flawxgv806gaEkZ+Qhh1xHjfzLHt",
-	"5W6h0EQXziScdLl2ByEbG/I4EaEUUgPMsjObTJ4Nc/u2O8hNNLVSBr8nwDpLEqLyilyUHEC7DT152rmW",
-	"YBFtoCdLf4BpdQ+Xd0USMGBF4+oBntzZngJUjluu9u8yUHlV+uW3ZlqCGl3ta3rdSVn4/CXTapc9abgs",
-	"Bzqna6dIgcmU0IhoLSknBkqts7eUFuNQQcc/Z65qnhF2cxDuAfuVa83Fxk+hhyQ6HONXxFGQJqRBa5kJ",
-	"FiASKyAsR5kGFtiZuJyHm0Xtax5qVe1jeWPtB1LEeYCYBO0Op1LoLIG3Nr5+CbqQuqe6X1SFWlP5k8Qo",
-	"fEEYx7O0LNoRogpcHeuMUtB6ncWxZSkCwqCYGpZgBlVvq5BUjde3tg/FA+MUXRATfRidoi/GpH+LOD9F",
-	"S9s14RQtSQJLbuDDObnv6c57d2fGr1erZ8VDLShL0pVnvV69rjUr1dOLNN+IARfoja/FYnPgOUWelrdN",
-	"bS7nANeBYjDQLdzf3PryMDC0CmbW7V5lNv3Ds5vR1yb2L2mQDReEsR7Ky+6HJ9dXWmPT1bVV/Yrkc7mR",
-	"mUFvqpC6hCa1F8bR/lbuecmLV/rovWhqxykg99hASbWzHuyn7kcbX/XSOBadf6O8YGzewwORcY0iILGJ",
-	"8lZUX9wqohHQrbvd/wUAAP//QeJyc+gRAAA=",
+	"H4sIAAAAAAAC/8xXbW/bNhD+KwS3Dy0g2/JL0lVBgbXdsAZLt6DuumJBENDk2WItkSpJGRUK//eBFGW9",
+	"us6ApNgnwxTv7rm3545fMZVpJgUIo3H0FWdEkRQMKPfv4zv4nIM2wP7mJrYnXOAIx0AYKBxgQVLAEf44",
+	"OtwbuYsBVvA55woYjozKIcCaxpASqwFEnuLoBn98e/XGmMxL4tsAmyKz2rRRXGzwfr+vxByWX5WS6h3o",
+	"TAoNDqqSGSjDwX2mkrlT+ELSLLF6uNiRhLM7I7cgcE99gBkYwhMnTRjjhktBkuuG1hK6l5OrT0CNlUtB",
+	"a7LpWHsfA8qU3HEGDDmTiGvkMSCpUEw0gi+ZC0rf12bEbkpnakO3AyDekg2nV1xsX0ux5iqt4tgLTOl+",
+	"CytZ0elszmC9ODs/iaWUvx+EY8mBlPCkjSHXoH72f8dUpjjAa6lSYnDkrw9kzArdcdbWdHYWwk+LMBzB",
+	"7PlqtJiyxYg8m56PFovz87OzxSIMw7CpPc/56QxUlgIP5pv+H439w/jdgXYPQB9A8XXx2Pm4Py4whBFD",
+	"+kBWOU/YneFpp5tm4ex8FM5H08X76bNoPo/m4T9DBbHh5k7HpC3M5jM4fz4/CbgSDpowhvAvDTG57qPX",
+	"h/PauNyetOvFhix9sGxBLBM5ursPze0OInfgZAbCtOaQsPKz08INpAP+uGtt7UdbcZAE01wbtAJEUEl7",
+	"ThoRxhRofTIupflv054/IEqR4iiMOopoTXjy3wm3E7E+EDuagOaKm2JpR5SvB9CaS/Fayi2Hw7Sk5d/D",
+	"tPS3akwk479DUQ48LtbSSjLQVPHM+oAj/PL6Eq2lQiYG9FqKT/mGGBhTinagVoj6E+svUzxJEMmyhFN3",
+	"MrZ2uHFxaYm+vL7EAd6B0qWN6TgchzakMgNBMo4jPB+H4ykOcEZM7Byc7KYTkpt4klqmSbjYTlSD+2T5",
+	"a0vK2b5kOMKeHA/c5PTVS8bNV/yjgjWO8A+TehWZ1FcmnSVkf1umDrR5JVlRNoUwIJzthueTT1q6wVfv",
+	"HkOW/Iox6bH5vl0kdhlwByWpunjMwlk/WU4RssFBHicilEJmgNnwLmazB8PcpQsHuY2m0Qvg7wRY52lK",
+	"VFFnB6UH0O7CQKJ3bqZYRBsYSPNvYDrjp5/oo3Fyun0IULWvueb5nIMq6t6pvh1fL7t9fttLWfjwJdOZ",
+	"twNpeF9thI4YL5ACkyuhEdFaUk4MVGRp25yW+1QZjr8uXdU8IOz2Jj0A9i3XmouNX2MPSXQ4pt8RRxk0",
+	"IQ1ay1ywAJFEAWEFyjWwwC7V1ULdLmpf89Coau/LEys/kiIpAsQkaKecSqHzFJ5a/4Y57Frq09X9P6Ox",
+	"zrvgXmwWPiKM42lelgMRUQWuEXROKWi9zpPEhrl8bTqESzCjero23pSH0e+H64vyiXOBromJX0wukH1q",
+	"/imS4gIt7dyGC7QkKSy5gRdX5MvAfrB3TTf9fsV+WT4Vg6qmXX03C94TY7vUfXiR5hsx4gI98cVcXg58",
+	"TJEPy9M2uVebiBthCRjoV/4v7nx5WFkeoOZbFbfoz8+qHPzbuV8S3zszf0iDbLxAGGuhohu//7k4dDa/",
+	"m1vrap2lK7mRuUFPapf6GUkbj6SjE7a685idW9kY7FS14xSQey+htL7ZdPZV/6P1r34sHfPOP7Me0Tdv",
+	"4RuecY1iIImJi45Xb9wpojHQraOHfwMAAP//FLmsbzoTAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
