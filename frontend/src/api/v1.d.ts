@@ -157,7 +157,9 @@ export interface components {
         };
     };
     responses: never;
-    parameters: never;
+    parameters: {
+        XRequestedWith: "XMLHttpRequest";
+    };
     requestBodies: never;
     headers: never;
     pathItems: never;
@@ -207,7 +209,9 @@ export interface operations {
     RequestMagicLink: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -279,7 +283,9 @@ export interface operations {
     PostMagicLinkVerify: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -313,7 +319,9 @@ export interface operations {
     DeleteSession: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
             path?: never;
             cookie?: never;
         };
