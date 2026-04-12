@@ -33,6 +33,13 @@ paths:
     post:
       summary: Request magic link
       operationId: RequestMagicLink
+      parameters:
+        - name: X-Requested-With
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [XMLHttpRequest]
       requestBody:
         required: true
         content:
@@ -83,6 +90,13 @@ paths:
     post:
       summary: Confirm sign-in (consume token, create session)
       operationId: PostMagicLinkVerify
+      parameters:
+        - name: X-Requested-With
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [XMLHttpRequest]
       requestBody:
         required: true
         content:
@@ -112,6 +126,13 @@ paths:
     delete:
       summary: Logout (invalidate session)
       operationId: DeleteSession
+      parameters:
+        - name: X-Requested-With
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [XMLHttpRequest]
       security:
         - sessionCookie: []
       responses:
