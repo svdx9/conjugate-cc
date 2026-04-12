@@ -5,15 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/svdx9/conjugate-cc/backend/internal/config"
+	"github.com/svdx9/conjugate-cc/backend/internal/db"
 	internalhttp "github.com/svdx9/conjugate-cc/backend/internal/http"
 	"github.com/svdx9/conjugate-cc/backend/internal/status"
 )
@@ -38,11 +37,20 @@ func main() {
 	}
 
 	logger.Info("starting conjugate-cc backend",
-		"port", cfg.Port,
-		"env", cfg.Env,
+		"config", cfg.Redacted(),
 		"git_sha", GitSHA,
 		"build_time", BuildTime,
 	)
+
+	// Create database pool
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	pool, err := db.NewPool(ctx, cfg.DatabaseURL)
+	cancel()
+	if err != nil {
+		logger.Error("failed to create database pool", "error", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
 
 	// Dependency injection
 	statusHandler := status.NewHandler(logger, GitSHA, BuildTime)
@@ -50,7 +58,7 @@ func main() {
 
 	//nolint:exhaustruct
 	server := &http.Server{
-		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
+		Addr:              cfg.Addr(),
 		Handler:           router,
 		ErrorLog:          slog.NewLogLogger(handler, slog.LevelError),
 		ReadTimeout:       5 * time.Second,
