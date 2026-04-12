@@ -205,28 +205,28 @@ class StubDrillProvider implements DrillProvider {
 
     const synthesizedItems = [...baseData.items];
 
-    for (const item of baseData.items) {
-      if (item.prompt.pronoun === 'il') {
-        if (!basePronouns.has('elle')) {
-          synthesizedItems.push({
-            prompt: { ...item.prompt, pronoun: 'elle' as Pronoun },
-            expectedAnswer: { ...item.expectedAnswer },
-          });
-        }
-        if (!basePronouns.has('on')) {
-          synthesizedItems.push({
-            prompt: { ...item.prompt, pronoun: 'on' as Pronoun },
-            expectedAnswer: { ...item.expectedAnswer },
-          });
-        }
-      } else if (item.prompt.pronoun === 'ils') {
-        if (!basePronouns.has('elles')) {
-          synthesizedItems.push({
-            prompt: { ...item.prompt, pronoun: 'elles' as Pronoun },
-            expectedAnswer: { ...item.expectedAnswer },
-          });
-        }
+    const ilItem = baseData.items.find((i) => i.prompt.pronoun === 'il');
+    if (ilItem) {
+      if (!basePronouns.has('elle')) {
+        synthesizedItems.push({
+          prompt: { ...ilItem.prompt, pronoun: 'elle' },
+          expectedAnswer: { ...ilItem.expectedAnswer },
+        });
       }
+      if (!basePronouns.has('on')) {
+        synthesizedItems.push({
+          prompt: { ...ilItem.prompt, pronoun: 'on' },
+          expectedAnswer: { ...ilItem.expectedAnswer },
+        });
+      }
+    }
+
+    const ilsItem = baseData.items.find((i) => i.prompt.pronoun === 'ils');
+    if (ilsItem && !basePronouns.has('elles')) {
+      synthesizedItems.push({
+        prompt: { ...ilsItem.prompt, pronoun: 'elles' },
+        expectedAnswer: { ...ilsItem.expectedAnswer },
+      });
     }
 
     return success({
