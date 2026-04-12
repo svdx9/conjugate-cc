@@ -11,6 +11,7 @@ import (
 
 // CompositeHandler combines multiple handlers to implement the full ServerInterface
 type CompositeHandler struct {
+	api.Unimplemented
 	statusHandler *status.Handler
 }
 
@@ -29,30 +30,6 @@ func (h *CompositeHandler) GetStatus(w http.ResponseWriter, r *http.Request) {
 // GetMetadata implements the metadata endpoint
 func (h *CompositeHandler) GetMetadata(w http.ResponseWriter, r *http.Request) {
 	h.statusHandler.GetMetadata(w, r)
-}
-
-// RequestMagicLink is a stub implementation for the magic link request endpoint
-func (h *CompositeHandler) RequestMagicLink(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement magic link request handler
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
-
-// GetMagicLinkVerify is a stub implementation for the magic link verify GET endpoint
-func (h *CompositeHandler) GetMagicLinkVerify(w http.ResponseWriter, r *http.Request, params api.GetMagicLinkVerifyParams) {
-	// TODO: Implement magic link verify GET handler
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
-
-// PostMagicLinkVerify is a stub implementation for the magic link verify POST endpoint
-func (h *CompositeHandler) PostMagicLinkVerify(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement magic link verify POST handler
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
-
-// DeleteSession is a stub implementation for the session deletion endpoint
-func (h *CompositeHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement session deletion handler
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
 }
 
 // NewRouter creates a new chi router and mounts the API handlers.
