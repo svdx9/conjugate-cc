@@ -143,42 +143,89 @@ const verbData: Record<string, Record<string, DrillData>> = {
   },
 };
 
+/*************  ✨ Windsurf Command 🌟  *************/
+/**
+ * Validate that a given string is a valid string.
+ * @param str The string to validate
+ * @returns A Result<string> containing either the validated string or an error
+ */
 const validateString = (str: string): Result<string> => {
+  // Check if the string is empty or not defined
+  // This check is done first to avoid potential errors
   if (!str || typeof str !== 'string' || str.trim() === '') {
     return error('Invalid string: string must be a non-empty string', 'INVALID_STRING');
   }
+
+  // Return the validated string
   return success(str);
 };
 
+/*************  ✨ Windsurf Command 🌟  *************/
+/**
+ * Validate that a given string is a valid tense.
+ * @param tense The string to validate
+ * @returns A Result<Tense> containing either the validated tense or an error
+ */
 const validateTense = (tense: string): Result<Tense> => {
+  // Validate that the tense is a non-empty string
   const tenseStringResult = validateString(tense);
   if (isError(tenseStringResult)) {
     return tenseStringResult;
   }
+
+  // Check if the tense is included in the list of valid tenses
   if (!validTenses.includes(tense as Tense)) {
-    return error(`Invalid tense: "${tense}" is not a valid tense`, 'INVALID_TENSE');
+    return error(
+      `Invalid tense: "${tense}" is not a valid tense`,
+      'INVALID_TENSE',
+    );
   }
+
+  // Return the validated tense
   return success(tense as Tense);
 };
 
+/**
+ * Validate that a given string is a valid pronoun.
+ * @param pronoun The string to validate
+ * @returns A Result<Pronoun> containing either the validated pronoun or an error
+ */
 const validatePronoun = (pronoun: string): Result<Pronoun> => {
+  // Validate that the pronoun is a non-empty string
   const pronounStringResult = validateString(pronoun);
   if (isError(pronounStringResult)) {
     return pronounStringResult;
   }
+
+  // Validate that the pronoun is in the list of valid pronouns
   if (!validPronouns.includes(pronoun as Pronoun)) {
     return error(`Invalid pronoun: "${pronoun}" is not a valid pronoun`, 'INVALID_PRONOUN');
   }
+
+  // Return the validated pronoun
   return success(pronoun as Pronoun);
 };
 
+/*************  ✨ Windsurf Command 🌟  *************/
+/**
+ * Normalize a verb string by trimming and converting it to lowercase.
+ * This normalization is locale-insensitive and handles accented characters correctly.
+ * @param verb The verb string to normalize
+ * @returns A Result<string> containing either the normalized verb string or an error
+ */
 const normalizeVerb = (verb: string): Result<string> => {
+  // Validate that the verb is a non-empty string
   const verbStringResult = validateString(verb);
   if (isError(verbStringResult)) {
     return verbStringResult;
   }
+
+  // Normalize the verb string
   // toLowerCase() correctly handles accented characters (e.g., "ÊTRE" → "être")
-  return success(verbStringResult.data.trim().toLowerCase());
+  const normalizedVerb = verbStringResult.data.trim().toLowerCase();
+
+  // Return the normalized verb string
+  return success(normalizedVerb);
 };
 
 // Stub implementation with hardcoded conjugation data
@@ -195,7 +242,7 @@ class StubDrillProvider implements DrillProvider {
     // Normalize verb
     const normalizedVerbResult = normalizeVerb(verb);
     if (isError(normalizedVerbResult)) {
-      return error(`Invalid verb: "${verb}" is not a valid pronoun`, 'INVALID_VERB');
+      return error(`Invalid verb: "${verb}" is not a valid verb`, 'INVALID_VERB');
     }
     const normalizedVerb = normalizedVerbResult.data;
 
@@ -248,12 +295,6 @@ class StubDrillProvider implements DrillProvider {
       items: synthesizedItems,
     });
   }
-
-  /**
-   * Validates pronoun input and normalizes it
-   * @param pronoun - The pronoun to validate
-   * @returns Result<Pronoun> with normalized pronoun or error
-   */
 
   getDrillItem(verb: string, tense: Tense, pronoun: Pronoun): Result<DrillItem> {
     // validate Pronoun
