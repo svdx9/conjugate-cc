@@ -1,10 +1,10 @@
 ---
 id: TASK-008.02
 title: Implement Backend Handlers and Database Storage
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-09 15:50'
-updated_date: '2026-04-09 16:05'
+updated_date: '2026-04-11 17:57'
 labels: []
 dependencies: []
 parent_task_id: TASK-008
@@ -45,10 +45,9 @@ Implement the backend handlers and database storage for magic link authenticatio
   - HTTP handlers implementing generated ServerInterface methods
 - `internal/db/` implements auth repository interfaces
 
-#### 3. Email Infrastructure
+#### 3. Email (stub only)
 - `internal/email/` package with sender interface
-- Stub sender for dev, real sender (SES) for prod
-- Magic link email template using `templ`
+- Stub sender that logs to stdout (production SES delivery is TASK-008.06)
 
 #### 4. HTTP Server Integration
 - Replace CompositeHandler stubs with real auth handlers
@@ -72,3 +71,15 @@ Implement the backend handlers and database storage for magic link authenticatio
 - PostgreSQL database for development
 - Email adapter (can be stubbed initially)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Task superseded. Scope was too large and has been broken into three focused tasks with explicit dependency ordering:
+
+- TASK-008.07: Database infrastructure setup (config, migrations, sqlc, pool) — depends on 008.01
+- TASK-008.08: Auth service layer and email stub — depends on 008.07
+- TASK-008.09: Auth HTTP handlers and server integration — depends on 008.08
+
+See doc-001 (Magic Link Authentication Flow) for the full auth flow design and security requirements.
+<!-- SECTION:FINAL_SUMMARY:END -->
