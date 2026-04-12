@@ -1,6 +1,6 @@
 project_name: "conjugate.cc"
 default_status: "To Do"
-statuses: ["To Do", "In Progress", "Done"]
+statuses: ["To Do", "In Progress", "Done", "Cancelled"]
 labels: []
 definition_of_done:
   - Tests pass
