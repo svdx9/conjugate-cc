@@ -3,9 +3,19 @@
 // and the future conjugation engine must implement
 
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
-import { Result, error, success } from '../../shared/types';
+import { Result, isError, error, success } from '../../shared/types';
 
-export const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles'];
+export const validPronouns: Pronoun[] = [
+  'je',
+  'tu',
+  'il',
+  'elle',
+  'on',
+  'nous',
+  'vous',
+  'ils',
+  'elles',
+];
 
 // List of valid tenses - not an exclusive list, future tense support may expand
 const validTenses: Tense[] = ['présent', 'imparfait', 'passé_composé', 'futur'];
@@ -133,55 +143,61 @@ const verbData: Record<string, Record<string, DrillData>> = {
   },
 };
 
+const validateString = (str: string): Result<string> => {
+  if (!str || typeof str !== 'string' || str.trim() === '') {
+    return error('Invalid string: string must be a non-empty string', 'INVALID_STRING');
+  }
+  return success(str);
+};
+
+const validateTense = (tense: string): Result<Tense> => {
+  const tenseStringResult = validateString(tense);
+  if (isError(tenseStringResult)) {
+    return tenseStringResult;
+  }
+  if (!validTenses.includes(tense as Tense)) {
+    return error(`Invalid tense: "${tense}" is not a valid tense`, 'INVALID_TENSE');
+  }
+  return success(tense as Tense);
+};
+
+const validatePronoun = (pronoun: string): Result<Pronoun> => {
+  const pronounStringResult = validateString(pronoun);
+  if (isError(pronounStringResult)) {
+    return pronounStringResult;
+  }
+  if (!validPronouns.includes(pronoun as Pronoun)) {
+    return error(`Invalid pronoun: "${pronoun}" is not a valid pronoun`, 'INVALID_PRONOUN');
+  }
+  return success(pronoun as Pronoun);
+};
+
+const normalizeVerb = (verb: string): Result<string> => {
+  const verbStringResult = validateString(verb);
+  if (isError(verbStringResult)) {
+    return verbStringResult;
+  }
+  // toLowerCase() correctly handles accented characters (e.g., "ÊTRE" → "être")
+  return success(verbStringResult.data.trim().toLowerCase());
+};
+
 // Stub implementation with hardcoded conjugation data
 // This will be replaced by a real conjugation engine in the future
 class StubDrillProvider implements DrillProvider {
-  /**
-   * Validates verb and tense inputs.
-   * Returns Result<{normalizedVerb: string, normalizedTense: Tense}> on success,
-   * or error if validation fails.
-   */
-  private validateInputs(
-    verb: string,
-    tense: Tense,
-  ): Result<{ normalizedVerb: string; normalizedTense: Tense }> {
-    // Validate inputs
-    if (!verb || typeof verb !== 'string' || verb.trim() === '') {
-      return error('Invalid verb: verb must be a non-empty string', 'INVALID_VERB');
-    }
-
-    // Normalize verb for lookup
-    // toLowerCase() correctly handles accented characters (e.g., "ÊTRE" → "être")
-    const normalizedVerb = verb.trim().toLowerCase();
-
-    return success({ normalizedVerb, normalizedTense: tense });
-  }
-
-  /**
-   * Validates tense input.
-   * @param tense - The tense to validate
-   * @returns Result<Tense> with the tense or error
-   */
-  private validateTense(tense: string): Result<Tense> {
-    if (!validTenses.includes(tense as Tense)) {
-      return error(`Invalid tense: "${tense}" is not a valid tense`, 'INVALID_TENSE');
-    }
-    return success(tense as Tense);
-  }
-
   getDrillData(verb: string, tense: Tense): Result<DrillData> {
     // Validate tense at runtime
-    const tenseValidation = this.validateTense(tense);
-    if (!tenseValidation.ok) {
-      return tenseValidation;
+    const normalizedTenseResult = validateTense(tense);
+    if (isError(normalizedTenseResult)) {
+      return normalizedTenseResult;
     }
+    const normalizedTense = normalizedTenseResult.data;
 
-    const validationResult = this.validateInputs(verb, tense);
-    if (!validationResult.ok) {
-      return validationResult;
+    // Normalize verb
+    const normalizedVerbResult = normalizeVerb(verb);
+    if (isError(normalizedVerbResult)) {
+      return error(`Invalid verb: "${verb}" is not a valid pronoun`, 'INVALID_VERB');
     }
-
-    const { normalizedVerb, normalizedTense } = validationResult.data;
+    const normalizedVerb = normalizedVerbResult.data;
 
     // Check if verb exists in our data
     if (!verbData[normalizedVerb]) {
@@ -200,9 +216,7 @@ class StubDrillProvider implements DrillProvider {
     }
 
     const baseData = verbData[normalizedVerb][normalizedTense];
-
     const basePronouns = new Set(baseData.items.map((item) => item.prompt.pronoun));
-
     const synthesizedItems = [...baseData.items];
 
     const ilItem = baseData.items.find((i) => i.prompt.pronoun === 'il');
@@ -240,35 +254,21 @@ class StubDrillProvider implements DrillProvider {
    * @param pronoun - The pronoun to validate
    * @returns Result<Pronoun> with normalized pronoun or error
    */
-  private validatePronoun(pronoun: Pronoun): Result<Pronoun> {
-    const normalizedPronoun = pronoun.toLowerCase().trim();
-
-    // Validate pronoun at runtime to ensure type safety
-    if (!validPronouns.includes(normalizedPronoun as Pronoun)) {
-      return error(
-        `Invalid pronoun: "${normalizedPronoun}" is not a valid pronoun`,
-        'INVALID_INPUT',
-      );
-    }
-
-    return success(normalizedPronoun as Pronoun);
-  }
 
   getDrillItem(verb: string, tense: Tense, pronoun: Pronoun): Result<DrillItem> {
+    // validate Pronoun
+    const pronounValidation = validatePronoun(pronoun);
+    if (isError(pronounValidation)) {
+      return pronounValidation;
+    }
+    // don't need to validate verb and tense, already done in getDrillData
     const drillDataResult = this.getDrillData(verb, tense);
-    if (!drillDataResult.ok) {
+    if (isError(drillDataResult)) {
       return drillDataResult;
     }
 
-    const pronounValidation = this.validatePronoun(pronoun);
-    if (!pronounValidation.ok) {
-      return pronounValidation;
-    }
-
     const normalizedPronoun = pronounValidation.data;
-    const item = drillDataResult.data.items.find(
-      (i) => i.prompt.pronoun === normalizedPronoun,
-    );
+    const item = drillDataResult.data.items.find((i) => i.prompt.pronoun === normalizedPronoun);
 
     if (item) {
       return success(item);
