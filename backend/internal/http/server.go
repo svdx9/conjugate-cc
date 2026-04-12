@@ -17,7 +17,7 @@ type CompositeHandler struct {
 
 // NewCompositeHandler creates a new composite handler
 func NewCompositeHandler(statusHandler *status.Handler) *CompositeHandler {
-	return &CompositeHandler{
+	return &CompositeHandler{ //nolint:exhaustruct
 		statusHandler: statusHandler,
 	}
 }
