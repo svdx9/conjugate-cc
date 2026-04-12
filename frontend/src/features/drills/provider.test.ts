@@ -6,11 +6,11 @@ import { Tense } from './types';
 describe('StubDrillProvider', () => {
   it('should return être present tense data', () => {
     const result = drillProvider.getDrillData('être', 'présent');
-    
+
     if (isError(result)) {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
-    
+
     expect(result.data.verb).toBe('être');
     expect(result.data.tense).toBe('présent');
     expect(result.data.items.length).toBe(8);
@@ -19,11 +19,11 @@ describe('StubDrillProvider', () => {
 
   it('should return avoir present tense data', () => {
     const result = drillProvider.getDrillData('avoir', 'présent');
-    
+
     if (isError(result)) {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
-    
+
     expect(result.data.verb).toBe('avoir');
     expect(result.data.tense).toBe('présent');
     expect(result.data.items.length).toBe(8);
@@ -32,11 +32,11 @@ describe('StubDrillProvider', () => {
 
   it('should return se laver present tense data with reflexive flag', () => {
     const result = drillProvider.getDrillData('se laver', 'présent');
-    
+
     if (isError(result)) {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
-    
+
     expect(result.data.verb).toBe('se laver');
     expect(result.data.tense).toBe('présent');
     expect(result.data.items.length).toBe(8);
@@ -65,22 +65,22 @@ describe('StubDrillProvider', () => {
 
   it('should return error for unknown verbs', () => {
     const result = drillProvider.getDrillData('unknown', 'présent');
-    
+
     if (!isError(result)) {
       expect.fail('Expected error but got data');
     }
-    
+
     expect(result.code).toBe('NOT_FOUND');
     expect(result.error).toContain('unknown');
   });
 
   it('should get specific drill item by pronoun', () => {
     const result = drillProvider.getDrillItem('être', 'présent', 'je');
-    
+
     if (isError(result)) {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
-    
+
     expect(result.data.prompt.infinitive).toBe('être');
     expect(result.data.prompt.tense).toBe('présent');
     expect(result.data.prompt.pronoun).toBe('je');
@@ -89,11 +89,11 @@ describe('StubDrillProvider', () => {
 
   it('should return all pronouns when no pronoun specified', () => {
     const result = drillProvider.getDrillData('avoir', 'présent');
-    
+
     if (isError(result)) {
       expect.fail(`Expected data but got error: ${result.error}`);
     }
-    
+
     expect(result.data.verb).toBe('avoir');
     expect(result.data.tense).toBe('présent');
     expect(result.data.items.length).toBe(8);
@@ -101,21 +101,21 @@ describe('StubDrillProvider', () => {
 
   it('should return error for invalid verb', () => {
     const result = drillProvider.getDrillData('', 'présent');
-    
+
     if (!isError(result)) {
       expect.fail('Expected error but got data');
     }
-    
+
     expect(result.code).toBe('INVALID_VERB');
   });
 
   it('should return error for invalid tense', () => {
     const result = drillProvider.getDrillData('être', 'invalide' as Tense);
-    
+
     if (!isError(result)) {
       expect.fail('Expected error but got data');
     }
-    
+
     expect(result.code).toBe('INVALID_TENSE');
   });
 
@@ -134,11 +134,11 @@ describe('StubDrillProvider', () => {
 
   it('should return error for unknown tense', () => {
     const result = drillProvider.getDrillData('être', 'futur');
-    
+
     if (!isError(result)) {
       expect.fail('Expected error but got data');
     }
-    
+
     expect(result.code).toBe('NOT_FOUND');
     expect(result.error).toContain('futur');
   });

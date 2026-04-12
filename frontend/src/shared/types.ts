@@ -4,18 +4,18 @@
  * Standard Result type for operations that may fail.
  * Uses a Discriminated Union (ok: true | false) to ensure that the
  * success path (data) and error path never overlap.
- * 
+ *
  * This pattern MUST be used for all data operations, API calls, and
  * any function that can fail in a non-exceptional way.
  */
 export type Result<T> =
-  | { 
-      ok: true; 
-      data: T; 
+  | {
+      ok: true;
+      data: T;
     }
-  | { 
-      ok: false; 
-      error: string; 
+  | {
+      ok: false;
+      error: string;
       code: string;
       details?: Record<string, unknown>;
     };
@@ -60,7 +60,10 @@ export function success<T>(data: T): Result<T> {
  * Utility function to create error results.
  * Usage: return error('Something went wrong', 'NOT_FOUND')
  */
-export function error<T>(message: string, code: string, details?: Record<string, unknown>): Result<T> {
+export function error<T>(
+  message: string,
+  code: string,
+  details?: Record<string, unknown>,
+): Result<T> {
   return { ok: false, error: message, code, details };
 }
-

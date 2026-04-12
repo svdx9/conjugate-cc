@@ -36,61 +36,135 @@ const verbData: Record<string, Record<string, DrillData>> = {
       verb: 'être',
       tense: 'présent' as Tense,
       items: [
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'je' }, expectedAnswer: { text: 'suis' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'tu' }, expectedAnswer: { text: 'es' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'il' }, expectedAnswer: { text: 'est' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'elle' }, expectedAnswer: { text: 'est' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'nous' }, expectedAnswer: { text: 'sommes' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'vous' }, expectedAnswer: { text: 'êtes' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'ils' }, expectedAnswer: { text: 'sont' } },
-        { prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'elles' }, expectedAnswer: { text: 'sont' } },
-      ]
-    }
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'je' },
+          expectedAnswer: { text: 'suis' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'tu' },
+          expectedAnswer: { text: 'es' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'il' },
+          expectedAnswer: { text: 'est' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'elle' },
+          expectedAnswer: { text: 'est' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'nous' },
+          expectedAnswer: { text: 'sommes' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'vous' },
+          expectedAnswer: { text: 'êtes' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'ils' },
+          expectedAnswer: { text: 'sont' },
+        },
+        {
+          prompt: { infinitive: 'être', tense: 'présent' as Tense, pronoun: 'elles' },
+          expectedAnswer: { text: 'sont' },
+        },
+      ],
+    },
   },
   avoir: {
-    present: {
+    présent: {
       verb: 'avoir',
       tense: 'présent' as Tense,
       items: [
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'je' }, expectedAnswer: { text: 'ai' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'tu' }, expectedAnswer: { text: 'as' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'il' }, expectedAnswer: { text: 'a' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'elle' }, expectedAnswer: { text: 'a' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'nous' }, expectedAnswer: { text: 'avons' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'vous' }, expectedAnswer: { text: 'avez' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'ils' }, expectedAnswer: { text: 'ont' } },
-        { prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'elles' }, expectedAnswer: { text: 'ont' } },
-      ]
-    }
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'je' },
+          expectedAnswer: { text: 'ai' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'tu' },
+          expectedAnswer: { text: 'as' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'il' },
+          expectedAnswer: { text: 'a' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'elle' },
+          expectedAnswer: { text: 'a' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'nous' },
+          expectedAnswer: { text: 'avons' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'vous' },
+          expectedAnswer: { text: 'avez' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'ils' },
+          expectedAnswer: { text: 'ont' },
+        },
+        {
+          prompt: { infinitive: 'avoir', tense: 'présent' as Tense, pronoun: 'elles' },
+          expectedAnswer: { text: 'ont' },
+        },
+      ],
+    },
   },
   'se laver': {
-    present: {
+    présent: {
       verb: 'se laver',
       tense: 'présent' as Tense,
       items: [
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'je' }, expectedAnswer: { text: 'me lave', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'tu' }, expectedAnswer: { text: 'te laves', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'il' }, expectedAnswer: { text: 'se lave', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'elle' }, expectedAnswer: { text: 'se lave', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'nous' }, expectedAnswer: { text: 'nous lavons', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'vous' }, expectedAnswer: { text: 'vous lavez', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'ils' }, expectedAnswer: { text: 'se lavent', isReflexive: true } },
-        { prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'elles' }, expectedAnswer: { text: 'se lavent', isReflexive: true } },
-      ]
-    }
-  }
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'je' },
+          expectedAnswer: { text: 'me lave', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'tu' },
+          expectedAnswer: { text: 'te laves', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'il' },
+          expectedAnswer: { text: 'se lave', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'elle' },
+          expectedAnswer: { text: 'se lave', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'nous' },
+          expectedAnswer: { text: 'nous lavons', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'vous' },
+          expectedAnswer: { text: 'vous lavez', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'ils' },
+          expectedAnswer: { text: 'se lavent', isReflexive: true },
+        },
+        {
+          prompt: { infinitive: 'se laver', tense: 'présent' as Tense, pronoun: 'elles' },
+          expectedAnswer: { text: 'se lavent', isReflexive: true },
+        },
+      ],
+    },
+  },
 };
 
 // Stub implementation with hardcoded conjugation data
 // This will be replaced by a real conjugation engine in the future
 class StubDrillProvider implements DrillProvider {
-
   /**
    * Validates verb and tense inputs.
    * Returns Result<{normalizedVerb: string, normalizedTense: Tense}> on success,
    * or error if validation fails.
    */
-  private validateInputs(verb: string, tense: Tense): Result<{ normalizedVerb: string, normalizedTense: Tense }> {
+  private validateInputs(
+    verb: string,
+    tense: Tense,
+  ): Result<{ normalizedVerb: string; normalizedTense: Tense }> {
     // Validate inputs
     if (!verb || typeof verb !== 'string' || verb.trim() === '') {
       return error('Invalid verb: verb must be a non-empty string', 'INVALID_VERB');
@@ -116,6 +190,12 @@ class StubDrillProvider implements DrillProvider {
   }
 
   getDrillData(verb: string, tense: Tense): Result<DrillData> {
+    // Validate tense at runtime
+    const tenseValidation = this.validateTense(tense);
+    if (!tenseValidation.ok) {
+      return tenseValidation;
+    }
+
     const validationResult = this.validateInputs(verb, tense);
     if (!validationResult.ok) {
       return validationResult;
@@ -125,12 +205,18 @@ class StubDrillProvider implements DrillProvider {
 
     // Check if verb exists in our data
     if (!verbData[normalizedVerb]) {
-      return error(`Verb "${normalizedVerb}" not found in conjugation data`, 'NOT_FOUND', { availableVerbs: Object.keys(verbData) });
+      return error(`Verb "${normalizedVerb}" not found in conjugation data`, 'NOT_FOUND', {
+        availableVerbs: Object.keys(verbData),
+      });
     }
 
     // Check if tense exists for this verb
     if (!verbData[normalizedVerb][normalizedTense]) {
-      return error(`Tense "${normalizedTense}" not found for verb "${normalizedVerb}"`, 'NOT_FOUND', { availableTenses: Object.keys(verbData[normalizedVerb]) });
+      return error(
+        `Tense "${normalizedTense}" not found for verb "${normalizedVerb}"`,
+        'NOT_FOUND',
+        { availableTenses: Object.keys(verbData[normalizedVerb]) },
+      );
     }
 
     // Return the found data
@@ -138,16 +224,19 @@ class StubDrillProvider implements DrillProvider {
   }
 
   /**
-  * Validates pronoun input and normalizes it
-  * @param pronoun - The pronoun to validate
-  * @returns Result<Pronoun> with normalized pronoun or error
-  */
+   * Validates pronoun input and normalizes it
+   * @param pronoun - The pronoun to validate
+   * @returns Result<Pronoun> with normalized pronoun or error
+   */
   private validatePronoun(pronoun: Pronoun): Result<Pronoun> {
     const normalizedPronoun = pronoun.toLowerCase().trim();
 
     // Validate pronoun at runtime to ensure type safety
     if (!validPronouns.includes(normalizedPronoun as Pronoun)) {
-      return error(`Invalid pronoun: "${normalizedPronoun}" is not a valid pronoun`, 'INVALID_INPUT');
+      return error(
+        `Invalid pronoun: "${normalizedPronoun}" is not a valid pronoun`,
+        'INVALID_INPUT',
+      );
     }
 
     return success(normalizedPronoun as Pronoun);
@@ -165,7 +254,7 @@ class StubDrillProvider implements DrillProvider {
     }
 
     const normalizedPronoun = pronounValidation.data;
-    const item = drillDataResult.data.items.find(i => i.prompt.pronoun === normalizedPronoun);
+    const item = drillDataResult.data.items.find((i) => i.prompt.pronoun === normalizedPronoun);
 
     if (item) {
       return success(item);
@@ -173,7 +262,7 @@ class StubDrillProvider implements DrillProvider {
 
     return error(
       `No conjugation found for verb "${drillDataResult.data.verb}" in tense "${drillDataResult.data.tense}" with pronoun "${normalizedPronoun}"`,
-      'NOT_FOUND'
+      'NOT_FOUND',
     );
   }
 }
