@@ -5,7 +5,7 @@
 import { DrillData, DrillItem, Pronoun, Tense } from './types';
 import { Result, error, success } from '../../shared/types';
 
-const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles'];
+const validPronouns: Pronoun[] = ['je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles'];
 
 // List of valid tenses - not an exclusive list, future tense support may expand
 const validTenses: Tense[] = ['présent', 'imparfait', 'passé_composé', 'futur'];

@@ -1,6 +1,6 @@
 // Drill data types for conjugation practice
 
-export type Pronoun = 'je' | 'tu' | 'il' | 'elle' | 'nous' | 'vous' | 'ils' | 'elles';
+export type Pronoun = 'je' | 'tu' | 'il' | 'on' | 'elle' | 'nous' | 'vous' | 'ils' | 'elles';
 
 export type Tense = 'présent' | 'imparfait' | 'passé_composé' | 'futur';
 
