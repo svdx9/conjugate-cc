@@ -1,6 +1,7 @@
 package auth_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
@@ -99,7 +100,7 @@ func (m *MockStore) CreateOrUpdateMagicLinkToken(ctx context.Context, userID str
 
 func (m *MockStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*auth.MagicLink, error) {
 	for _, ml := range m.magicLinks {
-		if len(ml.TokenHash) == len(tokenHash) && ml.TokenHash[0] == tokenHash[0] { // Simple comparison for testing
+		if bytes.Equal(ml.TokenHash, tokenHash) { // Simple comparison for testing
 			return ml, nil
 		}
 	}
@@ -132,7 +133,7 @@ func (m *MockStore) CreateSession(ctx context.Context, userID string, tokenHash 
 
 func (m *MockStore) FindSessionByTokenHash(ctx context.Context, tokenHash []byte) (*auth.Session, error) {
 	for _, s := range m.sessions {
-		if len(s.TokenHash) == len(tokenHash) && s.TokenHash[0] == tokenHash[0] { // Simple comparison for testing
+		if bytes.Equal(s.TokenHash, tokenHash) { // Simple comparison for testing
 			return s, nil
 		}
 	}
