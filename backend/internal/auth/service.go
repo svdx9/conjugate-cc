@@ -10,10 +10,6 @@ import (
 )
 
 const (
-	// MagicLinkTTL is the time-to-live for magic links (15 minutes)
-	MagicLinkTTL = 15 * time.Minute
-	// SessionTTL is the time-to-live for sessions (30 days)
-	SessionTTL = 30 * 24 * time.Hour
 	// TokenSize is the size of the random token in bytes
 	TokenSize = 32
 )
@@ -34,13 +30,17 @@ type Store interface {
 
 // Service handles authentication business logic
 type Service struct {
-	store Store
+	store        Store
+	magicLinkTTL time.Duration
+	sessionTTL   time.Duration
 }
 
 // NewService creates a new authentication service
-func NewService(store Store) *Service {
+func NewService(store Store, magicLinkTTL, sessionTTL time.Duration) *Service {
 	return &Service{
-		store: store,
+		store:        store,
+		magicLinkTTL: magicLinkTTL,
+		sessionTTL:   sessionTTL,
 	}
 }
 
@@ -114,7 +114,7 @@ func (s *Service) RequestMagicLink(ctx context.Context, email string) (*User, *T
 	}
 
 	// Create or update magic link (handles race conditions atomically in the database)
-	expiresAt := time.Now().Add(MagicLinkTTL)
+	expiresAt := time.Now().Add(s.magicLinkTTL)
 	_, err = s.store.CreateOrUpdateMagicLinkToken(ctx, user.ID, tokenPair.TokenHash, expiresAt)
 	if err != nil {
 		return nil, nil, err
@@ -169,7 +169,7 @@ func (s *Service) CreateSessionForUser(ctx context.Context, userID string) (*Tok
 	}
 
 	// Store session in database
-	expiresAt := time.Now().Add(SessionTTL)
+	expiresAt := time.Now().Add(s.sessionTTL)
 	_, err = s.store.CreateSession(ctx, userID, tokenPair.TokenHash, expiresAt)
 	if err != nil {
 		return nil, err

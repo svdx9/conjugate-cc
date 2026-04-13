@@ -58,7 +58,7 @@ func main() {
 
 	// Dependency injection - Authentication layer
 	authStore := db.NewAuthStore(pool, logger)
-	authService := auth.NewService(authStore)
+	authService := auth.NewService(authStore, cfg.AuthMagicLinkTTL, cfg.AuthSessionTTL)
 
 	// Dependency injection - HTTP layer
 	statusHandler := status.NewHandler(logger, GitSHA, BuildTime)
