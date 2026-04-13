@@ -13,7 +13,7 @@ import { initBackendStatusPolling } from '../store/backend';
 const Layout: Component<{ children?: JSX.Element }> = (props) => {
   initBackendStatusPolling();
   return (
-    <div class="bg-surface text-text-primary dark:bg-surface-dark dark:text-text-primary-dark flex min-h-screen flex-col transition-colors">
+    <div class="bg-background text-foreground flex min-h-screen flex-col transition-colors">
       <Navigation />
       <main class="flex-1">{props.children}</main>
       <Footer />

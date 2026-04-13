@@ -37,6 +37,19 @@ export interface DrillProvider {
    * @returns Result<DrillItem> with either data or error
    */
   getDrillItem(verb: string, tense: Tense, pronoun: Pronoun): Result<DrillItem>;
+
+  /**
+   * Get available tenses for a verb
+   * @param verb - The infinitive form of the verb
+   * @returns Array of available tense strings
+   */
+  getAvailableTenses(verb: string): string[];
+
+  /**
+   * Get all available verbs
+   * @returns Array of available verb strings
+   */
+  getAvailableVerbs(): string[];
 }
 
 // Verb conjugation data stored as JSON object
@@ -319,6 +332,22 @@ class StubDrillProvider implements DrillProvider {
       `No conjugation found for verb "${drillDataResult.data.verb}" in tense "${drillDataResult.data.tense}" with pronoun "${normalizedPronoun}"`,
       'NOT_FOUND',
     );
+  }
+
+  getAvailableTenses(verb: string): string[] {
+    const normalizedVerbResult = normalizeVerb(verb);
+    if (isError(normalizedVerbResult)) {
+      return [];
+    }
+    const normalizedVerb = normalizedVerbResult.data;
+    if (!verbData[normalizedVerb]) {
+      return [];
+    }
+    return Object.keys(verbData[normalizedVerb]);
+  }
+
+  getAvailableVerbs(): string[] {
+    return Object.keys(verbData);
   }
 }
 
