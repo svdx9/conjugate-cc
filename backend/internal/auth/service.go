@@ -24,7 +24,6 @@ type Store interface {
 	CreateUser(ctx context.Context, email string) (*User, error)
 	FindUserByEmail(ctx context.Context, email string) (*User, error)
 	FindUserByID(ctx context.Context, userID string) (*User, error)
-	CreateMagicLink(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*MagicLink, error)
 	CreateOrUpdateMagicLinkToken(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*MagicLink, error)
 	FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*MagicLink, error)
 	ConsumeMagicLink(ctx context.Context, magicLinkID string) error

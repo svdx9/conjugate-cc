@@ -1,8 +1,3 @@
--- name: CreateMagicLink :one
-INSERT INTO magic_links (user_id, token_hash, expires_at)
-VALUES ($1, $2, $3)
-RETURNING id, user_id, token_hash, expires_at, consumed_at, created_at;
-
 -- name: CreateOrUpdateMagicLinkToken :one
 INSERT INTO magic_links (user_id, token_hash, expires_at, consumed_at)
 VALUES ($1, $2, $3, NULL)

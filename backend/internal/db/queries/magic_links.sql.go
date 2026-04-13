@@ -22,32 +22,6 @@ func (q *Queries) ConsumeMagicLink(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
-const createMagicLink = `-- name: CreateMagicLink :one
-INSERT INTO magic_links (user_id, token_hash, expires_at)
-VALUES ($1, $2, $3)
-RETURNING id, user_id, token_hash, expires_at, consumed_at, created_at
-`
-
-type CreateMagicLinkParams struct {
-	UserID    pgtype.UUID        `json:"user_id"`
-	TokenHash []byte             `json:"token_hash"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-}
-
-func (q *Queries) CreateMagicLink(ctx context.Context, arg CreateMagicLinkParams) (MagicLink, error) {
-	row := q.db.QueryRow(ctx, createMagicLink, arg.UserID, arg.TokenHash, arg.ExpiresAt)
-	var i MagicLink
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.TokenHash,
-		&i.ExpiresAt,
-		&i.ConsumedAt,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const createOrUpdateMagicLinkToken = `-- name: CreateOrUpdateMagicLinkToken :one
 INSERT INTO magic_links (user_id, token_hash, expires_at, consumed_at)
 VALUES ($1, $2, $3, NULL)

@@ -75,29 +75,6 @@ func (s *AuthStore) FindUserByID(ctx context.Context, userID string) (*auth.User
 	return toAuthUser(&row), nil
 }
 
-// CreateMagicLink creates a new magic link token for a user
-func (s *AuthStore) CreateMagicLink(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*auth.MagicLink, error) {
-	uid, err := parseUUID(userID)
-	if err != nil {
-		return nil, auth.ErrUserNotFound
-	}
-	row, err := s.queries.CreateMagicLink(ctx, queries.CreateMagicLinkParams{
-		UserID:    uid,
-		TokenHash: tokenHash,
-		ExpiresAt: timestamptzFromTime(expiresAt),
-	})
-	if err != nil {
-		// Check for foreign key constraint violation (user doesn't exist)
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
-			return nil, auth.ErrUserNotFound
-		}
-		s.logger.Error("failed to create magic link", "user_id", userID, "error", err)
-		return nil, auth.ErrInternal
-	}
-	return toAuthMagicLink(&row), nil
-}
-
 // CreateOrUpdateMagicLinkToken creates or updates a magic link token for a user
 // This handles race conditions atomically at the database level using UPSERT:
 // - If no unconsumed magic link exists for this user, creates a new one
