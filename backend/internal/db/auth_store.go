@@ -238,43 +238,55 @@ func toAuthUser(u *queries.User) *auth.User {
 // toAuthMagicLink converts a sqlc MagicLink to an auth.MagicLink
 func toAuthMagicLink(ml *queries.MagicLink) *auth.MagicLink {
 	return &auth.MagicLink{
-		ID:        ml.ID.String(),
-		UserID:    ml.UserID.String(),
-		TokenHash: ml.TokenHash,
-		ExpiresAt: ml.ExpiresAt.Time,
-		CreatedAt: ml.CreatedAt.Time,
+		ID:            ml.ID.String(),
+		UserID:        ml.UserID.String(),
+		TokenHash:     ml.TokenHash,
+		ExpiresAt:     ml.ExpiresAt.Time,
+		CreatedAt:     ml.CreatedAt.Time,
+		Email:         "",
+		UserCreatedAt: time.Time{},
+		UserUpdatedAt: time.Time{},
 	}
 }
 
 // toAuthMagicLinkRow converts a sqlc FindMagicLinkByTokenHashRow to an auth.MagicLink
 func toAuthMagicLinkRow(ml *queries.FindMagicLinkByTokenHashRow) *auth.MagicLink {
 	return &auth.MagicLink{
-		ID:        ml.ID.String(),
-		UserID:    ml.UserID.String(),
-		TokenHash: ml.TokenHash,
-		ExpiresAt: ml.ExpiresAt.Time,
-		CreatedAt: ml.CreatedAt.Time,
+		ID:            ml.ID.String(),
+		UserID:        ml.UserID.String(),
+		TokenHash:     ml.TokenHash,
+		ExpiresAt:     ml.ExpiresAt.Time,
+		CreatedAt:     ml.CreatedAt.Time,
+		Email:         ml.Email,
+		UserCreatedAt: ml.UserCreatedAt.Time,
+		UserUpdatedAt: ml.UserUpdatedAt.Time,
 	}
 }
 
 // toAuthSession converts a sqlc Session to an auth.Session
 func toAuthSession(s *queries.Session) *auth.Session {
 	return &auth.Session{
-		ID:        s.ID.String(),
-		UserID:    s.UserID.String(),
-		TokenHash: s.TokenHash,
-		ExpiresAt: s.ExpiresAt.Time,
-		CreatedAt: s.CreatedAt.Time,
+		ID:            s.ID.String(),
+		UserID:        s.UserID.String(),
+		TokenHash:     s.TokenHash,
+		ExpiresAt:     s.ExpiresAt.Time,
+		CreatedAt:     s.CreatedAt.Time,
+		Email:         "",
+		UserCreatedAt: time.Time{},
+		UserUpdatedAt: time.Time{},
 	}
 }
 
 // toAuthSessionRow converts a sqlc FindSessionByTokenHashRow to an auth.Session
 func toAuthSessionRow(s *queries.FindSessionByTokenHashRow) *auth.Session {
 	return &auth.Session{
-		ID:        s.ID.String(),
-		UserID:    s.UserID.String(),
-		TokenHash: s.TokenHash,
-		ExpiresAt: s.ExpiresAt.Time,
-		CreatedAt: s.CreatedAt.Time,
+		ID:            s.ID.String(),
+		UserID:        s.UserID.String(),
+		TokenHash:     s.TokenHash,
+		ExpiresAt:     s.ExpiresAt.Time,
+		CreatedAt:     s.CreatedAt.Time,
+		Email:         s.Email,
+		UserCreatedAt: s.UserCreatedAt.Time,
+		UserUpdatedAt: s.UserUpdatedAt.Time,
 	}
 }

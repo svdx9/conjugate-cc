@@ -63,7 +63,9 @@ SELECT
   s.token_hash, 
   s.expires_at, 
   s.created_at,
-  u.email
+  u.email,
+  u.created_at as user_created_at,
+  u.updated_at as user_updated_at
 FROM sessions s
 JOIN users u ON u.id = s.user_id
 WHERE s.token_hash = $1
@@ -71,12 +73,14 @@ WHERE s.token_hash = $1
 `
 
 type FindSessionByTokenHashRow struct {
-	ID        pgtype.UUID        `json:"id"`
-	UserID    pgtype.UUID        `json:"user_id"`
-	TokenHash []byte             `json:"token_hash"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	Email     string             `json:"email"`
+	ID            pgtype.UUID        `json:"id"`
+	UserID        pgtype.UUID        `json:"user_id"`
+	TokenHash     []byte             `json:"token_hash"`
+	ExpiresAt     pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	Email         string             `json:"email"`
+	UserCreatedAt pgtype.Timestamptz `json:"user_created_at"`
+	UserUpdatedAt pgtype.Timestamptz `json:"user_updated_at"`
 }
 
 func (q *Queries) FindSessionByTokenHash(ctx context.Context, tokenHash []byte) (FindSessionByTokenHashRow, error) {
@@ -89,6 +93,8 @@ func (q *Queries) FindSessionByTokenHash(ctx context.Context, tokenHash []byte) 
 		&i.ExpiresAt,
 		&i.CreatedAt,
 		&i.Email,
+		&i.UserCreatedAt,
+		&i.UserUpdatedAt,
 	)
 	return i, err
 }

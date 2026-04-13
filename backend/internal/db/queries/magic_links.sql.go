@@ -64,7 +64,9 @@ SELECT
   ml.expires_at,
   ml.consumed_at,
   ml.created_at,
-  u.email
+  u.email,
+  u.created_at as user_created_at,
+  u.updated_at as user_updated_at
 FROM magic_links ml
 JOIN users u ON u.id = ml.user_id
 WHERE ml.token_hash = $1
@@ -73,13 +75,15 @@ WHERE ml.token_hash = $1
 `
 
 type FindMagicLinkByTokenHashRow struct {
-	ID         pgtype.UUID        `json:"id"`
-	UserID     pgtype.UUID        `json:"user_id"`
-	TokenHash  []byte             `json:"token_hash"`
-	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
-	ConsumedAt pgtype.Timestamptz `json:"consumed_at"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	Email      string             `json:"email"`
+	ID            pgtype.UUID        `json:"id"`
+	UserID        pgtype.UUID        `json:"user_id"`
+	TokenHash     []byte             `json:"token_hash"`
+	ExpiresAt     pgtype.Timestamptz `json:"expires_at"`
+	ConsumedAt    pgtype.Timestamptz `json:"consumed_at"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	Email         string             `json:"email"`
+	UserCreatedAt pgtype.Timestamptz `json:"user_created_at"`
+	UserUpdatedAt pgtype.Timestamptz `json:"user_updated_at"`
 }
 
 func (q *Queries) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (FindMagicLinkByTokenHashRow, error) {
@@ -93,6 +97,8 @@ func (q *Queries) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte
 		&i.ConsumedAt,
 		&i.CreatedAt,
 		&i.Email,
+		&i.UserCreatedAt,
+		&i.UserUpdatedAt,
 	)
 	return i, err
 }

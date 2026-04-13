@@ -15,20 +15,26 @@ type User struct {
 
 // MagicLink represents a magic link token for passwordless auth
 type MagicLink struct {
-	ID        string
-	UserID    string
-	TokenHash []byte
-	ExpiresAt time.Time
-	CreatedAt time.Time
+	ID            string
+	UserID        string
+	TokenHash     []byte
+	ExpiresAt     time.Time
+	CreatedAt     time.Time
+	Email         string
+	UserCreatedAt time.Time
+	UserUpdatedAt time.Time
 }
 
 // Session represents an authenticated session
 type Session struct {
-	ID        string
-	UserID    string
-	TokenHash []byte
-	ExpiresAt time.Time
-	CreatedAt time.Time
+	ID            string
+	UserID        string
+	TokenHash     []byte
+	ExpiresAt     time.Time
+	CreatedAt     time.Time
+	Email         string
+	UserCreatedAt time.Time
+	UserUpdatedAt time.Time
 }
 
 // Domain errors

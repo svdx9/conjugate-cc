@@ -133,7 +133,7 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, err
 	}
 	tokenHash := sha256.Sum256(decodedToken)
 
-	// Find the magic link
+	// Find the magic link and user in a single query
 	magicLink, err := s.store.FindMagicLinkByTokenHash(ctx, tokenHash[:])
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
@@ -147,10 +147,12 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, err
 		return nil, ErrMagicLinkExpired
 	}
 
-	// Get user details
-	user, err := s.store.FindUserByID(ctx, magicLink.UserID)
-	if err != nil {
-		return nil, err
+	// Construct user from magic link query (which joins users table)
+	user := &User{
+		ID:        magicLink.UserID,
+		Email:     magicLink.Email,
+		CreatedAt: magicLink.UserCreatedAt,
+		UpdatedAt: magicLink.UserUpdatedAt,
 	}
 
 	// Consume the magic link
@@ -189,7 +191,7 @@ func (s *Service) ValidateSessionToken(ctx context.Context, token string) (*User
 	}
 	tokenHash := sha256.Sum256(decodedToken)
 
-	// Find the session
+	// Find the session and user in a single query
 	session, err := s.store.FindSessionByTokenHash(ctx, tokenHash[:])
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
@@ -203,10 +205,12 @@ func (s *Service) ValidateSessionToken(ctx context.Context, token string) (*User
 		return nil, ErrSessionExpired
 	}
 
-	// Get user details
-	user, err := s.store.FindUserByID(ctx, session.UserID)
-	if err != nil {
-		return nil, err
+	// Construct user from session query (which joins users table)
+	user := &User{
+		ID:        session.UserID,
+		Email:     session.Email,
+		CreatedAt: session.UserCreatedAt,
+		UpdatedAt: session.UserUpdatedAt,
 	}
 
 	return user, nil

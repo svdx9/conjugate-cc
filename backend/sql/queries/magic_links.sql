@@ -17,7 +17,9 @@ SELECT
   ml.expires_at,
   ml.consumed_at,
   ml.created_at,
-  u.email
+  u.email,
+  u.created_at as user_created_at,
+  u.updated_at as user_updated_at
 FROM magic_links ml
 JOIN users u ON u.id = ml.user_id
 WHERE ml.token_hash = $1

@@ -56,11 +56,14 @@ func (m *MockStore) FindUserByID(ctx context.Context, userID string) (*auth.User
 
 func (m *MockStore) CreateMagicLink(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*auth.MagicLink, error) {
 	magicLink := &auth.MagicLink{
-		ID:        "ml-1",
-		UserID:    userID,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAt,
-		CreatedAt: time.Now(),
+		ID:            "ml-1",
+		UserID:        userID,
+		TokenHash:     tokenHash,
+		ExpiresAt:     expiresAt,
+		CreatedAt:     time.Now(),
+		Email:         "test@example.com",
+		UserCreatedAt: time.Now(),
+		UserUpdatedAt: time.Now(),
 	}
 	m.magicLinks["ml-1"] = magicLink
 	return magicLink, nil
@@ -81,11 +84,14 @@ func (m *MockStore) CreateOrUpdateMagicLinkToken(ctx context.Context, userID str
 	}
 	// Create new if doesn't exist
 	magicLink := &auth.MagicLink{
-		ID:        "ml-1",
-		UserID:    userID,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAt,
-		CreatedAt: time.Now(),
+		ID:            "ml-1",
+		UserID:        userID,
+		TokenHash:     tokenHash,
+		ExpiresAt:     expiresAt,
+		CreatedAt:     time.Now(),
+		Email:         "test@example.com",
+		UserCreatedAt: time.Now(),
+		UserUpdatedAt: time.Now(),
 	}
 	m.magicLinks["ml-1"] = magicLink
 	return magicLink, nil
@@ -111,11 +117,14 @@ func (m *MockStore) ConsumeMagicLink(ctx context.Context, magicLinkID string) er
 
 func (m *MockStore) CreateSession(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*auth.Session, error) {
 	s := &auth.Session{
-		ID:        "sess-1",
-		UserID:    userID,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAt,
-		CreatedAt: time.Now(),
+		ID:            "sess-1",
+		UserID:        userID,
+		TokenHash:     tokenHash,
+		ExpiresAt:     expiresAt,
+		CreatedAt:     time.Now(),
+		Email:         "test@example.com",
+		UserCreatedAt: time.Now(),
+		UserUpdatedAt: time.Now(),
 	}
 	m.sessions["sess-1"] = s
 	return s, nil

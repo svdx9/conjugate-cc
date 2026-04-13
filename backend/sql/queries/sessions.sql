@@ -10,7 +10,9 @@ SELECT
   s.token_hash, 
   s.expires_at, 
   s.created_at,
-  u.email
+  u.email,
+  u.created_at as user_created_at,
+  u.updated_at as user_updated_at
 FROM sessions s
 JOIN users u ON u.id = s.user_id
 WHERE s.token_hash = $1
