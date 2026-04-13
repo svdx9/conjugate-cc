@@ -164,7 +164,7 @@ func parseUUID(s string) (pgtype.UUID, error) {
 // timestamptzFromTime converts a time.Time to pgtype.Timestamptz
 func timestamptzFromTime(t time.Time) pgtype.Timestamptz {
 	var ts pgtype.Timestamptz
-	ts.Scan(t)
+	_ = ts.Scan(t)
 	return ts
 }
 

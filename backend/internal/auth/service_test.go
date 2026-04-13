@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"testing"
 	"time"
 
@@ -12,10 +13,9 @@ import (
 
 // MockStore implements the Store interface for testing
 type MockStore struct {
-	users        map[string]*auth.User
-	magicLinks   map[string]*auth.MagicLink
-	sessions     map[string]*auth.Session
-	createUserFn func(context.Context, string) (*auth.User, error)
+	users      map[string]*auth.User
+	magicLinks map[string]*auth.MagicLink
+	sessions   map[string]*auth.Session
 }
 
 func NewMockStore() *MockStore {
@@ -27,9 +27,6 @@ func NewMockStore() *MockStore {
 }
 
 func (m *MockStore) CreateUser(ctx context.Context, email string) (*auth.User, error) {
-	if m.createUserFn != nil {
-		return m.createUserFn(ctx, email)
-	}
 	user := &auth.User{
 		ID:        "user-1",
 		Email:     email,
@@ -129,6 +126,7 @@ func (m *MockStore) DeleteSessionsByUserID(ctx context.Context, userID string) e
 // Tests
 
 func TestGenerateToken(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -165,6 +163,7 @@ func TestGenerateToken(t *testing.T) {
 }
 
 func TestVerifyToken_Valid(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -179,6 +178,7 @@ func TestVerifyToken_Valid(t *testing.T) {
 }
 
 func TestVerifyToken_Invalid(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -187,12 +187,13 @@ func TestVerifyToken_Invalid(t *testing.T) {
 
 	// Try to verify with wrong token
 	err := svc.VerifyToken("invalid-token", pair.TokenHash)
-	if err != auth.ErrInvalidToken {
+	if !errors.Is(err, auth.ErrInvalidToken) {
 		t.Errorf("VerifyToken with invalid token = %v, want %v", err, auth.ErrInvalidToken)
 	}
 }
 
 func TestVerifyToken_MismatchHash(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -202,12 +203,13 @@ func TestVerifyToken_MismatchHash(t *testing.T) {
 
 	// Try to verify pair1's token with pair2's hash
 	err := svc.VerifyToken(pair1.Token, pair2.TokenHash)
-	if err != auth.ErrTokenHashMismatch {
+	if !errors.Is(err, auth.ErrTokenHashMismatch) {
 		t.Errorf("VerifyToken with mismatched hash = %v, want %v", err, auth.ErrTokenHashMismatch)
 	}
 }
 
 func TestRequestMagicLink_NewUser(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -234,12 +236,16 @@ func TestRequestMagicLink_NewUser(t *testing.T) {
 }
 
 func TestRequestMagicLink_ExistingUser(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
 	email := "test@example.com"
 	// Create initial user
-	store.CreateUser(context.Background(), email)
+	_, err := store.CreateUser(context.Background(), email)
+	if err != nil {
+		t.Fatalf("CreateUser failed: %v", err)
+	}
 
 	// Request magic link for same email
 	user, tokenPair, err := svc.RequestMagicLink(context.Background(), email)
@@ -259,6 +265,7 @@ func TestRequestMagicLink_ExistingUser(t *testing.T) {
 }
 
 func TestCreateSessionForUser(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -280,22 +287,30 @@ func TestCreateSessionForUser(t *testing.T) {
 }
 
 func TestLogoutSession(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
 	// Create a session first
 	userID := "user-1"
-	store.CreateUser(context.Background(), "test@example.com")
-	store.CreateSession(context.Background(), userID, []byte("token-hash"), time.Now().Add(30*24*time.Hour))
+	_, err := store.CreateUser(context.Background(), "test@example.com")
+	if err != nil {
+		t.Fatalf("CreateUser failed: %v", err)
+	}
+	_, err = store.CreateSession(context.Background(), userID, []byte("token-hash"), time.Now().Add(30*24*time.Hour))
+	if err != nil {
+		t.Fatalf("CreateSession failed: %v", err)
+	}
 
 	sessionID := "sess-1"
-	err := svc.LogoutSession(context.Background(), sessionID)
+	err = svc.LogoutSession(context.Background(), sessionID)
 	if err != nil {
 		t.Fatalf("LogoutSession failed: %v", err)
 	}
 }
 
 func TestLogoutAllSessions(t *testing.T) {
+	t.Parallel()
 	store := NewMockStore()
 	svc := auth.NewService(store)
 
@@ -308,6 +323,7 @@ func TestLogoutAllSessions(t *testing.T) {
 
 // Test that tokens follow the expected TTLs
 func TestTokenTTLs(t *testing.T) {
+	t.Parallel()
 	// These are constants defined in the service
 	if auth.MagicLinkTTL != 15*time.Minute {
 		t.Errorf("MagicLinkTTL = %v, want 15 minutes", auth.MagicLinkTTL)

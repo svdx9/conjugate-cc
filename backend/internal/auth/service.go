@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"errors"
 	"time"
 )
 
@@ -98,7 +99,7 @@ func (s *Service) VerifyToken(plainToken string, storedHash []byte) error {
 func (s *Service) RequestMagicLink(ctx context.Context, email string) (*User, *TokenPair, error) {
 	// Try to find existing user
 	user, err := s.store.FindUserByEmail(ctx, email)
-	if err != nil && err != ErrUserNotFound {
+	if err != nil && !errors.Is(err, ErrUserNotFound) {
 		return nil, nil, err
 	}
 
@@ -138,7 +139,7 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, err
 	// Find the magic link
 	magicLink, err := s.store.FindMagicLinkByTokenHash(ctx, tokenHash[:])
 	if err != nil {
-		if err == ErrUserNotFound {
+		if errors.Is(err, ErrUserNotFound) {
 			return nil, ErrMagicLinkNotFound
 		}
 		return nil, err
@@ -194,7 +195,7 @@ func (s *Service) ValidateSessionToken(ctx context.Context, token string) (*User
 	// Find the session
 	session, err := s.store.FindSessionByTokenHash(ctx, tokenHash[:])
 	if err != nil {
-		if err == ErrUserNotFound {
+		if errors.Is(err, ErrUserNotFound) {
 			return nil, ErrSessionNotFound
 		}
 		return nil, err

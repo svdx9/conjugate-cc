@@ -11,8 +11,9 @@ import (
 // For now, we provide unit test structure that demonstrates the expected behavior.
 // In a real scenario, you would use a test database fixture.
 
-// TestCreateUser demonstrates what the store should do
+// TestCreateUser_Structure demonstrates what the store should do
 func TestCreateUser_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a new user with email "test@example.com"
 	// 2. Assert the user is created with a non-empty ID
@@ -22,6 +23,7 @@ func TestCreateUser_Structure(t *testing.T) {
 
 // TestCreateUser_EmailUniqueness demonstrates the expected behavior
 func TestCreateUser_EmailUniqueness_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create first user with email "test@example.com"
 	// 2. Try to create second user with same email
@@ -31,6 +33,7 @@ func TestCreateUser_EmailUniqueness_Structure(t *testing.T) {
 
 // TestFindUserByEmail demonstrates the expected behavior
 func TestFindUserByEmail_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user with email "test@example.com"
 	// 2. Call FindUserByEmail with the same email
@@ -42,6 +45,7 @@ func TestFindUserByEmail_Structure(t *testing.T) {
 
 // TestCreateMagicLink demonstrates the expected behavior
 func TestCreateMagicLink_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user
 	// 2. Generate a token hash
@@ -53,6 +57,7 @@ func TestCreateMagicLink_Structure(t *testing.T) {
 
 // TestFindMagicLinkByTokenHash demonstrates the expected behavior
 func TestFindMagicLinkByTokenHash_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user and magic link
 	// 2. Call FindMagicLinkByTokenHash with token hash
@@ -66,6 +71,7 @@ func TestFindMagicLinkByTokenHash_Structure(t *testing.T) {
 
 // TestConsumeMagicLink demonstrates the expected behavior
 func TestConsumeMagicLink_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user and magic link
 	// 2. Call ConsumeMagicLink with magic link ID
@@ -77,6 +83,7 @@ func TestConsumeMagicLink_Structure(t *testing.T) {
 
 // TestCreateSession demonstrates the expected behavior
 func TestCreateSession_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user
 	// 2. Generate a token hash
@@ -88,6 +95,7 @@ func TestCreateSession_Structure(t *testing.T) {
 
 // TestFindSessionByTokenHash demonstrates the expected behavior
 func TestFindSessionByTokenHash_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user and session
 	// 2. Call FindSessionByTokenHash with token hash
@@ -101,6 +109,7 @@ func TestFindSessionByTokenHash_Structure(t *testing.T) {
 
 // TestDeleteSession demonstrates the expected behavior
 func TestDeleteSession_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user and session
 	// 2. Call DeleteSession with session ID
@@ -112,6 +121,7 @@ func TestDeleteSession_Structure(t *testing.T) {
 
 // TestDeleteSessionsByUserID demonstrates the expected behavior
 func TestDeleteSessionsByUserID_Structure(t *testing.T) {
+	t.Parallel()
 	// In a real test with a database:
 	// 1. Create a user with multiple sessions
 	// 2. Call DeleteSessionsByUserID with user ID
@@ -122,6 +132,7 @@ func TestDeleteSessionsByUserID_Structure(t *testing.T) {
 
 // TestTypeConversions verifies that type conversions work correctly
 func TestTypeConversions(t *testing.T) {
+	t.Parallel()
 	// Test UUID parsing
 	tests := []struct {
 		name      string
@@ -146,7 +157,9 @@ func TestTypeConversions(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			// This would be tested with actual type conversion functions
 			_ = tt.shouldErr
 			t.Logf("UUID parsing: %s", tt.input)
@@ -156,6 +169,7 @@ func TestTypeConversions(t *testing.T) {
 
 // TestErrorMapping verifies that database errors are properly mapped to domain errors
 func TestErrorMapping(t *testing.T) {
+	t.Parallel()
 	// These scenarios should be tested:
 	// 1. pgx.ErrNoRows maps to auth.ErrUserNotFound
 	// 2. Unique constraint violation on users_email_key maps to auth.ErrEmailTaken
@@ -163,8 +177,9 @@ func TestErrorMapping(t *testing.T) {
 	t.Log("Database errors should be mapped to appropriate domain errors")
 }
 
-// Example test with actual expectations
+// TestAuthStore_UserFlow demonstrates the expected flow
 func TestAuthStore_UserFlow(t *testing.T) {
+	t.Parallel()
 	// This demonstrates the expected flow:
 	// 1. Request magic link (creates user if doesn't exist)
 	// 2. Find magic link by token hash
@@ -185,8 +200,9 @@ func TestAuthStore_UserFlow(t *testing.T) {
 	t.Log("Complete auth flow should work correctly")
 }
 
-// Verify constants and configuration
+// TestAuthStoreConfiguration verifies constants and configuration
 func TestAuthStoreConfiguration(t *testing.T) {
+	t.Parallel()
 	// The following should be true:
 	// - MagicLinkTTL = 15 minutes
 	// - SessionTTL = 30 days
