@@ -235,7 +235,7 @@ func FromEnv() (Config, error) {
 	}
 
 	// Parse SITE_URL (computed from host:port if not set)
-	SiteURL := strings.TrimSpace(getEnvOrDefault(SiteURLKey, ""))
+	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, ""))
 	if SiteURL == "" && environment == "dev" {
 		SiteURL = "http://" + net.JoinHostPort(host, strconv.Itoa(port))
 	}
