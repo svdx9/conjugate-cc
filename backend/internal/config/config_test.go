@@ -307,6 +307,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
 		t.Setenv("ENV", "production")
 		t.Setenv("AUTH_COOKIE_SECURE", "")
+		t.Setenv("SITE_URL", "https://example.com")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -322,6 +323,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
 		t.Setenv("ENV", "production")
 		t.Setenv("LOG_LEVEL", "")
+		t.Setenv("SITE_URL", "https://example.com")
 
 		cfg, err := FromEnv()
 		if err != nil {

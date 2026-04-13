@@ -20,7 +20,8 @@ func WithTx(ctx context.Context, pool *pgxpool.Pool, fn func(pgx.Tx) error) erro
 		_ = tx.Rollback(ctx)
 	}()
 
-	if err := fn(tx); err != nil {
+	err = fn(tx)
+	if err != nil {
 		return err
 	}
 
