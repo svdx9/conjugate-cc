@@ -25,6 +25,7 @@ type Store interface {
 	FindUserByEmail(ctx context.Context, email string) (*User, error)
 	FindUserByID(ctx context.Context, userID string) (*User, error)
 	CreateMagicLink(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*MagicLink, error)
+	CreateOrUpdateMagicLinkToken(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*MagicLink, error)
 	FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*MagicLink, error)
 	ConsumeMagicLink(ctx context.Context, magicLinkID string) error
 	CreateSession(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*Session, error)
@@ -117,9 +118,9 @@ func (s *Service) RequestMagicLink(ctx context.Context, email string) (*User, *T
 		return nil, nil, err
 	}
 
-	// Store magic link in database
+	// Create or update magic link (handles race conditions atomically in the database)
 	expiresAt := time.Now().Add(MagicLinkTTL)
-	_, err = s.store.CreateMagicLink(ctx, user.ID, tokenPair.TokenHash, expiresAt)
+	_, err = s.store.CreateOrUpdateMagicLinkToken(ctx, user.ID, tokenPair.TokenHash, expiresAt)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -3,13 +3,24 @@ INSERT INTO magic_links (user_id, token_hash, expires_at)
 VALUES ($1, $2, $3)
 RETURNING id, user_id, token_hash, expires_at, consumed_at, created_at;
 
+-- name: CreateOrUpdateMagicLinkToken :one
+INSERT INTO magic_links (user_id, token_hash, expires_at, consumed_at)
+VALUES ($1, $2, $3, NULL)
+ON CONFLICT (user_id) WHERE consumed_at IS NULL
+DO UPDATE SET
+	token_hash = EXCLUDED.token_hash,
+	created_at = CURRENT_TIMESTAMP,
+	expires_at = EXCLUDED.expires_at,
+	consumed_at = NULL
+RETURNING id, user_id, token_hash, expires_at, consumed_at, created_at;
+
 -- name: FindMagicLinkByTokenHash :one
-SELECT 
-  ml.id, 
-  ml.user_id, 
-  ml.token_hash, 
-  ml.expires_at, 
-  ml.consumed_at, 
+SELECT
+  ml.id,
+  ml.user_id,
+  ml.token_hash,
+  ml.expires_at,
+  ml.consumed_at,
   ml.created_at,
   u.email
 FROM magic_links ml

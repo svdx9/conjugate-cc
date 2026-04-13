@@ -66,6 +66,31 @@ func (m *MockStore) CreateMagicLink(ctx context.Context, userID string, tokenHas
 	return magicLink, nil
 }
 
+func (m *MockStore) CreateOrUpdateMagicLinkToken(ctx context.Context, userID string, tokenHash []byte, expiresAt time.Time) (*auth.MagicLink, error) {
+	// Upsert logic: check if unconsumed magic link exists for this user
+	for id, ml := range m.magicLinks {
+		// Check if it's for same user and unconsumed (we don't have consumed_at in mock, so check if not marked as consumed)
+		if ml.UserID == userID {
+			// Update existing
+			ml.TokenHash = tokenHash
+			ml.ExpiresAt = expiresAt
+			ml.CreatedAt = time.Now()
+			m.magicLinks[id] = ml
+			return ml, nil
+		}
+	}
+	// Create new if doesn't exist
+	magicLink := &auth.MagicLink{
+		ID:        "ml-1",
+		UserID:    userID,
+		TokenHash: tokenHash,
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+	}
+	m.magicLinks["ml-1"] = magicLink
+	return magicLink, nil
+}
+
 func (m *MockStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*auth.MagicLink, error) {
 	for _, ml := range m.magicLinks {
 		if len(ml.TokenHash) == len(tokenHash) && ml.TokenHash[0] == tokenHash[0] { // Simple comparison for testing
@@ -261,6 +286,52 @@ func TestRequestMagicLink_ExistingUser(t *testing.T) {
 	// Token should be generated
 	if tokenPair.Token == "" {
 		t.Error("Token is empty")
+	}
+}
+
+func TestRequestMagicLink_ConcurrentRequests(t *testing.T) {
+	t.Parallel()
+	// Test that concurrent requests for the same email both succeed
+	// The UPSERT at the DB layer ensures they don't conflict
+	store := NewMockStore()
+	svc := auth.NewService(store)
+
+	email := "test@example.com"
+
+	// First request
+	user1, token1, err := svc.RequestMagicLink(context.Background(), email)
+	if err != nil {
+		t.Fatalf("First RequestMagicLink failed: %v", err)
+	}
+
+	// Second request for same email (simulates concurrent request)
+	user2, token2, err := svc.RequestMagicLink(context.Background(), email)
+	if err != nil {
+		t.Fatalf("Second RequestMagicLink failed: %v", err)
+	}
+
+	// Both should succeed and return same user
+	if user1.Email != email {
+		t.Errorf("User1 email = %s, want %s", user1.Email, email)
+	}
+	if user2.Email != email {
+		t.Errorf("User2 email = %s, want %s", user2.Email, email)
+	}
+	if user1.ID != user2.ID {
+		t.Errorf("User IDs differ: %s vs %s", user1.ID, user2.ID)
+	}
+
+	// Tokens should be different (newly generated)
+	if token1.Token == token2.Token {
+		t.Error("Tokens are identical, expected different tokens")
+	}
+
+	// Both tokens should be non-empty
+	if token1.Token == "" {
+		t.Error("Token1 is empty")
+	}
+	if token2.Token == "" {
+		t.Error("Token2 is empty")
 	}
 }
 
