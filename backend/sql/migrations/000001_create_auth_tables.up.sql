@@ -28,7 +28,7 @@ CREATE TABLE magic_links (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_magic_links_token_hash ON magic_links (token_hash);
+CREATE UNIQUE INDEX idx_magic_links_token_hash ON magic_links (token_hash);
 CREATE UNIQUE INDEX idx_magic_links_user_id_unconsumed ON magic_links (user_id) WHERE consumed_at IS NULL;
 
 CREATE TABLE sessions (
@@ -39,5 +39,5 @@ CREATE TABLE sessions (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_sessions_token_hash ON sessions (token_hash);
+CREATE UNIQUE INDEX idx_sessions_token_hash ON sessions (token_hash);
 CREATE INDEX idx_sessions_user_id ON sessions (user_id);
