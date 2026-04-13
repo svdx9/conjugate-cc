@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/svdx9/conjugate-cc/backend/internal/auth"
 	"github.com/svdx9/conjugate-cc/backend/internal/config"
 	"github.com/svdx9/conjugate-cc/backend/internal/db"
 	internalhttp "github.com/svdx9/conjugate-cc/backend/internal/http"
@@ -52,9 +53,17 @@ func main() {
 	}
 	defer pool.Close()
 
-	// Dependency injection
+	// Dependency injection - Authentication layer
+	authStore := db.NewAuthStore(pool, logger)
+	authService := auth.NewService(authStore)
+
+	// Dependency injection - HTTP layer
 	statusHandler := status.NewHandler(logger, GitSHA, BuildTime)
 	router := internalhttp.NewRouter(statusHandler)
+
+	// Wire auth service into router (when HTTP handlers are created)
+	// TODO: Add route handlers that use authService when implementing Task 008.09
+	_ = authService
 
 	//nolint:exhaustruct
 	server := &http.Server{
