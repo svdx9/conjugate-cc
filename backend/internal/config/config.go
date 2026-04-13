@@ -26,7 +26,7 @@ const (
 	authCookieSecureKey = "AUTH_COOKIE_SECURE"
 	authSessionTTLKey   = "AUTH_SESSION_TTL"
 	authMagicLinkTTLKey = "AUTH_MAGIC_LINK_TTL"
-	SiteURLKey          = "SITE_URL"
+	siteURLKey          = "SITE_URL"
 )
 
 const (
