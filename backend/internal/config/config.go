@@ -236,17 +236,17 @@ func FromEnv() (Config, error) {
 
 	// Parse SITE_URL (computed from host:port if not set)
 	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, ""))
-	if SiteURL == "" && environment == "dev" {
-		SiteURL = "http://" + net.JoinHostPort(host, strconv.Itoa(port))
+	if siteURL == "" && environment == "dev" {
+		siteURL = "http://" + net.JoinHostPort(host, strconv.Itoa(port))
 	}
-	if SiteURL == "" {
-		return Config{}, fmt.Errorf("%s: must be provided for env %s: %w", SiteURLKey, environment, ErrMissingMagicLinkURL)
+	if siteURL == "" {
+		return Config{}, fmt.Errorf("%s: must be provided for env %s: %w", siteURLKey, environment, ErrMissingMagicLinkURL)
 	}
 
 	// Validate SITE_URL is a valid URL
-	_, err = url.Parse(SiteURL)
+	_, err = url.Parse(siteURL)
 	if err != nil {
-		return Config{}, fmt.Errorf("%s: %w: %w", SiteURLKey, ErrInvalidURL, err)
+		return Config{}, fmt.Errorf("%s: %w: %w", siteURLKey, ErrInvalidURL, err)
 	}
 
 	// Cross-field validation: magic link TTL must be shorter than session TTL
@@ -265,7 +265,7 @@ func FromEnv() (Config, error) {
 		AuthCookieSecure: authCookieSecure,
 		AuthSessionTTL:   authSessionTTL,
 		AuthMagicLinkTTL: authMagicLinkTTL,
-		SiteURL:          SiteURL,
+		SiteURL:          siteURL,
 	}
 
 	return cfg, nil
