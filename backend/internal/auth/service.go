@@ -97,18 +97,15 @@ func (s *Service) VerifyToken(plainToken string, storedHash []byte) error {
 
 // RequestMagicLink handles the magic link request flow
 func (s *Service) RequestMagicLink(ctx context.Context, email string) (*User, *TokenPair, error) {
-	// Try to find existing user
-	user, err := s.store.FindUserByEmail(ctx, email)
-	if err != nil && !errors.Is(err, ErrUserNotFound) {
+	// Create or get user atomically using UPSERT
+	// This single operation handles both new users and concurrent requests efficiently:
+	// - First request: creates user and returns it
+	// - Concurrent requests: all serialize on the unique constraint and get the same user
+	// - Repeat requests: no-op update returns existing user
+	// This is more efficient than SELECT + INSERT because it's a single database round-trip
+	user, err := s.store.CreateUser(ctx, email)
+	if err != nil {
 		return nil, nil, err
-	}
-
-	// Create user if doesn't exist
-	if user == nil {
-		user, err = s.store.CreateUser(ctx, email)
-		if err != nil {
-			return nil, nil, err
-		}
 	}
 
 	// Generate magic link token
