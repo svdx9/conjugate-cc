@@ -11,15 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const consumeMagicLink = `-- name: ConsumeMagicLink :exec
+const consumeMagicLink = `-- name: ConsumeMagicLink :one
 UPDATE magic_links
 SET consumed_at = now()
 WHERE id = $1 AND consumed_at IS NULL
+RETURNING id
 `
 
-func (q *Queries) ConsumeMagicLink(ctx context.Context, id pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, consumeMagicLink, id)
-	return err
+func (q *Queries) ConsumeMagicLink(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, consumeMagicLink, id)
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createOrUpdateMagicLinkToken = `-- name: CreateOrUpdateMagicLinkToken :one

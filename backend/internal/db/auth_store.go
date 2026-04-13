@@ -14,6 +14,17 @@ import (
 	"github.com/svdx9/conjugate-cc/backend/internal/db/queries"
 )
 
+// PostgreSQL error codes
+const (
+	pgErrCodeUniqueViolation     = "23505" // unique constraint violation
+	pgErrCodeForeignKeyViolation = "23503" // foreign key constraint violation
+)
+
+// PostgreSQL constraint names
+const (
+	constraintUsersEmailUnique = "users_email_unique"
+)
+
 // AuthStore handles all authentication-related database operations
 type AuthStore struct {
 	queries *queries.Queries
@@ -36,7 +47,7 @@ func (s *AuthStore) CreateUser(ctx context.Context, email string) (*auth.User, e
 	if err != nil {
 		// Check for email uniqueness constraint violation
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" && pgErr.ConstraintName == "users_email_key" {
+		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeUniqueViolation && pgErr.ConstraintName == constraintUsersEmailUnique {
 			return nil, auth.ErrEmailTaken
 		}
 		s.logger.Error("failed to create user", "email", email, "error", err)
@@ -93,7 +104,7 @@ func (s *AuthStore) CreateOrUpdateMagicLinkToken(ctx context.Context, userID str
 	if err != nil {
 		// Check for foreign key constraint violation (user doesn't exist)
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeForeignKeyViolation {
 			return nil, auth.ErrUserNotFound
 		}
 		s.logger.Error("failed to create or update magic link token", "user_id", userID, "error", err)
@@ -116,13 +127,18 @@ func (s *AuthStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []by
 }
 
 // ConsumeMagicLink marks a magic link as consumed
+// Returns ErrMagicLinkConsumed if the magic link was already consumed (no rows updated)
 func (s *AuthStore) ConsumeMagicLink(ctx context.Context, magicLinkID string) error {
 	mlid, err := parseUUID(magicLinkID)
 	if err != nil {
 		return auth.ErrMagicLinkNotFound
 	}
-	err = s.queries.ConsumeMagicLink(ctx, mlid)
+	_, err = s.queries.ConsumeMagicLink(ctx, mlid)
 	if err != nil {
+		// Check if this is a "no rows" scenario (magic link already consumed)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return auth.ErrMagicLinkConsumed
+		}
 		s.logger.Error("failed to consume magic link", "magic_link_id", magicLinkID, "error", err)
 		return auth.ErrInternal
 	}
@@ -143,7 +159,7 @@ func (s *AuthStore) CreateSession(ctx context.Context, userID string, tokenHash 
 	if err != nil {
 		// Check for foreign key constraint violation (user doesn't exist)
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeForeignKeyViolation {
 			return nil, auth.ErrUserNotFound
 		}
 		s.logger.Error("failed to create session", "user_id", userID, "error", err)

@@ -24,7 +24,8 @@ WHERE ml.token_hash = $1
   AND ml.consumed_at IS NULL
   AND ml.expires_at > now();
 
--- name: ConsumeMagicLink :exec
+-- name: ConsumeMagicLink :one
 UPDATE magic_links
 SET consumed_at = now()
-WHERE id = $1 AND consumed_at IS NULL;
+WHERE id = $1 AND consumed_at IS NULL
+RETURNING id;
