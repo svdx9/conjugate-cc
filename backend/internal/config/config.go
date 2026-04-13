@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -110,7 +111,7 @@ type Config struct {
 	Host             string
 	Port             int
 	Env              string
-	LogLevel         string
+	LogLevel         slog.Level
 	DatabaseURL      string
 	UiPath           string
 	AuthDevBypass    bool
@@ -125,7 +126,7 @@ type ConfigRedacted struct {
 	Host             string
 	Port             int
 	Env              string
-	LogLevel         string
+	LogLevel         slog.Level
 	UiPath           string
 	AuthDevBypass    bool
 	AuthCookieSecure bool
@@ -166,18 +167,18 @@ func FromEnv() (Config, error) {
 	// Compute context-aware defaults based on environment
 	var (
 		defaultCookieSecure bool
-		defaultLogLevel     string
+		defaultLogLevel     slog.Level
 	)
 	switch environment {
 	case "production":
 		defaultCookieSecure = true
-		defaultLogLevel = "INFO"
+		defaultLogLevel = slog.LevelInfo
 	case "staging":
 		defaultCookieSecure = true
-		defaultLogLevel = "INFO"
+		defaultLogLevel = slog.LevelInfo
 	case "dev":
 		defaultCookieSecure = false
-		defaultLogLevel = "DEBUG"
+		defaultLogLevel = slog.LevelDebug
 	}
 
 	// Parse PORT
@@ -202,9 +203,9 @@ func FromEnv() (Config, error) {
 	}
 
 	// Determine log level: DEBUG if flag set, otherwise environment default
-	var logLevel string
+	var logLevel slog.Level
 	if debugMode {
-		logLevel = "DEBUG"
+		logLevel = slog.LevelDebug
 	} else {
 		logLevel = defaultLogLevel
 	}

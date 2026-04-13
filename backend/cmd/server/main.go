@@ -27,15 +27,18 @@ var (
 )
 
 func main() {
-	handler := slog.NewTextHandler(os.Stdout, nil)
-	logger := slog.New(handler)
-	slog.SetDefault(logger)
-
 	cfg, err := config.FromEnv()
 	if err != nil {
 		slog.Error("failed to load config", "error", err)
 		os.Exit(1)
 	}
+	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level:       cfg.LogLevel,
+		ReplaceAttr: nil,
+		AddSource:   true,
+	})
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 
 	logger.Info("starting conjugate-cc backend",
 		"config", cfg.Redacted(),

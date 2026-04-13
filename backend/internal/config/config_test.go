@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"log/slog"
 	"testing"
 	"time"
 )
@@ -38,7 +39,7 @@ func TestFromEnv(t *testing.T) {
 			t.Errorf("Env = %s, want %s", cfg.Env, defaultEnv)
 		}
 
-		if cfg.LogLevel != "DEBUG" {
+		if cfg.LogLevel != slog.LevelDebug {
 			t.Errorf("LogLevel = %s, want DEBUG", cfg.LogLevel)
 		}
 
@@ -101,7 +102,7 @@ func TestFromEnv(t *testing.T) {
 			t.Errorf("DatabaseURL = %s, want postgres://prod-db:5432/app", cfg.DatabaseURL)
 		}
 
-		if cfg.LogLevel != "INFO" {
+		if cfg.LogLevel != slog.LevelInfo {
 			t.Errorf("LogLevel = %s, want INFO", cfg.LogLevel)
 		}
 
@@ -330,7 +331,7 @@ func TestFromEnv(t *testing.T) {
 			t.Fatalf("FromEnv() error = %v, wantErr false", err)
 		}
 
-		if cfg.LogLevel != "INFO" {
+		if cfg.LogLevel != slog.LevelInfo {
 			t.Errorf("LogLevel = %s, want INFO (production default)", cfg.LogLevel)
 		}
 	})
@@ -346,7 +347,7 @@ func TestFromEnv(t *testing.T) {
 			t.Fatalf("FromEnv() error = %v, wantErr false", err)
 		}
 
-		if cfg.LogLevel != "DEBUG" {
+		if cfg.LogLevel != slog.LevelDebug {
 			t.Errorf("LogLevel = %s, want DEBUG (DEBUG flag overrides environment)", cfg.LogLevel)
 		}
 	})
