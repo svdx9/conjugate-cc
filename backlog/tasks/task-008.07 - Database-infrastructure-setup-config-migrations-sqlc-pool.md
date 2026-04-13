@@ -1,10 +1,10 @@
 ---
 id: TASK-008.07
 title: 'Database infrastructure setup (config, migrations, sqlc, pool)'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-11 17:56'
-updated_date: '2026-04-12 16:12'
+updated_date: '2026-04-12 17:37'
 labels:
   - backend
   - database
@@ -20,7 +20,7 @@ priority: high
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Set up the database infrastructure required for magic link authentication.
 
-- Extend `internal/config/config.go` with DATABASE_URL (required), AUTH_COOKIE_SECURE, AUTH_SESSION_TTL, AUTH_MAGIC_LINK_TTL, AUTH_MAGIC_LINK_URL, AUTH_DEV_BYPASS — with validation, env-aware defaults, Addr(), and Redacted()
+- Extend `internal/config/config.go` with DATABASE_URL (required), AUTH_COOKIE_SECURE, AUTH_SESSION_TTL, AUTH_MAGIC_LINK_TTL, SITE_URL, AUTH_DEV_BYPASS — with validation, env-aware defaults, Addr(), and Redacted()
 - Create a single migration (000001_create_auth_tables) for users, magic_links, and sessions tables
 - Set up sqlc.yaml and write queries in sql/queries/
 - Generate sqlc code into internal/db/queries/
@@ -32,23 +32,22 @@ Set up the database infrastructure required for magic link authentication.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Config adds DATABASE_URL (required) and AUTH_COOKIE_SECURE (bool, env-aware default) with validation
-- [ ] #2 Config adds AUTH_SESSION_TTL, AUTH_MAGIC_LINK_TTL (duration), AUTH_MAGIC_LINK_URL, AUTH_DEV_BYPASS with validation and cross-field checks
-- [ ] #3 Config provides Addr() and Redacted() methods; main.go uses both
-- [ ] #4 Single migration (000001_create_auth_tables) creates users, magic_links, sessions tables with indexes and FKs
-- [ ] #5 Migrations apply and roll back cleanly via migrate CLI
-- [ ] #6 sqlc.yaml configured, queries written in sql/queries/, sqlc generates code into internal/db/queries/ without errors
-- [ ] #7 internal/db/ package provides NewPool (pgxpool) and transaction helpers
-- [ ] #8 Database pool created in main.go at startup, closed on shutdown
-- [ ] #9 Makefile adds sqlc tool install and sqlc-generate, migrate-up, migrate-down targets
-- [ ] #10 Config tests updated for all new fields (required, defaults, invalid values, cross-field)
-- [ ] #11 All code compiles, existing tests pass, lint passes
+- [x] #1 Config adds DATABASE_URL (required) and AUTH_COOKIE_SECURE (bool, env-aware default) with validation
+- [x] #2 Config adds AUTH_SESSION_TTL, AUTH_MAGIC_LINK_TTL (duration), SITE_URL, AUTH_DEV_BYPASS with validation and cross-field checks
+- [x] #3 Config provides Addr() and Redacted() methods; main.go uses both
+- [x] #4 Single migration (000001_create_auth_tables) creates users, magic_links, sessions tables with indexes and FKs
+- [x] #5 Migrations apply and roll back cleanly via migrate CLI
+- [x] #6 sqlc.yaml configured, queries written in sql/queries/, sqlc generates code into internal/db/queries/ without errors
+- [x] #7 internal/db/ package provides NewPool (pgxpool) and transaction helpers
+- [x] #8 Database pool created in main.go at startup, closed on shutdown
+- [x] #9 Makefile adds sqlc tool install and sqlc-generate, migrate-up, migrate-down targets
+- [x] #10 Config tests updated for all new fields (required, defaults, invalid values, cross-field)
+- [x] #11 All code compiles, existing tests pass, lint passes
 <!-- AC:END -->
 
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-
 ### Step 1: Extend `internal/config/config.go` (AC #1, #2, #3)
 
 **Add helper functions:**
@@ -73,7 +72,7 @@ type Config struct {
     AuthCookieSecure bool
     AuthSessionTTL   time.Duration
     AuthMagicLinkTTL time.Duration
-    AuthMagicLinkURL string
+    SiteURL string
 }
 ```
 
@@ -91,13 +90,13 @@ type Config struct {
 | AuthCookieSecure | AUTH_COOKIE_SECURE | no | false (dev) / true (staging/prod) |
 | AuthSessionTTL | AUTH_SESSION_TTL | no | 720h (30 days) |
 | AuthMagicLinkTTL | AUTH_MAGIC_LINK_TTL | no | 15m |
-| AuthMagicLinkURL | AUTH_MAGIC_LINK_URL | no | http://host:port/magic-link |
+| SiteURL | SITE_URL | no | http://host:port |
 
 **Validation:**
 - ENV must be one of: dev, staging, production
 - Port must be 1-65535
 - DATABASE_URL must be present and non-empty
-- AUTH_MAGIC_LINK_URL must be a valid URL
+- SITE_URL must be a valid URL, this field is mandatory for non-dev environments, for dev is is computed from host/port
 - AUTH_MAGIC_LINK_TTL must be shorter than AUTH_SESSION_TTL
 
 **Methods:**
@@ -273,5 +272,4 @@ All existing tests must still pass (they'll need DATABASE_URL set via t.Setenv).
 6. Makefile updates (step 7)
 7. main.go wiring (step 6)
 8. Full verification (step 9)
-
 <!-- SECTION:PLAN:END -->

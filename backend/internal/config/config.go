@@ -26,7 +26,7 @@ const (
 	authCookieSecureKey = "AUTH_COOKIE_SECURE"
 	authSessionTTLKey   = "AUTH_SESSION_TTL"
 	authMagicLinkTTLKey = "AUTH_MAGIC_LINK_TTL"
-	authMagicLinkURLKey = "AUTH_MAGIC_LINK_URL"
+	SiteURLKey          = "SITE_URL"
 )
 
 const (
@@ -40,13 +40,14 @@ const (
 )
 
 var (
-	ErrPortOutOfRange    = errors.New("port out of range")
-	ErrMissingEnv        = errors.New("missing required env var")
-	ErrInvalidBool       = errors.New("invalid boolean value")
-	ErrInvalidDuration   = errors.New("invalid duration value")
-	ErrInvalidURL        = errors.New("invalid URL")
-	ErrInvalidEnv        = errors.New("invalid environment value")
-	ErrMagicLinkTTLRange = errors.New("magic link TTL must be shorter than session TTL")
+	ErrPortOutOfRange      = errors.New("port out of range")
+	ErrMissingEnv          = errors.New("missing required env var")
+	ErrInvalidBool         = errors.New("invalid boolean value")
+	ErrInvalidDuration     = errors.New("invalid duration value")
+	ErrInvalidURL          = errors.New("invalid URL")
+	ErrInvalidEnv          = errors.New("invalid environment value")
+	ErrMagicLinkTTLRange   = errors.New("magic link TTL must be shorter than session TTL")
+	ErrMissingMagicLinkURL = errors.New("missing magic link URL")
 )
 
 func getEnvOrDefault(key, defaultVal string) string {
@@ -116,7 +117,7 @@ type Config struct {
 	AuthCookieSecure bool
 	AuthSessionTTL   time.Duration
 	AuthMagicLinkTTL time.Duration
-	AuthMagicLinkURL string
+	SiteURL          string
 }
 
 // ConfigRedacted holds safe fields for logging (excludes secrets like DatabaseURL).
@@ -130,7 +131,7 @@ type ConfigRedacted struct {
 	AuthCookieSecure bool
 	AuthSessionTTL   time.Duration
 	AuthMagicLinkTTL time.Duration
-	AuthMagicLinkURL string
+	SiteURL          string
 }
 
 // Addr returns the "host:port" string for net.Listen().
@@ -150,7 +151,7 @@ func (c Config) Redacted() ConfigRedacted {
 		AuthCookieSecure: c.AuthCookieSecure,
 		AuthSessionTTL:   c.AuthSessionTTL,
 		AuthMagicLinkTTL: c.AuthMagicLinkTTL,
-		AuthMagicLinkURL: c.AuthMagicLinkURL,
+		SiteURL:          c.SiteURL,
 	}
 }
 
@@ -233,16 +234,19 @@ func FromEnv() (Config, error) {
 		return Config{}, fmt.Errorf("%s: %w", authMagicLinkTTLKey, err)
 	}
 
-	// Parse AUTH_MAGIC_LINK_URL (computed from host:port if not set)
-	authMagicLinkURL := strings.TrimSpace(getEnvOrDefault(
-		authMagicLinkURLKey,
-		"http://"+net.JoinHostPort(host, strconv.Itoa(port))+"/magic-link",
-	))
+	// Parse SITE_URL (computed from host:port if not set)
+	SiteURL := strings.TrimSpace(getEnvOrDefault(SiteURLKey, ""))
+	if SiteURL == "" && environment == "dev" {
+		SiteURL = "http://" + net.JoinHostPort(host, strconv.Itoa(port))
+	}
+	if SiteURL == "" {
+		return Config{}, fmt.Errorf("%s: must be provided for env %s: %w", SiteURLKey, environment, ErrMissingMagicLinkURL)
+	}
 
-	// Validate AUTH_MAGIC_LINK_URL is a valid URL
-	_, err = url.Parse(authMagicLinkURL)
+	// Validate SITE_URL is a valid URL
+	_, err = url.Parse(SiteURL)
 	if err != nil {
-		return Config{}, fmt.Errorf("%s: %w: %w", authMagicLinkURLKey, ErrInvalidURL, err)
+		return Config{}, fmt.Errorf("%s: %w: %w", SiteURLKey, ErrInvalidURL, err)
 	}
 
 	// Cross-field validation: magic link TTL must be shorter than session TTL
@@ -261,7 +265,7 @@ func FromEnv() (Config, error) {
 		AuthCookieSecure: authCookieSecure,
 		AuthSessionTTL:   authSessionTTL,
 		AuthMagicLinkTTL: authMagicLinkTTL,
-		AuthMagicLinkURL: authMagicLinkURL,
+		SiteURL:          SiteURL,
 	}
 
 	return cfg, nil

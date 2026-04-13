@@ -19,7 +19,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("AUTH_COOKIE_SECURE", "")
 		t.Setenv("AUTH_SESSION_TTL", "")
 		t.Setenv("AUTH_MAGIC_LINK_TTL", "")
-		t.Setenv("AUTH_MAGIC_LINK_URL", "")
+		t.Setenv("SITE_URL", "")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -62,8 +62,8 @@ func TestFromEnv(t *testing.T) {
 			t.Errorf("AuthMagicLinkTTL = %v, want %v", cfg.AuthMagicLinkTTL, defaultMagicLinkTTL)
 		}
 
-		if cfg.AuthMagicLinkURL != "http://0.0.0.0:8080/magic-link" {
-			t.Errorf("AuthMagicLinkURL = %s, want computed default", cfg.AuthMagicLinkURL)
+		if cfg.SiteURL != "http://0.0.0.0:8080" {
+			t.Errorf("SiteURL = %s, want computed default", cfg.SiteURL)
 		}
 	})
 
@@ -78,7 +78,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("AUTH_COOKIE_SECURE", "false")
 		t.Setenv("AUTH_SESSION_TTL", "168h")
 		t.Setenv("AUTH_MAGIC_LINK_TTL", "10m")
-		t.Setenv("AUTH_MAGIC_LINK_URL", "https://example.com/auth")
+		t.Setenv("SITE_URL", "https://example.com")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -125,8 +125,8 @@ func TestFromEnv(t *testing.T) {
 			t.Errorf("AuthMagicLinkTTL = %v, want 10m", cfg.AuthMagicLinkTTL)
 		}
 
-		if cfg.AuthMagicLinkURL != "https://example.com/auth" {
-			t.Errorf("AuthMagicLinkURL = %s, want https://example.com/auth", cfg.AuthMagicLinkURL)
+		if cfg.SiteURL != "https://example.com" {
+			t.Errorf("SiteURL = %s, want https://example.com", cfg.SiteURL)
 		}
 	})
 
@@ -164,7 +164,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("HOST", "invalid host!")
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
 		// Must provide explicit magic link URL since the computed URL would be invalid
-		t.Setenv("AUTH_MAGIC_LINK_URL", "http://localhost:8080/magic-link")
+		t.Setenv("SITE_URL", "http://localhost:8080/magic-link")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -275,9 +275,9 @@ func TestFromEnv(t *testing.T) {
 		}
 	})
 
-	t.Run("invalid AUTH_MAGIC_LINK_URL", func(t *testing.T) {
+	t.Run("invalid SITE_URL", func(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
-		t.Setenv("AUTH_MAGIC_LINK_URL", "not a valid url://broken[")
+		t.Setenv("SITE_URL", "not a valid url://broken[")
 
 		_, err := FromEnv()
 		if err == nil {
