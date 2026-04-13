@@ -42,4 +42,5 @@ var (
 	ErrInvalidToken      = errors.New("invalid token")
 	ErrTokenHashMismatch = errors.New("token hash does not match")
 	ErrMagicLinkConsumed = errors.New("magic link already consumed")
+	ErrInternal          = errors.New("internal server error")
 )

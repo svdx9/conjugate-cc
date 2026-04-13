@@ -40,7 +40,7 @@ func (s *AuthStore) CreateUser(ctx context.Context, email string) (*auth.User, e
 			return nil, auth.ErrEmailTaken
 		}
 		s.logger.Error("failed to create user", "email", email, "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthUser(&row), nil
 }
@@ -53,7 +53,7 @@ func (s *AuthStore) FindUserByEmail(ctx context.Context, email string) (*auth.Us
 			return nil, auth.ErrUserNotFound
 		}
 		s.logger.Error("failed to find user by email", "email", email, "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthUser(&row), nil
 }
@@ -70,7 +70,7 @@ func (s *AuthStore) FindUserByID(ctx context.Context, userID string) (*auth.User
 			return nil, auth.ErrUserNotFound
 		}
 		s.logger.Error("failed to find user by id", "user_id", userID, "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthUser(&row), nil
 }
@@ -93,7 +93,7 @@ func (s *AuthStore) CreateMagicLink(ctx context.Context, userID string, tokenHas
 			return nil, auth.ErrUserNotFound
 		}
 		s.logger.Error("failed to create magic link", "user_id", userID, "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthMagicLink(&row), nil
 }
@@ -106,7 +106,7 @@ func (s *AuthStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []by
 			return nil, auth.ErrMagicLinkNotFound
 		}
 		s.logger.Error("failed to find magic link by token hash", "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthMagicLinkRow(&row), nil
 }
@@ -120,7 +120,7 @@ func (s *AuthStore) ConsumeMagicLink(ctx context.Context, magicLinkID string) er
 	err = s.queries.ConsumeMagicLink(ctx, mlid)
 	if err != nil {
 		s.logger.Error("failed to consume magic link", "magic_link_id", magicLinkID, "error", err)
-		return err
+		return auth.ErrInternal
 	}
 	return nil
 }
@@ -143,7 +143,7 @@ func (s *AuthStore) CreateSession(ctx context.Context, userID string, tokenHash 
 			return nil, auth.ErrUserNotFound
 		}
 		s.logger.Error("failed to create session", "user_id", userID, "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthSession(&row), nil
 }
@@ -156,7 +156,7 @@ func (s *AuthStore) FindSessionByTokenHash(ctx context.Context, tokenHash []byte
 			return nil, auth.ErrSessionNotFound
 		}
 		s.logger.Error("failed to find session by token hash", "error", err)
-		return nil, err
+		return nil, auth.ErrInternal
 	}
 	return toAuthSessionRow(&row), nil
 }
@@ -170,7 +170,7 @@ func (s *AuthStore) DeleteSession(ctx context.Context, sessionID string) error {
 	err = s.queries.DeleteSession(ctx, sid)
 	if err != nil {
 		s.logger.Error("failed to delete session", "session_id", sessionID, "error", err)
-		return err
+		return auth.ErrInternal
 	}
 	return nil
 }
@@ -184,7 +184,7 @@ func (s *AuthStore) DeleteSessionsByUserID(ctx context.Context, userID string) e
 	err = s.queries.DeleteSessionsByUserID(ctx, uid)
 	if err != nil {
 		s.logger.Error("failed to delete sessions by user id", "user_id", userID, "error", err)
-		return err
+		return auth.ErrInternal
 	}
 	return nil
 }
