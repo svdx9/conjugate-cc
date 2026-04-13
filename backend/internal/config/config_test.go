@@ -72,7 +72,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("HOST", "localhost")
 		t.Setenv("ENV", "production")
 		t.Setenv("DATABASE_URL", "postgres://prod-db:5432/app")
-		t.Setenv("LOG_LEVEL", "INFO")
+		t.Setenv("DEBUG", "")
 		t.Setenv("UI_PATH", "assets")
 		t.Setenv("AUTH_DEV_BYPASS", "true")
 		t.Setenv("AUTH_COOKIE_SECURE", "false")
@@ -319,10 +319,10 @@ func TestFromEnv(t *testing.T) {
 		}
 	})
 
-	t.Run("log level info in production", func(t *testing.T) {
+	t.Run("log level info in production without DEBUG flag", func(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
 		t.Setenv("ENV", "production")
-		t.Setenv("LOG_LEVEL", "")
+		t.Setenv("DEBUG", "")
 		t.Setenv("SITE_URL", "https://example.com")
 
 		cfg, err := FromEnv()
@@ -332,6 +332,22 @@ func TestFromEnv(t *testing.T) {
 
 		if cfg.LogLevel != "INFO" {
 			t.Errorf("LogLevel = %s, want INFO (production default)", cfg.LogLevel)
+		}
+	})
+
+	t.Run("log level debug when DEBUG flag is set", func(t *testing.T) {
+		t.Setenv("DATABASE_URL", "postgres://localhost/test")
+		t.Setenv("ENV", "production")
+		t.Setenv("DEBUG", "true")
+		t.Setenv("SITE_URL", "https://example.com")
+
+		cfg, err := FromEnv()
+		if err != nil {
+			t.Fatalf("FromEnv() error = %v, wantErr false", err)
+		}
+
+		if cfg.LogLevel != "DEBUG" {
+			t.Errorf("LogLevel = %s, want DEBUG (DEBUG flag overrides environment)", cfg.LogLevel)
 		}
 	})
 

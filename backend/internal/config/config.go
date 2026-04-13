@@ -20,7 +20,7 @@ const (
 	portKey             = "PORT"
 	hostKey             = "HOST"
 	databaseURLKey      = "DATABASE_URL"
-	logLevelKey         = "LOG_LEVEL"
+	debugKey            = "DEBUG"
 	uiPathKey           = "UI_PATH"
 	authDevBypassKey    = "AUTH_DEV_BYPASS"
 	authCookieSecureKey = "AUTH_COOKIE_SECURE"
@@ -195,8 +195,19 @@ func FromEnv() (Config, error) {
 	// Parse UI_PATH
 	uiPath := getEnvOrDefault(uiPathKey, defaultUiPath)
 
-	// Parse LOG_LEVEL
-	logLevel := getEnvOrDefault(logLevelKey, defaultLogLevel)
+	// Parse DEBUG flag for debug logging
+	debugMode, err := parseBool(getEnvOrDefault(debugKey, "false"), false)
+	if err != nil {
+		return Config{}, fmt.Errorf("%s: %w", debugKey, err)
+	}
+
+	// Determine log level: DEBUG if flag set, otherwise environment default
+	var logLevel string
+	if debugMode {
+		logLevel = "DEBUG"
+	} else {
+		logLevel = defaultLogLevel
+	}
 
 	// DATABASE_URL is required
 	databaseURL, err := requireEnv(databaseURLKey)
