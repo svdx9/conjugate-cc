@@ -20,11 +20,6 @@ const (
 	pgErrCodeForeignKeyViolation = "23503" // foreign key constraint violation
 )
 
-// PostgreSQL constraint names
-const (
-	constraintUsersEmailUnique = "users_email_unique"
-)
-
 // AuthStore handles all authentication-related database operations
 type AuthStore struct {
 	queries *queries.Queries
