@@ -34,7 +34,13 @@ func NewAuthStore(pool *pgxpool.Pool, logger *slog.Logger) *AuthStore {
 func (s *AuthStore) CreateUser(ctx context.Context, email string) (*auth.User, error) {
 	row, err := s.queries.CreateUser(ctx, email)
 	if err != nil {
-		return nil, s.handleDBError(err)
+		// Check for email uniqueness constraint violation
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" && pgErr.ConstraintName == "users_email_key" {
+			return nil, auth.ErrEmailTaken
+		}
+		s.logger.Error("failed to create user", "email", email, "error", err)
+		return nil, err
 	}
 	return toAuthUser(&row), nil
 }
@@ -43,7 +49,11 @@ func (s *AuthStore) CreateUser(ctx context.Context, email string) (*auth.User, e
 func (s *AuthStore) FindUserByEmail(ctx context.Context, email string) (*auth.User, error) {
 	row, err := s.queries.FindUserByEmail(ctx, email)
 	if err != nil {
-		return nil, s.handleDBError(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, auth.ErrUserNotFound
+		}
+		s.logger.Error("failed to find user by email", "email", email, "error", err)
+		return nil, err
 	}
 	return toAuthUser(&row), nil
 }
@@ -56,7 +66,11 @@ func (s *AuthStore) FindUserByID(ctx context.Context, userID string) (*auth.User
 	}
 	row, err := s.queries.GetUserByID(ctx, uid)
 	if err != nil {
-		return nil, s.handleDBError(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, auth.ErrUserNotFound
+		}
+		s.logger.Error("failed to find user by id", "user_id", userID, "error", err)
+		return nil, err
 	}
 	return toAuthUser(&row), nil
 }
@@ -73,7 +87,13 @@ func (s *AuthStore) CreateMagicLink(ctx context.Context, userID string, tokenHas
 		ExpiresAt: timestamptzFromTime(expiresAt),
 	})
 	if err != nil {
-		return nil, s.handleDBError(err)
+		// Check for foreign key constraint violation (user doesn't exist)
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+			return nil, auth.ErrUserNotFound
+		}
+		s.logger.Error("failed to create magic link", "user_id", userID, "error", err)
+		return nil, err
 	}
 	return toAuthMagicLink(&row), nil
 }
@@ -82,7 +102,11 @@ func (s *AuthStore) CreateMagicLink(ctx context.Context, userID string, tokenHas
 func (s *AuthStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*auth.MagicLink, error) {
 	row, err := s.queries.FindMagicLinkByTokenHash(ctx, tokenHash)
 	if err != nil {
-		return nil, s.handleDBError(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, auth.ErrMagicLinkNotFound
+		}
+		s.logger.Error("failed to find magic link by token hash", "error", err)
+		return nil, err
 	}
 	return toAuthMagicLinkRow(&row), nil
 }
@@ -95,7 +119,8 @@ func (s *AuthStore) ConsumeMagicLink(ctx context.Context, magicLinkID string) er
 	}
 	err = s.queries.ConsumeMagicLink(ctx, mlid)
 	if err != nil {
-		return s.handleDBError(err)
+		s.logger.Error("failed to consume magic link", "magic_link_id", magicLinkID, "error", err)
+		return err
 	}
 	return nil
 }
@@ -112,7 +137,13 @@ func (s *AuthStore) CreateSession(ctx context.Context, userID string, tokenHash 
 		ExpiresAt: timestamptzFromTime(expiresAt),
 	})
 	if err != nil {
-		return nil, s.handleDBError(err)
+		// Check for foreign key constraint violation (user doesn't exist)
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+			return nil, auth.ErrUserNotFound
+		}
+		s.logger.Error("failed to create session", "user_id", userID, "error", err)
+		return nil, err
 	}
 	return toAuthSession(&row), nil
 }
@@ -121,7 +152,11 @@ func (s *AuthStore) CreateSession(ctx context.Context, userID string, tokenHash 
 func (s *AuthStore) FindSessionByTokenHash(ctx context.Context, tokenHash []byte) (*auth.Session, error) {
 	row, err := s.queries.FindSessionByTokenHash(ctx, tokenHash)
 	if err != nil {
-		return nil, s.handleDBError(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, auth.ErrSessionNotFound
+		}
+		s.logger.Error("failed to find session by token hash", "error", err)
+		return nil, err
 	}
 	return toAuthSessionRow(&row), nil
 }
@@ -134,7 +169,8 @@ func (s *AuthStore) DeleteSession(ctx context.Context, sessionID string) error {
 	}
 	err = s.queries.DeleteSession(ctx, sid)
 	if err != nil {
-		return s.handleDBError(err)
+		s.logger.Error("failed to delete session", "session_id", sessionID, "error", err)
+		return err
 	}
 	return nil
 }
@@ -147,7 +183,8 @@ func (s *AuthStore) DeleteSessionsByUserID(ctx context.Context, userID string) e
 	}
 	err = s.queries.DeleteSessionsByUserID(ctx, uid)
 	if err != nil {
-		return s.handleDBError(err)
+		s.logger.Error("failed to delete sessions by user id", "user_id", userID, "error", err)
+		return err
 	}
 	return nil
 }
@@ -220,33 +257,4 @@ func toAuthSessionRow(s *queries.FindSessionByTokenHashRow) *auth.Session {
 		ExpiresAt: s.ExpiresAt.Time,
 		CreatedAt: s.CreatedAt.Time,
 	}
-}
-
-// handleDBError maps database errors to domain errors
-func (s *AuthStore) handleDBError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	// Check for "no rows" error
-	if errors.Is(err, pgx.ErrNoRows) {
-		// Different endpoints need different error messages, but we can't distinguish here
-		// The caller should check the context to determine which error to return
-		return auth.ErrUserNotFound // Default, may be overridden by caller
-	}
-
-	// Check for unique constraint violations
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		// unique_violation error code is 23505
-		if pgErr.Code == "23505" {
-			// Check which constraint was violated based on constraint name
-			if pgErr.ConstraintName == "users_email_key" {
-				return auth.ErrEmailTaken
-			}
-		}
-	}
-
-	// Unknown error
-	return err
 }
