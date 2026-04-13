@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
-	"errors"
 	"time"
 )
 
@@ -136,9 +135,6 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, err
 	// Find the magic link and user in a single query
 	magicLink, err := s.store.FindMagicLinkByTokenHash(ctx, tokenHash[:])
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return nil, ErrMagicLinkNotFound
-		}
 		return nil, err
 	}
 
@@ -194,9 +190,6 @@ func (s *Service) ValidateSessionToken(ctx context.Context, token string) (*User
 	// Find the session and user in a single query
 	session, err := s.store.FindSessionByTokenHash(ctx, tokenHash[:])
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return nil, ErrSessionNotFound
-		}
 		return nil, err
 	}
 
