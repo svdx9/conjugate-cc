@@ -4,6 +4,7 @@ title: Auth service layer and email stub
 status: To Do
 assignee: []
 created_date: '2026-04-11 17:57'
+updated_date: '2026-04-13 05:36'
 labels:
   - backend
   - authentication
@@ -16,23 +17,292 @@ priority: high
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Implement the auth service layer and a stub email sender for magic link authentication.
+Implement the auth service layer, AuthStore for persistence, and a stub email sender for magic link authentication.
 
-- Create `internal/auth/` package with repository interfaces (user, magic link, session)
-- Implement auth service: token generation (crypto/rand, 32 bytes), SHA-256 hashing, constant-time comparison, 15min TTL
-- `internal/db/` implements auth repository interfaces using sqlc-generated queries
+- Create `internal/auth/` package with service and domain types
+- Implement AuthStore in `internal/db/auth_store.go` wrapping sqlc queries with domain logic
+- Auth service: token generation (crypto/rand, 32 bytes), SHA-256 hashing, constant-time comparison, 15min TTL
 - Create `internal/email/` package with sender interface and stub sender (logs to stdout)
 - Unit tests for auth service (token generation, hashing, expiry, atomic consumption)
+- Domain types: User, MagicLink, Session with proper error handling and type conversion
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Auth repository interfaces defined in internal/auth/
-- [ ] #2 Auth service implements token generation with crypto/rand (32 bytes)
-- [ ] #3 Tokens stored as SHA-256 hashes and compared with constant-time comparison
-- [ ] #4 Token TTL of 15 minutes is enforced
-- [ ] #5 internal/db/ implements auth repository interfaces
-- [ ] #6 Email sender interface exists with a stub implementation that logs to stdout
-- [ ] #7 Unit tests cover token generation, hashing, expiry, and consumption logic
-- [ ] #8 All code compiles and tests pass
+- [ ] #1 AuthStore implemented in internal/db/auth_store.go wrapping sqlc queries
+- [ ] #2 AuthStore has methods: CreateUser, FindUserByEmail, CreateMagicLink, FindMagicLinkByTokenHash, ConsumeMagicLink, CreateSession, FindSessionByTokenHash, DeleteSession
+- [ ] #3 Auth service (internal/auth/service.go) implements token generation with crypto/rand (32 bytes)
+- [ ] #4 Token hashing uses SHA-256 and constant-time comparison (crypto/subtle.ConstantTimeCompare)
+- [ ] #5 Token TTL of 15 minutes enforced on creation and validation
+- [ ] #6 Domain types defined (User, MagicLink, Session) with proper type conversion from sqlc models
+- [ ] #7 Error mapping: pgx.ErrNoRows → domain errors, unique constraint violations handled
+- [ ] #8 Email sender interface in internal/email/sender.go with Stub implementation logging to stdout
+- [ ] #9 Unit tests cover: token generation, SHA-256 hashing, constant-time compare, TTL validation, magic link consumption atomicity
+- [ ] #10 All code compiles, tests pass, lint passes
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+## Implementation Plan
+
+### Step 1: Define Domain Types (AC #6)
+
+File: `internal/auth/types.go`
+
+```go
+package auth
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+// User represents an authenticated user.
+type User struct {
+	ID        uuid.UUID
+	Email     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+// MagicLink represents a magic link token for passwordless sign-in.
+type MagicLink struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	TokenHash []byte
+	ExpiresAt time.Time
+	ConsumedAt *time.Time
+	CreatedAt time.Time
+}
+
+// Session represents an authenticated user session.
+type Session struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	TokenHash []byte
+	ExpiresAt time.Time
+	CreatedAt time.Time
+}
+
+// Error definitions for auth domain
+var (
+	ErrUserNotFound       = errors.New("user not found")
+	ErrEmailTaken         = errors.New("email already registered")
+	ErrMagicLinkNotFound  = errors.New("magic link not found, expired, or already used")
+	ErrSessionNotFound    = errors.New("session not found or expired")
+	ErrTokenGeneration    = errors.New("failed to generate token")
+	ErrInvalidToken       = errors.New("invalid token")
+)
+```
+
+### Step 2: Create AuthStore (AC #1, #2, #7)
+
+File: `internal/db/auth_store.go`
+
+**Structure:**
+```go
+type AuthStore struct {
+	q      *queries.Queries
+	pool   *pgxpool.Pool
+	logger *slog.Logger
+}
+
+// Constructor
+func NewAuthStore(pool *pgxpool.Pool, queries *queries.Queries, logger *slog.Logger) *AuthStore { ... }
+
+// User operations
+func (s *AuthStore) CreateUser(ctx context.Context, email string) (auth.User, error) { ... }
+func (s *AuthStore) FindUserByEmail(ctx context.Context, email string) (auth.User, error) { ... }
+func (s *AuthStore) FindUserByID(ctx context.Context, id uuid.UUID) (auth.User, error) { ... }
+
+// Magic link operations
+func (s *AuthStore) CreateMagicLink(ctx context.Context, userID uuid.UUID, tokenHash []byte, expiresAt time.Time) error { ... }
+func (s *AuthStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (auth.MagicLink, error) { ... }
+func (s *AuthStore) ConsumeMagicLink(ctx context.Context, id uuid.UUID) error { ... }
+
+// Session operations
+func (s *AuthStore) CreateSession(ctx context.Context, userID uuid.UUID, tokenHash []byte, expiresAt time.Time) (auth.Session, error) { ... }
+func (s *AuthStore) FindSessionByTokenHash(ctx context.Context, tokenHash []byte) (auth.Session, error) { ... }
+func (s *AuthStore) DeleteSession(ctx context.Context, id uuid.UUID) error { ... }
+
+// Helper methods
+func (s *AuthStore) withTx(ctx context.Context, fn func(*queries.Queries) error) error { ... }
+func (s *AuthStore) handleDBError(err error) error { ... }
+```
+
+**Key responsibilities:**
+- Type conversion: queries.* → auth.* types (using helper functions)
+- Error mapping: pgx.ErrNoRows → auth.ErrUserNotFound, unique violations → auth.ErrEmailTaken
+- Transaction orchestration via `withTx()` for atomic operations (e.g., consume magic link)
+
+### Step 3: Implement Auth Service (AC #3, #4, #5)
+
+File: `internal/auth/service.go`
+
+```go
+type Service struct {
+	store *db.AuthStore
+}
+
+// Token generation
+func (s *Service) GenerateToken() (string, error) {
+	// crypto/rand.Reader, 32 bytes
+	// base64 URL-safe encoding
+}
+
+// Hash token with SHA-256
+func (s *Service) HashToken(token string) []byte {
+	// crypto/sha256
+	// returns fixed 32-byte hash
+}
+
+// Constant-time token comparison
+func (s *Service) VerifyTokenHash(hash, computed []byte) bool {
+	// crypto/subtle.ConstantTimeCompare
+}
+
+// Business logic methods
+func (s *Service) RequestMagicLink(ctx context.Context, email string) error {
+	// Find or create user
+	// Generate token
+	// Store hash with 15min expiry
+	// Return plaintext token (for email)
+}
+
+func (s *Service) VerifyMagicLink(ctx context.Context, tokenHash []byte) (auth.User, error) {
+	// Find magic link by hash
+	// Check not expired, not consumed
+	// Return associated user
+}
+
+func (s *Service) ConsumeMagicLink(ctx context.Context, userID uuid.UUID, tokenHash []byte) (auth.Session, error) {
+	// Atomic transaction:
+	//   1. Find magic link by hash
+	//   2. Verify not consumed
+	//   3. Mark as consumed
+	//   4. Generate session token
+	//   5. Store session with 30-day expiry
+	// Return session
+}
+
+func (s *Service) ValidateSession(ctx context.Context, sessionTokenHash []byte) (auth.User, error) {
+	// Find session by hash
+	// Check not expired
+	// Return user
+}
+
+func (s *Service) Logout(ctx context.Context, sessionID uuid.UUID) error {
+	// Delete session by ID
+}
+```
+
+**Constants:**
+```go
+const (
+	TokenLength        = 32  // bytes
+	TokenTTL           = 15 * time.Minute
+	SessionTTL         = 30 * 24 * time.Hour
+)
+```
+
+### Step 4: Email Interface & Stub (AC #8)
+
+File: `internal/email/sender.go`
+
+```go
+type Sender interface {
+	Send(ctx context.Context, to, subject, body string) error
+}
+
+type StubSender struct {
+	logger *slog.Logger
+}
+
+func NewStubSender(logger *slog.Logger) *StubSender { ... }
+
+func (s *StubSender) Send(ctx context.Context, to, subject, body string) error {
+	// Log to stdout/logger
+	// Return nil
+}
+```
+
+### Step 5: Unit Tests (AC #9)
+
+File: `internal/auth/service_test.go`
+
+**Test cases:**
+- `TestGenerateToken` — 32 bytes, base64 format
+- `TestHashToken` — SHA-256, deterministic, 32-byte output
+- `TestVerifyTokenHash` — constant-time comparison with crypto/subtle
+- `TestTokenTTL` — magic link expires after 15 minutes
+- `TestMagicLinkConsumption` — atomicity, can only consume once
+- `TestSessionExpiry` — session rejects expired tokens
+- `TestEmailStub` — stub sender logs without error
+
+File: `internal/db/auth_store_test.go`
+
+**Test cases:**
+- `TestCreateUser` — inserts user, returns correct ID
+- `TestCreateUserDuplicate` — email unique constraint → auth.ErrEmailTaken
+- `TestFindUserByEmail` — retrieves user, pgx.ErrNoRows → auth.ErrUserNotFound
+- `TestCreateMagicLink` — stores token hash with expiry
+- `TestConsumeMagicLink` — atomic: find, mark consumed, fail on duplicate
+- `TestCreateSession` — stores session token hash
+- `TestFindSessionByTokenHash` — retrieves session, checks expiry
+
+### Step 6: Helper Functions & Error Mapping
+
+In `internal/db/auth_store.go`:
+
+```go
+// Type conversion helpers
+func toAuthUser(row queries.User) auth.User { ... }
+func toAuthMagicLink(row queries.MagicLink) auth.MagicLink { ... }
+func toAuthSession(row queries.Session) auth.Session { ... }
+
+// pgtype helpers
+func toTimestamptz(t time.Time) pgtype.Timestamptz { ... }
+func timestamptzTime(t pgtype.Timestamptz) time.Time { ... }
+
+// Error mapping
+func (s *AuthStore) handleDBError(err error) error {
+	if errors.Is(err, pgx.ErrNoRows) {
+		return auth.ErrUserNotFound // or other context-specific error
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		if pgErr.Code == "23505" { // unique violation
+			switch pgErr.ConstraintName {
+			case "users_email_unique":
+				return auth.ErrEmailTaken
+			}
+		}
+	}
+	return err
+}
+```
+
+### Step 7: Integration with main.go
+
+```go
+// Create authStore
+authStore := db.NewAuthStore(pool, queries.New(pool), logger)
+
+// Create auth service
+authService := auth.NewService(authStore)
+emailSender := email.NewStubSender(logger)
+
+// Pass to handlers (task 008.09)
+```
+
+### Execution Order
+
+1. Domain types (`internal/auth/types.go`)
+2. AuthStore (`internal/db/auth_store.go`)
+3. Auth service (`internal/auth/service.go`)
+4. Email interface (`internal/email/sender.go`)
+5. Unit tests (service_test.go, auth_store_test.go)
+6. Verification (compile, test, lint)
+<!-- SECTION:PLAN:END -->
