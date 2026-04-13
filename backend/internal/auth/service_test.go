@@ -19,16 +19,18 @@ const (
 
 // MockStore implements the Store interface for testing
 type MockStore struct {
-	users      map[string]*auth.User
-	magicLinks map[string]*auth.MagicLink
-	sessions   map[string]*auth.Session
+	users         map[string]*auth.User
+	magicLinks    map[string]*auth.MagicLink
+	consumedLinks map[string]bool // Track which links have been consumed
+	sessions      map[string]*auth.Session
 }
 
 func NewMockStore() *MockStore {
 	return &MockStore{
-		users:      make(map[string]*auth.User),
-		magicLinks: make(map[string]*auth.MagicLink),
-		sessions:   make(map[string]*auth.Session),
+		users:         make(map[string]*auth.User),
+		magicLinks:    make(map[string]*auth.MagicLink),
+		consumedLinks: make(map[string]bool),
+		sessions:      make(map[string]*auth.Session),
 	}
 }
 
@@ -104,8 +106,12 @@ func (m *MockStore) CreateOrUpdateMagicLinkToken(ctx context.Context, userID str
 }
 
 func (m *MockStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*auth.MagicLink, error) {
-	for _, ml := range m.magicLinks {
+	for id, ml := range m.magicLinks {
 		if bytes.Equal(ml.TokenHash, tokenHash) { // Simple comparison for testing
+			// Check if already consumed
+			if m.consumedLinks[id] {
+				return nil, auth.ErrMagicLinkNotFound
+			}
 			return ml, nil
 		}
 	}
@@ -117,7 +123,12 @@ func (m *MockStore) ConsumeMagicLink(ctx context.Context, magicLinkID string) er
 	if !ok {
 		return auth.ErrMagicLinkNotFound
 	}
-	delete(m.magicLinks, magicLinkID)
+	// Check if already consumed
+	if m.consumedLinks[magicLinkID] {
+		return auth.ErrMagicLinkConsumed
+	}
+	// Mark as consumed
+	m.consumedLinks[magicLinkID] = true
 	return nil
 }
 
@@ -404,5 +415,135 @@ func TestLogoutAllSessions(t *testing.T) {
 	err := svc.LogoutAllSessions(context.Background(), userID)
 	if err != nil {
 		t.Fatalf("LogoutAllSessions failed: %v", err)
+	}
+}
+
+func TestVerifyMagicLink_Valid(t *testing.T) {
+	t.Parallel()
+	store := NewMockStore()
+	svc := auth.NewService(store, magicLinkTTL, sessionTTL)
+
+	// Generate a token
+	tokenPair, err := svc.GenerateToken()
+	if err != nil {
+		t.Fatalf("GenerateToken failed: %v", err)
+	}
+
+	// Create a magic link in the store
+	expiresAt := time.Now().Add(magicLinkTTL)
+	_, err = store.CreateOrUpdateMagicLinkToken(context.Background(), "user-1", tokenPair.TokenHash, expiresAt)
+	if err != nil {
+		t.Fatalf("CreateOrUpdateMagicLinkToken failed: %v", err)
+	}
+
+	// Verify the magic link (should NOT consume it)
+	user, err := svc.VerifyMagicLink(context.Background(), tokenPair.Token)
+	if err != nil {
+		t.Fatalf("VerifyMagicLink failed: %v", err)
+	}
+
+	if user == nil {
+		t.Fatal("VerifyMagicLink returned nil user")
+	}
+	if user.Email != "test@example.com" {
+		t.Errorf("Expected email test@example.com, got %s", user.Email)
+	}
+
+	// Verify token was NOT consumed by checking if we can find it again
+	user2, err := svc.VerifyMagicLink(context.Background(), tokenPair.Token)
+	if err != nil {
+		t.Fatalf("Second VerifyMagicLink call failed (token was consumed): %v", err)
+	}
+	if user2 == nil {
+		t.Fatal("Second VerifyMagicLink returned nil user (token was consumed)")
+	}
+}
+
+func TestVerifyMagicLink_Expired(t *testing.T) {
+	t.Parallel()
+	store := NewMockStore()
+	svc := auth.NewService(store, magicLinkTTL, sessionTTL)
+
+	// Generate a token with expired TTL
+	tokenPair, err := svc.GenerateToken()
+	if err != nil {
+		t.Fatalf("GenerateToken failed: %v", err)
+	}
+
+	// Create a magic link that expires immediately
+	expiresAt := time.Now().Add(-1 * time.Second)
+	_, err = store.CreateOrUpdateMagicLinkToken(context.Background(), "user-1", tokenPair.TokenHash, expiresAt)
+	if err != nil {
+		t.Fatalf("CreateOrUpdateMagicLinkToken failed: %v", err)
+	}
+
+	// Try to verify the expired link
+	_, err = svc.VerifyMagicLink(context.Background(), tokenPair.Token)
+	if !errors.Is(err, auth.ErrMagicLinkExpired) {
+		t.Errorf("Expected ErrMagicLinkExpired, got %v", err)
+	}
+}
+
+func TestConsumeMagicLinkAndCreateSession_Valid(t *testing.T) {
+	t.Parallel()
+	store := NewMockStore()
+	svc := auth.NewService(store, magicLinkTTL, sessionTTL)
+
+	// Generate a token
+	tokenPair, err := svc.GenerateToken()
+	if err != nil {
+		t.Fatalf("GenerateToken failed: %v", err)
+	}
+
+	// Create a magic link in the store
+	expiresAt := time.Now().Add(magicLinkTTL)
+	_, err = store.CreateOrUpdateMagicLinkToken(context.Background(), "user-1", tokenPair.TokenHash, expiresAt)
+	if err != nil {
+		t.Fatalf("CreateOrUpdateMagicLinkToken failed: %v", err)
+	}
+
+	// Consume the link and create session
+	user, sessionToken, err := svc.ConsumeMagicLinkAndCreateSession(context.Background(), tokenPair.Token)
+	if err != nil {
+		t.Fatalf("ConsumeMagicLinkAndCreateSession failed: %v", err)
+	}
+
+	if user == nil {
+		t.Fatal("ConsumeMagicLinkAndCreateSession returned nil user")
+	}
+	if user.Email != "test@example.com" {
+		t.Errorf("Expected email test@example.com, got %s", user.Email)
+	}
+
+	if sessionToken == nil {
+		t.Fatal("ConsumeMagicLinkAndCreateSession returned nil session token")
+	}
+	if sessionToken.Token == "" {
+		t.Fatal("ConsumeMagicLinkAndCreateSession returned empty session token")
+	}
+
+	// Verify token WAS consumed by trying to use it again
+	// The store returns ErrMagicLinkNotFound for consumed tokens (security: don't reveal token was consumed)
+	_, _, err = svc.ConsumeMagicLinkAndCreateSession(context.Background(), tokenPair.Token)
+	if !errors.Is(err, auth.ErrMagicLinkNotFound) {
+		t.Errorf("Expected ErrMagicLinkNotFound on second use (token was consumed), got %v", err)
+	}
+}
+
+func TestConsumeMagicLinkAndCreateSession_TokenNotFound(t *testing.T) {
+	t.Parallel()
+	store := NewMockStore()
+	svc := auth.NewService(store, magicLinkTTL, sessionTTL)
+
+	// Generate a token that doesn't exist in the store
+	tokenPair, err := svc.GenerateToken()
+	if err != nil {
+		t.Fatalf("GenerateToken failed: %v", err)
+	}
+
+	// Try to consume a non-existent token
+	_, _, err = svc.ConsumeMagicLinkAndCreateSession(context.Background(), tokenPair.Token)
+	if !errors.Is(err, auth.ErrMagicLinkNotFound) {
+		t.Errorf("Expected ErrMagicLinkNotFound, got %v", err)
 	}
 }

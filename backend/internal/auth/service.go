@@ -123,7 +123,13 @@ func (s *Service) RequestMagicLink(ctx context.Context, email string) (*User, *T
 	return user, tokenPair, nil
 }
 
-// VerifyMagicLink validates a magic link token and consumes it
+// VerifyMagicLink validates a magic link token without consuming it.
+//
+// This is called by GET /v1/auth/magiclink/verify to allow users to preview
+// which email they're signing in as before confirming. It does NOT consume the token
+// to prevent automated email link scanners from burning valid tokens.
+//
+// The token is only consumed by ConsumeMagicLinkAndCreateSession (POST endpoint).
 func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, error) {
 	// Decode and hash the token
 	decodedToken, err := base64.URLEncoding.DecodeString(token)
@@ -151,13 +157,58 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, err
 		UpdatedAt: magicLink.UserUpdatedAt,
 	}
 
-	// Consume the magic link
-	err = s.store.ConsumeMagicLink(ctx, magicLink.ID)
+	return user, nil
+}
+
+// ConsumeMagicLinkAndCreateSession validates, consumes, and creates a session for a magic link token.
+//
+// This is called by POST /v1/auth/magiclink/verify after the user confirms they want to sign in.
+// It performs three operations atomically:
+//  1. Verify the token is valid and not expired
+//  2. Consume the token (mark as used) to ensure single-use property
+//  3. Create a new session token for the user
+//
+// If the token was already consumed or doesn't exist, returns ErrMagicLinkConsumed or ErrMagicLinkNotFound.
+func (s *Service) ConsumeMagicLinkAndCreateSession(ctx context.Context, token string) (*User, *TokenPair, error) {
+	// Decode and hash the token
+	decodedToken, err := base64.URLEncoding.DecodeString(token)
 	if err != nil {
-		return nil, err
+		return nil, nil, ErrInvalidToken
+	}
+	tokenHash := sha256.Sum256(decodedToken)
+
+	// Find the magic link and user in a single query
+	magicLink, err := s.store.FindMagicLinkByTokenHash(ctx, tokenHash[:])
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return user, nil
+	// Check expiration
+	if time.Now().After(magicLink.ExpiresAt) {
+		return nil, nil, ErrMagicLinkExpired
+	}
+
+	// Consume the magic link (mark as used)
+	err = s.store.ConsumeMagicLink(ctx, magicLink.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Construct user from magic link query (which joins users table)
+	user := &User{
+		ID:        magicLink.UserID,
+		Email:     magicLink.Email,
+		CreatedAt: magicLink.UserCreatedAt,
+		UpdatedAt: magicLink.UserUpdatedAt,
+	}
+
+	// Create session token for the user
+	sessionToken, err := s.CreateSessionForUser(ctx, user.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return user, sessionToken, nil
 }
 
 // CreateSessionForUser creates a new session token for a user
