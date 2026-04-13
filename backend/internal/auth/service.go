@@ -14,6 +14,18 @@ const (
 	TokenSize = 32
 )
 
+// Clock provides the current time, allowing time-dependent operations to be testable
+type Clock interface {
+	Now() time.Time
+}
+
+// SystemClock implements Clock using the system time
+type SystemClock struct{}
+
+func (SystemClock) Now() time.Time {
+	return time.Now()
+}
+
 // Store defines the interface for database operations
 type Store interface {
 	CreateUser(ctx context.Context, email string) (*User, error)
@@ -31,14 +43,26 @@ type Store interface {
 // Service handles authentication business logic
 type Service struct {
 	store        Store
+	clock        Clock
 	magicLinkTTL time.Duration
 	sessionTTL   time.Duration
 }
 
-// NewService creates a new authentication service
+// NewService creates a new authentication service with system clock
 func NewService(store Store, magicLinkTTL, sessionTTL time.Duration) *Service {
 	return &Service{
 		store:        store,
+		clock:        SystemClock{},
+		magicLinkTTL: magicLinkTTL,
+		sessionTTL:   sessionTTL,
+	}
+}
+
+// NewServiceWithClock creates a new authentication service with a custom clock (for testing)
+func NewServiceWithClock(store Store, clock Clock, magicLinkTTL, sessionTTL time.Duration) *Service {
+	return &Service{
+		store:        store,
+		clock:        clock,
 		magicLinkTTL: magicLinkTTL,
 		sessionTTL:   sessionTTL,
 	}
@@ -114,7 +138,7 @@ func (s *Service) RequestMagicLink(ctx context.Context, email string) (*User, *T
 	}
 
 	// Create or update magic link (handles race conditions atomically in the database)
-	expiresAt := time.Now().Add(s.magicLinkTTL)
+	expiresAt := s.clock.Now().Add(s.magicLinkTTL)
 	_, err = s.store.CreateOrUpdateMagicLinkToken(ctx, user.ID, tokenPair.TokenHash, expiresAt)
 	if err != nil {
 		return nil, nil, err
@@ -145,7 +169,7 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*User, err
 	}
 
 	// Check expiration
-	if time.Now().After(magicLink.ExpiresAt) {
+	if s.clock.Now().After(magicLink.ExpiresAt) {
 		return nil, ErrMagicLinkExpired
 	}
 
@@ -184,7 +208,7 @@ func (s *Service) ConsumeMagicLinkAndCreateSession(ctx context.Context, token st
 	}
 
 	// Check expiration
-	if time.Now().After(magicLink.ExpiresAt) {
+	if s.clock.Now().After(magicLink.ExpiresAt) {
 		return nil, nil, ErrMagicLinkExpired
 	}
 
@@ -220,7 +244,7 @@ func (s *Service) CreateSessionForUser(ctx context.Context, userID string) (*Tok
 	}
 
 	// Store session in database
-	expiresAt := time.Now().Add(s.sessionTTL)
+	expiresAt := s.clock.Now().Add(s.sessionTTL)
 	_, err = s.store.CreateSession(ctx, userID, tokenPair.TokenHash, expiresAt)
 	if err != nil {
 		return nil, err
@@ -245,7 +269,7 @@ func (s *Service) ValidateSessionToken(ctx context.Context, token string) (*User
 	}
 
 	// Check expiration
-	if time.Now().After(session.ExpiresAt) {
+	if s.clock.Now().After(session.ExpiresAt) {
 		return nil, ErrSessionExpired
 	}
 

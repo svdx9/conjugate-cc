@@ -17,6 +17,19 @@ const (
 	sessionTTL   = 30 * 24 * time.Hour
 )
 
+// MockClock implements the Clock interface for testing with fixed time
+type MockClock struct {
+	currentTime time.Time
+}
+
+func NewMockClock(t time.Time) *MockClock {
+	return &MockClock{currentTime: t}
+}
+
+func (m *MockClock) Now() time.Time {
+	return m.currentTime
+}
+
 // MockStore implements the Store interface for testing
 type MockStore struct {
 	users         map[string]*auth.User

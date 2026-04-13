@@ -212,7 +212,12 @@ func parseUUID(s string) (pgtype.UUID, error) {
 // timestamptzFromTime converts a time.Time to pgtype.Timestamptz
 func timestamptzFromTime(t time.Time) pgtype.Timestamptz {
 	var ts pgtype.Timestamptz
-	_ = ts.Scan(t)
+	// pgtype.Timestamptz.Scan() should not fail with time.Time, but we should handle errors properly
+	err := ts.Scan(t)
+	if err != nil {
+		// This should never happen with valid time.Time input, but log it if it does
+		panic("failed to scan time: " + err.Error())
+	}
 	return ts
 }
 
