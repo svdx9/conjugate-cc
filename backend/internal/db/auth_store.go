@@ -43,13 +43,9 @@ func NewAuthStore(pool *pgxpool.Pool, logger *slog.Logger) *AuthStore {
 
 // CreateUser creates a new user with the given email
 func (s *AuthStore) CreateUser(ctx context.Context, email string) (*auth.User, error) {
+	// CreateUser is an UPSERT operation
 	row, err := s.queries.CreateUser(ctx, email)
 	if err != nil {
-		// Check for email uniqueness constraint violation
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeUniqueViolation && pgErr.ConstraintName == constraintUsersEmailUnique {
-			return nil, auth.ErrEmailTaken
-		}
 		s.logger.Error("failed to create user", "email", email, "error", err)
 		return nil, auth.ErrInternal
 	}
