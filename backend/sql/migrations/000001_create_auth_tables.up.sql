@@ -29,6 +29,7 @@ CREATE TABLE magic_links (
 );
 
 CREATE INDEX idx_magic_links_token_hash ON magic_links (token_hash);
+CREATE UNIQUE INDEX idx_magic_links_user_id_unconsumed ON magic_links (user_id) WHERE consumed_at IS NULL;
 
 CREATE TABLE sessions (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
