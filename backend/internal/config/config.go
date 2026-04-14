@@ -38,6 +38,12 @@ const (
 	defaultSessionTTL    = 30 * 24 * time.Hour
 	defaultMagicLinkTTL  = 15 * time.Minute
 	defaultAuthDevBypass = false
+	defaultSiteURL       = "http://localhost:8080"
+
+	minMagicLinkTTL = 1 * time.Minute
+	maxMagicLinkTTL = 60 * time.Minute
+	minSessionTTL   = 1 * time.Hour
+	maxSessionTTL   = 8760 * time.Hour // 1 year
 )
 
 var (
@@ -49,6 +55,8 @@ var (
 	ErrInvalidEnv          = errors.New("invalid environment value")
 	ErrMagicLinkTTLRange   = errors.New("magic link TTL must be shorter than session TTL")
 	ErrMissingMagicLinkURL = errors.New("missing magic link URL")
+	ErrMagicLinkTTLBounds  = errors.New("magic link TTL must be between 1m0s and 60m0s")
+	ErrSessionTTLBounds    = errors.New("session TTL must be between 1h0m0s and 8760h0m0s")
 )
 
 func getEnvOrDefault(key, defaultVal string) string {
@@ -246,11 +254,8 @@ func FromEnv() (Config, error) {
 		return Config{}, fmt.Errorf("%s: %w", authMagicLinkTTLKey, err)
 	}
 
-	// Parse SITE_URL (computed from host:port if not set)
+	// Parse SITE_URL (required in all environments)
 	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, ""))
-	if siteURL == "" && environment == "dev" {
-		siteURL = "http://" + net.JoinHostPort(host, strconv.Itoa(port))
-	}
 	if siteURL == "" {
 		return Config{}, fmt.Errorf("%s: must be provided for env %s: %w", siteURLKey, environment, ErrMissingMagicLinkURL)
 	}
@@ -264,6 +269,14 @@ func FromEnv() (Config, error) {
 	// Cross-field validation: magic link TTL must be shorter than session TTL
 	if authMagicLinkTTL >= authSessionTTL {
 		return Config{}, fmt.Errorf("%w: %v >= %v", ErrMagicLinkTTLRange, authMagicLinkTTL, authSessionTTL)
+	}
+
+	// Validate TTL bounds
+	if authMagicLinkTTL < minMagicLinkTTL || authMagicLinkTTL > maxMagicLinkTTL {
+		return Config{}, ErrMagicLinkTTLBounds
+	}
+	if authSessionTTL < minSessionTTL || authSessionTTL > maxSessionTTL {
+		return Config{}, ErrSessionTTLBounds
 	}
 
 	cfg := Config{

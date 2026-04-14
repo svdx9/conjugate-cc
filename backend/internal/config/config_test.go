@@ -20,7 +20,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("AUTH_COOKIE_SECURE", "")
 		t.Setenv("AUTH_SESSION_TTL", "")
 		t.Setenv("AUTH_MAGIC_LINK_TTL", "")
-		t.Setenv("SITE_URL", "")
+		t.Setenv("SITE_URL", "http://localhost:8080")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -63,8 +63,8 @@ func TestFromEnv(t *testing.T) {
 			t.Errorf("AuthMagicLinkTTL = %v, want %v", cfg.AuthMagicLinkTTL, defaultMagicLinkTTL)
 		}
 
-		if cfg.SiteURL != "http://0.0.0.0:8080" {
-			t.Errorf("SiteURL = %s, want computed default", cfg.SiteURL)
+		if cfg.SiteURL != "http://localhost:8080" {
+			t.Errorf("SiteURL = %s, want http://localhost:8080", cfg.SiteURL)
 		}
 	})
 
@@ -181,6 +181,7 @@ func TestFromEnv(t *testing.T) {
 	t.Run("valid IP host", func(t *testing.T) {
 		t.Setenv("HOST", "192.168.1.1")
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
+		t.Setenv("SITE_URL", "http://localhost:8080")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -195,6 +196,7 @@ func TestFromEnv(t *testing.T) {
 	t.Run("valid hostname", func(t *testing.T) {
 		t.Setenv("HOST", "example.com")
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
+		t.Setenv("SITE_URL", "http://localhost:8080")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -263,6 +265,7 @@ func TestFromEnv(t *testing.T) {
 
 	t.Run("magic link TTL >= session TTL", func(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
+		t.Setenv("SITE_URL", "http://localhost:8080")
 		t.Setenv("AUTH_SESSION_TTL", "30m")
 		t.Setenv("AUTH_MAGIC_LINK_TTL", "30m")
 
@@ -356,6 +359,7 @@ func TestFromEnv(t *testing.T) {
 		t.Setenv("PORT", "9000")
 		t.Setenv("HOST", "localhost")
 		t.Setenv("DATABASE_URL", "postgres://localhost/test")
+		t.Setenv("SITE_URL", "http://localhost:9000")
 
 		cfg, err := FromEnv()
 		if err != nil {
@@ -370,6 +374,7 @@ func TestFromEnv(t *testing.T) {
 
 	t.Run("Redacted() excludes DatabaseURL", func(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://user:password@host/db")
+		t.Setenv("SITE_URL", "http://localhost:8080")
 
 		cfg, err := FromEnv()
 		if err != nil {
