@@ -1,6 +1,6 @@
 import { Component, Show, createEffect, onMount } from 'solid-js';
 
-const VOWELS = 'aeiouAEIOU';
+const VOWELS = 'aeiouàâäéèêëïîôùûüAEIOUÀÂÄÉÈÊËÏÎÔÙÛÜ';
 const VOWEL_LIKE_CONSONANTS = 'hH';
 
 const canElide = (userInput: string): boolean => {

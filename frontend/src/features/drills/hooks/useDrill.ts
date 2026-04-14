@@ -24,7 +24,6 @@ export interface DrillActions {
   resetDrill: () => void;
   setVerb: (verb: string) => void;
   setTense: (tense: string) => void;
-  goToNext: () => void;
 }
 
 export function useDrill(verb: () => string, tense: () => string): [DrillState, DrillActions] {
@@ -105,9 +104,10 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
   const submitAnswer = () => {
     const item = currentItem();
     if (!item) return;
+    if (answerState() !== 'unanswered') return;
 
     const isCorrect = checkAnswer(userAnswer(), item.expectedAnswer.text);
-    
+
     setAnswerState(isCorrect ? 'correct' : 'incorrect');
     setScore((prev) => ({
       correct: prev.correct + (isCorrect ? 1 : 0),
@@ -116,16 +116,9 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
   };
 
   const nextQuestion = () => {
-    const verbs = drillProvider.getAvailableVerbs();
-    const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
-    const availableTenses = drillProvider.getAvailableTenses(randomVerb);
-    const randomTense = availableTenses[Math.floor(Math.random() * availableTenses.length)];
-    
-    loadDrillData(randomVerb, randomTense);
-  };
-
-  const goToNext = () => {
-    nextQuestion();
+    setCurrentIndex((idx) => idx + 1);
+    setUserAnswer('');
+    setAnswerState('unanswered');
   };
 
   const resetDrill = () => {
@@ -152,7 +145,6 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
     resetDrill,
     setVerb,
     setTense,
-    goToNext,
   };
 
   return [state, actions];

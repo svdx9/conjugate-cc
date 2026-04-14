@@ -37,18 +37,6 @@ export function isSuccess<T>(result: Result<T>): result is Extract<Result<T>, { 
 }
 
 /**
- * Common error codes for consistent error handling across the application.
- * Feature-specific modules MAY extend this with domain-specific codes.
- */
-export type CommonErrorCode =
-  | 'INVALID_INPUT'
-  | 'NOT_FOUND'
-  | 'NETWORK_ERROR'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'UNKNOWN';
-
-/**
  * Utility function to create success results.
  * Usage: return success(data)
  */

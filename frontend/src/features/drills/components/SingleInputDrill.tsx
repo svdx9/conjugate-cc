@@ -40,7 +40,7 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
             value={state.userAnswer()}
             onInput={actions.setUserAnswer}
             onSubmit={actions.submitAnswer}
-            onReset={actions.goToNext}
+            onReset={actions.nextQuestion}
             disabled={false}
             pronoun={state.currentItem()?.prompt.pronoun}
             answerState={state.answerState()}
