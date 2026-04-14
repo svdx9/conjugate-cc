@@ -2,11 +2,17 @@ import { Component, Show, createEffect, onMount } from 'solid-js';
 
 const VOWELS = 'aeiouàâäéèêëïîôùûüAEIOUÀÂÄÉÈÊËÏÎÔÙÛÜ';
 const VOWEL_LIKE_CONSONANTS = 'hH';
+const ELISION_WORDS = ['y', 'Y'];
 
 const canElide = (userInput: string): boolean => {
-  const first = userInput.trim()[0];
-  if (!first) return false;
-  return VOWELS.includes(first) || VOWEL_LIKE_CONSONANTS.includes(first);
+  const trimmed = userInput.trim();
+  if (!trimmed) return false;
+  const first = trimmed[0];
+  if (VOWELS.includes(first) || VOWEL_LIKE_CONSONANTS.includes(first)) {
+    return true;
+  }
+  const firstWord = trimmed.split(/\s+/)[0];
+  return ELISION_WORDS.includes(firstWord);
 };
 
 const getElidedPronoun = (pronoun: string, userInput: string): string => {
