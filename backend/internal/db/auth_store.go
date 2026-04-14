@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -87,10 +88,15 @@ func (s *AuthStore) CreateOrUpdateMagicLinkToken(ctx context.Context, userID str
 	if err != nil {
 		return nil, auth.ErrUserNotFound
 	}
+	expiresAtTS, err := timestamptzFromTime(expiresAt)
+	if err != nil {
+		s.logger.Error("failed to convert expiresAt to timestamp", "error", err)
+		return nil, auth.ErrInternal
+	}
 	row, err := s.queries.CreateOrUpdateMagicLinkToken(ctx, queries.CreateOrUpdateMagicLinkTokenParams{
 		UserID:    uid,
 		TokenHash: tokenHash,
-		ExpiresAt: timestamptzFromTime(expiresAt),
+		ExpiresAt: expiresAtTS,
 	})
 	if err != nil {
 		// Check for foreign key constraint violation (user doesn't exist)
@@ -142,10 +148,15 @@ func (s *AuthStore) CreateSession(ctx context.Context, userID string, tokenHash 
 	if err != nil {
 		return nil, auth.ErrUserNotFound
 	}
+	expiresAtTS, err := timestamptzFromTime(expiresAt)
+	if err != nil {
+		s.logger.Error("failed to convert expiresAt to timestamp", "error", err)
+		return nil, auth.ErrInternal
+	}
 	row, err := s.queries.CreateSession(ctx, queries.CreateSessionParams{
 		UserID:    uid,
 		TokenHash: tokenHash,
-		ExpiresAt: timestamptzFromTime(expiresAt),
+		ExpiresAt: expiresAtTS,
 	})
 	if err != nil {
 		// Check for foreign key constraint violation (user doesn't exist)
@@ -210,15 +221,13 @@ func parseUUID(s string) (pgtype.UUID, error) {
 }
 
 // timestamptzFromTime converts a time.Time to pgtype.Timestamptz
-func timestamptzFromTime(t time.Time) pgtype.Timestamptz {
+func timestamptzFromTime(t time.Time) (pgtype.Timestamptz, error) {
 	var ts pgtype.Timestamptz
-	// pgtype.Timestamptz.Scan() should not fail with time.Time, but we should handle errors properly
 	err := ts.Scan(t)
 	if err != nil {
-		// This should never happen with valid time.Time input, but log it if it does
-		panic("failed to scan time: " + err.Error())
+		return pgtype.Timestamptz{}, fmt.Errorf("failed to scan time: %w", err)
 	}
-	return ts
+	return ts, nil
 }
 
 // toAuthUser converts a sqlc User to an auth.User
