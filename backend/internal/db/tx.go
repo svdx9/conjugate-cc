@@ -19,8 +19,8 @@ func WithTx(ctx context.Context, pool *pgxpool.Pool, logger *slog.Logger, fn fun
 		return err
 	}
 	defer func() {
-		err := tx.Rollback(ctx)
-		if err != nil {
+		rbErr := tx.Rollback(ctx)
+		if rbErr != nil {
 			logger.Error("rollback failed", "error", errors.Join(err, rbErr))
 		}
 	}()
