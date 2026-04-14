@@ -96,7 +96,7 @@ type Config struct {
 - ENV must be one of: dev, staging, production
 - Port must be 1-65535
 - DATABASE_URL must be present and non-empty
-- SITE_URL must be a valid URL, this field is mandatory for non-dev environments, for dev is is computed from host/port
+- SITE_URL must be a valid URL, this field is mandatory for non-dev environments, for dev is is computed from "localhost" + port
 - AUTH_MAGIC_LINK_TTL must be shorter than AUTH_SESSION_TTL
 
 **Methods:**
