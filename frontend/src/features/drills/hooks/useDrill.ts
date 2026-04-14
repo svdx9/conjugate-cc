@@ -1,4 +1,4 @@
-import { createSignal, createMemo } from 'solid-js';
+import { createSignal, createMemo, createEffect, batch } from 'solid-js';
 import { DrillItem, DrillData, Tense } from '../types';
 import { drillProvider } from '../provider';
 
@@ -107,7 +107,15 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
     loadDrillData(currentVerb(), newTense);
   };
 
-  loadDrillData(currentVerb(), currentTense());
+  createEffect(() => {
+    const v = verb();
+    const t = tense();
+    batch(() => {
+      setCurrentVerb(v);
+      setCurrentTense(t);
+      loadDrillData(v, t);
+    });
+  });
 
   const checkAnswer = (userAns: string, expected: string): boolean => {
     const normalizedUser = userAns.trim().toLowerCase();

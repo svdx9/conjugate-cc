@@ -77,6 +77,7 @@ const VerbDropdown: Component<VerbDropdownProps> = (props) => {
         class="flex items-center gap-1 rounded-none border-b border-dotted border-muted-foreground px-1 py-0.5 font-bold text-foreground hover:border-solid focus:outline-none"
         aria-haspopup="listbox"
         aria-expanded={isOpen()}
+        aria-activedescendant={isOpen() ? `option-${highlightedIndex()}` : undefined}
       >
         <span>{props.value}</span>
         <span class="text-xs text-muted-foreground">▼</span>
@@ -92,13 +93,17 @@ const VerbDropdown: Component<VerbDropdownProps> = (props) => {
               <button
                 type="button"
                 role="option"
+                id={`option-${index()}`}
                 aria-selected={option === props.value}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOptionClick(option);
                 }}
                 onMouseEnter={() => setHighlightedIndex(index())}
-                class="w-full px-3 py-2 text-left text-foreground hover:bg-accent focus:bg-accent"
+                classList={{
+                  'w-full px-3 py-2 text-left text-foreground hover:bg-accent focus:bg-accent': true,
+                  'bg-accent': index() === highlightedIndex(),
+                }}
               >
                 {option}
               </button>
