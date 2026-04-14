@@ -28,6 +28,8 @@
 
   /* Custom accent - our gold highlight */
   --highlight: #ebc61d;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
 
   /* Button colors */
   --btn-bg: #f8f8f8;
@@ -59,6 +61,8 @@
 
   /* Custom accent */
   --highlight: #ebc61d;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
 
   /* Button colors */
   --btn-bg: #1f1f1f;
@@ -92,6 +96,8 @@
   --color-highlight: var(--highlight);
   --color-btn-bg: var(--btn-bg);
   --color-btn-text: var(--btn-text);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
 
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);

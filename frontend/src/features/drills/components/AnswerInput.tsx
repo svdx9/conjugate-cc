@@ -90,8 +90,8 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
       </div>
 
       <Show when={props.answerState === 'correct'}>
-        <div class="rounded-[var(--radius-md)] border border-green-500 bg-green-50 px-4 py-3 dark:bg-green-900/20" role="alert" aria-live="polite">
-          <p class="font-medium text-green-700 dark:text-green-400">Correct!</p>
+        <div class="rounded-[var(--radius-md)] border border-success bg-success/10 px-4 py-3 dark:bg-success-foreground/10" role="alert" aria-live="polite">
+          <p class="font-medium text-success dark:text-success-foreground">Correct!</p>
         </div>
       </Show>
 
