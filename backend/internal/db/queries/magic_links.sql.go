@@ -71,7 +71,6 @@ FROM magic_links ml
 JOIN users u ON u.id = ml.user_id
 WHERE ml.token_hash = $1
   AND ml.consumed_at IS NULL
-  AND ml.expires_at > now()
 `
 
 type FindMagicLinkByTokenHashRow struct {
@@ -86,6 +85,8 @@ type FindMagicLinkByTokenHashRow struct {
 	UserUpdatedAt pgtype.Timestamptz `json:"user_updated_at"`
 }
 
+// do not filter on expires_at in the db, will be done in the service
+// to show error to user
 func (q *Queries) FindMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (FindMagicLinkByTokenHashRow, error) {
 	row := q.db.QueryRow(ctx, findMagicLinkByTokenHash, tokenHash)
 	var i FindMagicLinkByTokenHashRow

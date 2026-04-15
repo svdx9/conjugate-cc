@@ -22,9 +22,10 @@ SELECT
   u.updated_at as user_updated_at
 FROM magic_links ml
 JOIN users u ON u.id = ml.user_id
+-- do not filter on expires_at in the db, will be done in the service
+-- to show error to user
 WHERE ml.token_hash = $1
-  AND ml.consumed_at IS NULL
-  AND ml.expires_at > now();
+  AND ml.consumed_at IS NULL;
 
 -- name: ConsumeMagicLink :one
 UPDATE magic_links
