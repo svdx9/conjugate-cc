@@ -254,8 +254,12 @@ func FromEnv() (Config, error) {
 		return Config{}, fmt.Errorf("%s: %w", authMagicLinkTTLKey, err)
 	}
 
-	// Parse SITE_URL (required in all environments)
-	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, ""))
+	// Parse SITE_URL (in dev mode, default to http://localhost:port)
+	defaultSiteURL := ""
+	if environment == "dev" {
+		defaultSiteURL = "http://" + net.JoinHostPort("localhost", strconv.Itoa(port))
+	}
+	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, defaultSiteURL))
 	if siteURL == "" {
 		return Config{}, fmt.Errorf("%s: must be provided for env %s: %w", siteURLKey, environment, ErrMissingMagicLinkURL)
 	}
