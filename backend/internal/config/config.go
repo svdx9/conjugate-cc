@@ -267,7 +267,7 @@ func FromEnv() (Config, error) {
 	if err != nil {
 		return Config{}, fmt.Errorf("%s: %w: %w", siteURLKey, ErrInvalidURL, err)
 	}
-	if parsedURL.Scheme != "http" {
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
 		return Config{}, fmt.Errorf("%s: must be a valid HTTP URL: %w", siteURLKey, ErrInvalidURL)
 	}
 	if parsedURL.Host == "" {
