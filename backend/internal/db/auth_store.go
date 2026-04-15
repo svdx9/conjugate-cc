@@ -70,7 +70,7 @@ func (s *AuthStore) CreateUser(ctx context.Context, email string) (auth.User, er
 	// CreateUser is an UPSERT operation
 	row, err := s.queries.CreateUser(ctx, email)
 	if err != nil {
-		s.logger.Error("failed to create user", "email", email, "error", err)
+		s.logger.Error("failed to create user", "error", err)
 		return auth.User{}, auth.ErrInternal
 	}
 	return toAuthUser(&row), nil
