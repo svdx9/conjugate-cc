@@ -207,10 +207,6 @@ sql:
 `internal/db/pool.go`:
 - `NewPool(ctx context.Context, databaseURL string) (*pgxpool.Pool, error)` — creates pool, pings to verify connectivity
 
-`internal/db/tx.go`:
-- `WithTx(ctx context.Context, pool *pgxpool.Pool, fn func(pgx.Tx) error) error` — begins tx, calls fn, commits or rolls back
-- pgx types must not leak from exported signatures
-
 ---
 
 ### Step 6: Wire pool into main.go (AC #8)
