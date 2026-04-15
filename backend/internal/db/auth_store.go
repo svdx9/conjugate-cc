@@ -17,7 +17,6 @@ import (
 
 // PostgreSQL error codes
 const (
-	// pgErrCodeUniqueViolation     = "23505" // unique constraint violation
 	pgErrCodeForeignKeyViolation = "23503" // foreign key constraint violation
 )
 
@@ -76,36 +75,6 @@ func (s *AuthStore) CreateUser(ctx context.Context, email string) (auth.User, er
 	return toAuthUser(&row), nil
 }
 
-// // FindUserByEmail finds a user by their email address
-// func (s *AuthStore) FindUserByEmail(ctx context.Context, email string) (auth.User, error) {
-// 	row, err := s.queries.FindUserByEmail(ctx, email)
-// 	if err != nil {
-// 		if errors.Is(err, pgx.ErrNoRows) {
-// 			return auth.User{}, auth.ErrUserNotFound
-// 		}
-// 		s.logger.Error("failed to find user by email", "email", email, "error", err)
-// 		return auth.User{}, auth.ErrInternal
-// 	}
-// 	return toAuthUser(&row), nil
-// }
-
-// // FindUserByID finds a user by their ID
-// func (s *AuthStore) FindUserByID(ctx context.Context, userID string) (auth.User, error) {
-// 	uid, err := parseUUID(userID)
-// 	if err != nil {
-// 		return auth.User{}, auth.ErrUserNotFound
-// 	}
-// 	row, err := s.queries.GetUserByID(ctx, uid)
-// 	if err != nil {
-// 		if errors.Is(err, pgx.ErrNoRows) {
-// 			return auth.User{}, auth.ErrUserNotFound
-// 		}
-// 		s.logger.Error("failed to find user by id", "user_id", userID, "error", err)
-// 		return auth.User{}, auth.ErrInternal
-// 	}
-// 	return toAuthUser(&row), nil
-// }
-
 // CreateOrUpdateMagicLinkToken creates or updates a magic link token for a user
 // This handles race conditions atomically at the database level using UPSERT:
 // - If no unconsumed magic link exists for this user, creates a new one
@@ -145,8 +114,8 @@ func (s *AuthStore) ConsumeMagicLinkAndCreateSession(ctx context.Context, tokenH
 	// if the magic link is found, check if it is expired
 	// if the magic link is not expired, consume the magic link (mark as used)
 	// create a session token for the user using the given sessionTokenHash and userID from the magic link
-	user := auth.User{}
-	session := auth.Session{}
+	var user auth.User
+	var session auth.Session
 	err := s.withTx(ctx, func(qtx *queries.Queries) error {
 		// Find the magic link and user in a single query
 		ml, err := qtx.FindMagicLinkByTokenHash(ctx, tokenHash)

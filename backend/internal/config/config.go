@@ -255,7 +255,7 @@ func FromEnv() (Config, error) {
 
 	// Parse SITE_URL (in dev mode, default to http://localhost:port)
 	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, defaultSiteURL))
-	if environment == "dev" {
+	if environment == "dev" && siteURL == defaultSiteURL {
 		siteURL = "http://" + net.JoinHostPort("localhost", strconv.Itoa(port))
 	}
 	if siteURL == "" {
