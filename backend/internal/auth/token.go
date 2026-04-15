@@ -3,7 +3,6 @@ package auth
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/subtle"
 	"encoding/base64"
 )
 
@@ -24,23 +23,14 @@ func (t tokenPair) String() string {
 	return string(t.token)
 }
 
-func verifyToken(token Token, tokenHash TokenHash) error {
-	// VerifyToken checks if a plain token matches a stored hash using constant-time comparison
-	if token == "" {
-		return ErrInvalidToken
-	}
-	// Decode the plain token from base64
+func decodeToken(token Token) (TokenHash, error) {
+	// Decode and hash the token
 	decodedToken, err := base64.URLEncoding.DecodeString(string(token))
 	if err != nil {
-		return ErrInvalidToken
+		return TokenHash{}, ErrInvalidToken
 	}
-	// Hash the decoded token
-	hash := sha256.Sum256(decodedToken)
-	// Compare using constant-time comparison to prevent timing attacks
-	if subtle.ConstantTimeCompare(hash[:], tokenHash) != 1 {
-		return ErrTokenHashMismatch
-	}
-	return nil
+	buf := sha256.Sum256(decodedToken)
+	return buf[:], nil
 }
 
 // GenerateToken creates a new random token and returns both the plain token and its hash

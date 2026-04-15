@@ -2,8 +2,6 @@ package auth
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/base64"
 	"time"
 )
 
@@ -95,15 +93,13 @@ func (s *Service) RequestMagicLink(ctx context.Context, email string) (User, Tok
 //
 // The token is only consumed by ConsumeMagicLinkAndCreateSession (POST endpoint).
 func (s *Service) VerifyMagicLink(ctx context.Context, token Token) (User, error) {
-	// Decode and hash the token
-	decodedToken, err := base64.URLEncoding.DecodeString(string(token))
-	if err != nil {
-		return User{}, ErrInvalidToken
-	}
-	tokenHash := sha256.Sum256(decodedToken)
 
+	tokenHash, err := decodeToken(token)
+	if err != nil {
+		return User{}, err
+	}
 	// Find the magic link and user in a single query
-	magicLink, err := s.store.FindMagicLinkByTokenHash(ctx, tokenHash[:])
+	magicLink, err := s.store.FindMagicLinkByTokenHash(ctx, tokenHash)
 	if err != nil {
 		return User{}, err
 	}
@@ -133,14 +129,11 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token Token) (User, error
 //  3. Create a new session token for the user
 //
 // If the token was already consumed or doesn't exist, returns ErrMagicLinkConsumed or ErrMagicLinkNotFound.
-func (s *Service) ConsumeMagicLinkAndCreateSession(ctx context.Context, token string) (User, Token, error) {
-	// Decode and hash the token
-	decodedToken, err := base64.URLEncoding.DecodeString(token)
+func (s *Service) ConsumeMagicLinkAndCreateSession(ctx context.Context, token Token) (User, Token, error) {
+	tokenHash, err := decodeToken(token)
 	if err != nil {
-		return User{}, "", ErrInvalidToken
+		return User{}, "", err
 	}
-	tokenHash := sha256.Sum256(decodedToken)
-
 	// generate a session token
 	sessionTokenPair, err := newTokenPair()
 	if err != nil {
@@ -150,7 +143,7 @@ func (s *Service) ConsumeMagicLinkAndCreateSession(ctx context.Context, token st
 	// Create or update magic link (handles race conditions atomically in the database)
 	sessionsExpiresAt := s.clock.Now().Add(s.sessionTTL)
 
-	user, _, err := s.store.ConsumeMagicLinkAndCreateSession(ctx, tokenHash[:], sessionTokenPair.tokenHash, s.clock.Now(), sessionsExpiresAt)
+	user, _, err := s.store.ConsumeMagicLinkAndCreateSession(ctx, tokenHash, sessionTokenPair.tokenHash, s.clock.Now(), sessionsExpiresAt)
 	if err != nil {
 		return User{}, "", err
 	}
@@ -159,16 +152,15 @@ func (s *Service) ConsumeMagicLinkAndCreateSession(ctx context.Context, token st
 }
 
 // ValidateSessionToken checks if a session token is valid and returns the associated user
-func (s *Service) ValidateSessionToken(ctx context.Context, token string) (User, error) {
+func (s *Service) ValidateSessionToken(ctx context.Context, token Token) (User, error) {
 	// Decode and hash the token
-	decodedToken, err := base64.URLEncoding.DecodeString(token)
+	tokenHash, err := decodeToken(token)
 	if err != nil {
-		return User{}, ErrInvalidToken
+		return User{}, err
 	}
-	tokenHash := sha256.Sum256(decodedToken)
 
 	// Find the session and user in a single query
-	session, err := s.store.FindSessionByTokenHash(ctx, tokenHash[:])
+	session, err := s.store.FindSessionByTokenHash(ctx, tokenHash)
 	if err != nil {
 		return User{}, err
 	}

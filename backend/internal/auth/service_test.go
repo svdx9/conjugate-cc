@@ -385,7 +385,7 @@ func TestConsumeMagicLinkAndCreateSession_Valid(t *testing.T) {
 		t.Fatalf("RequestMagicLink failed: %v", err)
 	}
 
-	user, sessionToken, err := svc.ConsumeMagicLinkAndCreateSession(context.Background(), string(token))
+	user, sessionToken, err := svc.ConsumeMagicLinkAndCreateSession(context.Background(), token)
 	if err != nil {
 		t.Fatalf("ConsumeMagicLinkAndCreateSession failed: %v", err)
 	}
@@ -412,13 +412,13 @@ func TestConsumeMagicLinkAndCreateSession_TokenNotFound(t *testing.T) {
 	}
 
 	// First consume should succeed
-	_, _, err = svc.ConsumeMagicLinkAndCreateSession(context.Background(), string(token))
+	_, _, err = svc.ConsumeMagicLinkAndCreateSession(context.Background(), token)
 	if err != nil {
 		t.Fatalf("First ConsumeMagicLinkAndCreateSession failed: %v", err)
 	}
 
 	// Second consume should fail (token already consumed)
-	_, _, err = svc.ConsumeMagicLinkAndCreateSession(context.Background(), string(token))
+	_, _, err = svc.ConsumeMagicLinkAndCreateSession(context.Background(), token)
 	if !errors.Is(err, auth.ErrMagicLinkNotFound) {
 		t.Errorf("Expected ErrMagicLinkNotFound, got %v", err)
 	}
