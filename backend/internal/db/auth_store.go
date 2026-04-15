@@ -36,7 +36,7 @@ func (s *store) withTx(ctx context.Context, fn func(qtx *queries.Queries) error)
 	}
 	defer func() {
 		rbErr := tx.Rollback(ctx)
-		if rbErr != nil {
+		if rbErr != nil && !errors.Is(rbErr, pgx.ErrTxClosed) {
 			s.logger.Error("rollback failed", "error", errors.Join(err, rbErr))
 		}
 	}()
