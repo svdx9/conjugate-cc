@@ -76,35 +76,35 @@ func (s *AuthStore) CreateUser(ctx context.Context, email string) (auth.User, er
 	return toAuthUser(&row), nil
 }
 
-// FindUserByEmail finds a user by their email address
-func (s *AuthStore) FindUserByEmail(ctx context.Context, email string) (auth.User, error) {
-	row, err := s.queries.FindUserByEmail(ctx, email)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return auth.User{}, auth.ErrUserNotFound
-		}
-		s.logger.Error("failed to find user by email", "email", email, "error", err)
-		return auth.User{}, auth.ErrInternal
-	}
-	return toAuthUser(&row), nil
-}
+// // FindUserByEmail finds a user by their email address
+// func (s *AuthStore) FindUserByEmail(ctx context.Context, email string) (auth.User, error) {
+// 	row, err := s.queries.FindUserByEmail(ctx, email)
+// 	if err != nil {
+// 		if errors.Is(err, pgx.ErrNoRows) {
+// 			return auth.User{}, auth.ErrUserNotFound
+// 		}
+// 		s.logger.Error("failed to find user by email", "email", email, "error", err)
+// 		return auth.User{}, auth.ErrInternal
+// 	}
+// 	return toAuthUser(&row), nil
+// }
 
-// FindUserByID finds a user by their ID
-func (s *AuthStore) FindUserByID(ctx context.Context, userID string) (auth.User, error) {
-	uid, err := parseUUID(userID)
-	if err != nil {
-		return auth.User{}, auth.ErrUserNotFound
-	}
-	row, err := s.queries.GetUserByID(ctx, uid)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return auth.User{}, auth.ErrUserNotFound
-		}
-		s.logger.Error("failed to find user by id", "user_id", userID, "error", err)
-		return auth.User{}, auth.ErrInternal
-	}
-	return toAuthUser(&row), nil
-}
+// // FindUserByID finds a user by their ID
+// func (s *AuthStore) FindUserByID(ctx context.Context, userID string) (auth.User, error) {
+// 	uid, err := parseUUID(userID)
+// 	if err != nil {
+// 		return auth.User{}, auth.ErrUserNotFound
+// 	}
+// 	row, err := s.queries.GetUserByID(ctx, uid)
+// 	if err != nil {
+// 		if errors.Is(err, pgx.ErrNoRows) {
+// 			return auth.User{}, auth.ErrUserNotFound
+// 		}
+// 		s.logger.Error("failed to find user by id", "user_id", userID, "error", err)
+// 		return auth.User{}, auth.ErrInternal
+// 	}
+// 	return toAuthUser(&row), nil
+// }
 
 // CreateOrUpdateMagicLinkToken creates or updates a magic link token for a user
 // This handles race conditions atomically at the database level using UPSERT:
@@ -149,40 +149,69 @@ func (s *AuthStore) ConsumeMagicLinkAndCreateSession(ctx context.Context, tokenH
 	session := auth.Session{}
 	err := s.withTx(ctx, func(qtx *queries.Queries) error {
 		// Find the magic link and user in a single query
-		magicLink, err := s.FindMagicLinkByTokenHash(ctx, tokenHash)
+		ml, err := qtx.FindMagicLinkByTokenHash(ctx, tokenHash)
 		if err != nil {
-			return err
+			if errors.Is(err, pgx.ErrNoRows) {
+				return auth.ErrMagicLinkNotFound
+			}
+			s.logger.Error("failed to find magic link by token hash", "error", err)
+			return auth.ErrInternal
+		}
+
+		if !ml.ExpiresAt.Valid {
+			return auth.ErrMagicLinkExpired
 		}
 
 		// Check expiration
-		if now.After(magicLink.ExpiresAt) {
+		if now.After(ml.ExpiresAt.Time) {
 			return auth.ErrMagicLinkExpired
 		}
 
 		// Consume the magic link (mark as used)
-		err = s.ConsumeMagicLink(ctx, magicLink.ID)
+		_, err = s.queries.ConsumeMagicLink(ctx, ml.ID)
 		if err != nil {
-			return err
+			// Check if this is a "no rows" scenario (magic link already consumed)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return auth.ErrMagicLinkConsumed
+			}
+			s.logger.Error("failed to consume magic link", "magic_link_id", ml.ID, "error", err)
+			return auth.ErrInternal
 		}
+
 		// Construct user from magic link query (which joins users table)
 		user = auth.User{
-			ID:        magicLink.UserID,
-			Email:     magicLink.Email,
-			CreatedAt: magicLink.UserCreatedAt,
-			UpdatedAt: magicLink.UserUpdatedAt,
+			ID:        ml.UserID.String(),
+			Email:     ml.Email,
+			CreatedAt: ml.UserCreatedAt.Time,
+			UpdatedAt: ml.UserUpdatedAt.Time,
 		}
 		// Store session in database
-		session, err = s.CreateSession(ctx, user.ID, sessionTokenHash, sessionExpiresAt)
+		expiresAtTS, err := timestamptzFromTime(sessionExpiresAt)
 		if err != nil {
-			return err
+			s.logger.Error("failed to convert expiresAt to timestamp", "error", err)
+			return auth.ErrInternal
 		}
+		row, err := s.queries.CreateSession(ctx, queries.CreateSessionParams{
+			UserID:    ml.UserID,
+			TokenHash: tokenHash,
+			ExpiresAt: expiresAtTS,
+		})
+		if err != nil {
+			// Check for foreign key constraint violation (user doesn't exist)
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeForeignKeyViolation {
+				return auth.ErrUserNotFound
+			}
+			s.logger.Error("failed to create session", "user_id", ml.UserID, "error", err)
+			return auth.ErrInternal
+		}
+		session = toAuthSession(&row)
 		// Return user and session
 		return nil
 	})
 	if err != nil {
 		return auth.User{}, auth.Session{}, err
 	}
-	// TODO - fix this
 	return user, session, err
 
 }
@@ -198,53 +227,6 @@ func (s *AuthStore) FindMagicLinkByTokenHash(ctx context.Context, tokenHash auth
 		return auth.MagicLink{}, auth.ErrInternal
 	}
 	return toAuthMagicLinkRow(&row), nil
-}
-
-// ConsumeMagicLink marks a magic link as consumed
-// Returns ErrMagicLinkConsumed if the magic link was already consumed (no rows updated)
-func (s *AuthStore) ConsumeMagicLink(ctx context.Context, magicLinkID string) error {
-	mlid, err := parseUUID(magicLinkID)
-	if err != nil {
-		return auth.ErrMagicLinkNotFound
-	}
-	_, err = s.queries.ConsumeMagicLink(ctx, mlid)
-	if err != nil {
-		// Check if this is a "no rows" scenario (magic link already consumed)
-		if errors.Is(err, pgx.ErrNoRows) {
-			return auth.ErrMagicLinkConsumed
-		}
-		s.logger.Error("failed to consume magic link", "magic_link_id", magicLinkID, "error", err)
-		return auth.ErrInternal
-	}
-	return nil
-}
-
-// CreateSession creates a new session token for a user
-func (s *AuthStore) CreateSession(ctx context.Context, userID string, tokenHash auth.TokenHash, expiresAt time.Time) (auth.Session, error) {
-	uid, err := parseUUID(userID)
-	if err != nil {
-		return auth.Session{}, auth.ErrUserNotFound
-	}
-	expiresAtTS, err := timestamptzFromTime(expiresAt)
-	if err != nil {
-		s.logger.Error("failed to convert expiresAt to timestamp", "error", err)
-		return auth.Session{}, auth.ErrInternal
-	}
-	row, err := s.queries.CreateSession(ctx, queries.CreateSessionParams{
-		UserID:    uid,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAtTS,
-	})
-	if err != nil {
-		// Check for foreign key constraint violation (user doesn't exist)
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeForeignKeyViolation {
-			return auth.Session{}, auth.ErrUserNotFound
-		}
-		s.logger.Error("failed to create session", "user_id", userID, "error", err)
-		return auth.Session{}, auth.ErrInternal
-	}
-	return toAuthSession(&row), nil
 }
 
 // FindSessionByTokenHash finds a non-expired session by its token hash
