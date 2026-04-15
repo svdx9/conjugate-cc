@@ -261,9 +261,15 @@ func FromEnv() (Config, error) {
 	}
 
 	// Validate SITE_URL is a valid URL
-	_, err = url.Parse(siteURL)
+	parsedURL, err := url.Parse(siteURL)
 	if err != nil {
 		return Config{}, fmt.Errorf("%s: %w: %w", siteURLKey, ErrInvalidURL, err)
+	}
+	if parsedURL.Scheme != "http" {
+		return Config{}, fmt.Errorf("%s: must be a valid HTTP URL: %w", siteURLKey, ErrInvalidURL)
+	}
+	if parsedURL.Host == "" {
+		return Config{}, fmt.Errorf("%s: must be a valid HTTP URL: %w", siteURLKey, ErrInvalidURL)
 	}
 
 	// Cross-field validation: magic link TTL must be shorter than session TTL
