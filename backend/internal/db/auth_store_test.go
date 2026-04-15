@@ -8,7 +8,7 @@ import (
 
 // MagicLinkTTL is the time-to-live for magic links (15 minutes)
 
-// These tests are integration tests that would need a real database connection.
+// TODO: These tests are integration tests that would need a real database connection.
 // For now, we provide unit test structure that demonstrates the expected behavior.
 // In a real scenario, you would use a test database fixture.
 
