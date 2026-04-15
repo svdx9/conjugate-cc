@@ -137,7 +137,7 @@ func (s *AuthStore) ConsumeMagicLinkAndCreateSession(ctx context.Context, tokenH
 		}
 
 		// Consume the magic link (mark as used)
-		_, err = s.queries.ConsumeMagicLink(ctx, ml.ID)
+		_, err = qtx.ConsumeMagicLink(ctx, ml.ID)
 		if err != nil {
 			// Check if this is a "no rows" scenario (magic link already consumed)
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -160,9 +160,9 @@ func (s *AuthStore) ConsumeMagicLinkAndCreateSession(ctx context.Context, tokenH
 			s.logger.Error("failed to convert expiresAt to timestamp", "error", err)
 			return auth.ErrInternal
 		}
-		row, err := s.queries.CreateSession(ctx, queries.CreateSessionParams{
+		row, err := qtx.CreateSession(ctx, queries.CreateSessionParams{
 			UserID:    ml.UserID,
-			TokenHash: tokenHash,
+			TokenHash: sessionTokenHash,
 			ExpiresAt: expiresAtTS,
 		})
 		if err != nil {
