@@ -21,7 +21,7 @@ Implement the auth service layer, AuthStore for persistence, and a stub email se
 
 - Create `internal/auth/` package with service and domain types
 - Implement AuthStore in `internal/db/auth_store.go` wrapping sqlc queries with domain logic
-- Auth service: token generation (crypto/rand, 32 bytes), SHA-256 hashing, constant-time comparison, 15min TTL
+- Auth service: token generation (crypto/rand, 32 bytes), 15min TTL, hash token comparison is implemented using: decodeToken() → SHA-256 hash → database lookup by hash. Token verification is done by hash-equality in the database query
 - Create `internal/email/` package with sender interface and stub sender (logs to stdout)
 - Unit tests for auth service (token generation, hashing, expiry, atomic consumption)
 - Domain types: User, MagicLink, Session with proper error handling and type conversion
