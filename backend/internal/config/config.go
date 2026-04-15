@@ -38,12 +38,11 @@ const (
 	defaultSessionTTL    = 30 * 24 * time.Hour
 	defaultMagicLinkTTL  = 15 * time.Minute
 	defaultAuthDevBypass = false
-	defaultSiteURL       = "http://localhost:8080"
-
-	minMagicLinkTTL = 1 * time.Minute
-	maxMagicLinkTTL = 60 * time.Minute
-	minSessionTTL   = 1 * time.Hour
-	maxSessionTTL   = 8760 * time.Hour // 1 year
+	defaultSiteURL       = ""
+	minMagicLinkTTL      = 1 * time.Minute
+	maxMagicLinkTTL      = 60 * time.Minute
+	minSessionTTL        = 1 * time.Hour
+	maxSessionTTL        = 8760 * time.Hour // 1 year
 )
 
 var (
@@ -255,11 +254,10 @@ func FromEnv() (Config, error) {
 	}
 
 	// Parse SITE_URL (in dev mode, default to http://localhost:port)
-	defaultSiteURL := ""
-	if environment == "dev" {
-		defaultSiteURL = "http://" + net.JoinHostPort("localhost", strconv.Itoa(port))
-	}
 	siteURL := strings.TrimSpace(getEnvOrDefault(siteURLKey, defaultSiteURL))
+	if environment == "dev" {
+		siteURL = "http://" + net.JoinHostPort("localhost", strconv.Itoa(port))
+	}
 	if siteURL == "" {
 		return Config{}, fmt.Errorf("%s: must be provided for env %s: %w", siteURLKey, environment, ErrMissingMagicLinkURL)
 	}
