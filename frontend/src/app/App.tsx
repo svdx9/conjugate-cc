@@ -8,15 +8,15 @@ import ContactPage from '../features/contact/ContactPage';
 import CookiePolicyPage from '../features/legal/CookiePolicyPage';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import { initBackendStatusPolling } from '../store/backend';
+import { useBackendStatus } from '../hooks/useBackendStatus';
 
 const Layout: Component<{ children?: JSX.Element }> = (props) => {
-  initBackendStatusPolling();
+  const backend = useBackendStatus();
   return (
     <div class="bg-background text-foreground flex min-h-screen flex-col transition-colors">
       <Navigation />
       <main class="flex-1">{props.children}</main>
-      <Footer />
+      <Footer backend={backend} />
     </div>
   );
 };

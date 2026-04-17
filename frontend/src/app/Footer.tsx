@@ -1,8 +1,12 @@
 import { Component, Show } from 'solid-js';
 import { A } from '@solidjs/router';
-import { backendAvailable, gitSha, buildTime } from '../store/backend';
+import { BackendStatus } from '../hooks/useBackendStatus';
 
-const Footer: Component = () => {
+interface FooterProps {
+  backend: BackendStatus;
+}
+
+const Footer: Component<FooterProps> = (props) => {
   return (
     <footer class="bg-background py-8 transition-colors">
       <div class="px-4 sm:px-6 lg:px-8">
@@ -12,11 +16,15 @@ const Footer: Component = () => {
               <span
                 class="h-2 w-2 rounded-full"
                 classList={{
-                  'bg-green-500': backendAvailable(),
-                  'bg-red-500': !backendAvailable(),
+                  'bg-green-500': props.backend.available(),
+                  'bg-red-500': !props.backend.available(),
                 }}
               />
-              <span>{backendAvailable() ? `${gitSha()} ${buildTime()}` : ''}</span>
+              <span>
+                {props.backend.available()
+                  ? `${props.backend.gitSha()} ${props.backend.buildTime()}`
+                  : ''}
+              </span>
             </div>
           </Show>
           <div class="flex gap-8">
