@@ -127,9 +127,9 @@ class StubDrillProvider implements DrillProvider {
     if (!tenseResult.ok) return tenseResult;
 
     const verbResult = normalizeVerb(verb);
-    if (!verbResult.ok) {
     if (!verbResult.ok) return verbResult;
 
+    const normalizedVerb = verbResult.data;
     const tenseData = verbData[normalizedVerb];
     if (!tenseData) {
       return error(`Verb "${normalizedVerb}" not found`, 'NOT_FOUND', {
