@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from 'solid-js';
-import { DrillItem, DrillData, Tense } from '../types';
+import { DrillItem, DrillData } from '../types';
 import { drillProvider } from '../provider';
 
 export type AnswerState = 'unanswered' | 'correct' | 'incorrect';
@@ -31,7 +31,7 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
     const t = tense();
     setIsLoading(true);
     setError(null);
-    const result = drillProvider.getDrillData(v, t as Tense);
+    const result = drillProvider.getDrillData(v, t);
     if (result.ok) {
       setDrillData(result.data);
       pickRandomItem();

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { drillProvider, validPronouns } from './provider';
 import { isError } from '../../shared/types';
-import { Tense } from './types';
 
 const numPronouns = validPronouns.length;
 
@@ -122,7 +121,7 @@ describe('StubDrillProvider', () => {
   });
 
   it('should return error for invalid tense', () => {
-    const result = drillProvider.getDrillData('être', 'invalide' as Tense);
+    const result = drillProvider.getDrillData('être', 'invalide');
 
     if (!isError(result)) {
       expect.fail('Expected error but got data');

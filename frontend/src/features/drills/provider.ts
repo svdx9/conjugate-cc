@@ -16,8 +16,8 @@ export const validPronouns: Pronoun[] = [
 const validTenses: Tense[] = ['présent', 'imparfait', 'passé_composé', 'futur'];
 
 export interface DrillProvider {
-  getDrillData(verb: string, tense: Tense): Result<DrillData>;
-  getDrillItem(verb: string, tense: Tense, pronoun: Pronoun): Result<DrillItem>;
+  getDrillData(verb: string, tense: string): Result<DrillData>;
+  getDrillItem(verb: string, tense: string, pronoun: string): Result<DrillItem>;
   getAvailableTenses(verb: string): string[];
   getAvailableVerbs(): string[];
 }
@@ -122,7 +122,7 @@ function synthesizePronouns(items: DrillItem[]): DrillItem[] {
 }
 
 class StubDrillProvider implements DrillProvider {
-  getDrillData(verb: string, tense: Tense): Result<DrillData> {
+  getDrillData(verb: string, tense: string): Result<DrillData> {
     const tenseResult = validateTense(tense);
     if (!tenseResult.ok) return tenseResult;
 
@@ -137,7 +137,7 @@ class StubDrillProvider implements DrillProvider {
       });
     }
 
-    const drillData = tenseData[tense];
+    const drillData = tenseData[tenseResult.data];
     if (!drillData) {
       return error(`Tense "${tense}" not found for "${normalizedVerb}"`, 'NOT_FOUND', {
         availableTenses: Object.keys(tenseData),
@@ -150,7 +150,7 @@ class StubDrillProvider implements DrillProvider {
     });
   }
 
-  getDrillItem(verb: string, tense: Tense, pronoun: Pronoun): Result<DrillItem> {
+  getDrillItem(verb: string, tense: string, pronoun: string): Result<DrillItem> {
     const pronounResult = validatePronoun(pronoun);
     if (!pronounResult.ok) return pronounResult;
 
