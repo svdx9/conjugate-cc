@@ -39,7 +39,10 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
   createEffect(() => {
     if (props.answerState === 'unanswered' && inputRef) {
       inputRef.focus();
-    } else if ((props.answerState === 'correct' || props.answerState === 'incorrect') && nextButtonRef) {
+    } else if (
+      (props.answerState === 'correct' || props.answerState === 'incorrect') &&
+      nextButtonRef
+    ) {
       setTimeout(() => nextButtonRef.focus(), 0);
     }
   });
@@ -59,20 +62,23 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
     <div class="space-y-4">
       {/* Unified pronoun + input row */}
       <div
-        class="flex items-stretch overflow-hidden rounded-[var(--radius-lg)] border bg-background transition-all"
+        class="bg-background flex items-stretch overflow-hidden rounded-[var(--radius-lg)] border transition-all"
         classList={{
           'border-border focus-within:border-foreground/30': props.answerState === 'unanswered',
           'border-success/30 bg-success/5 shadow-sm': props.answerState === 'correct',
-          'border-red-500/30 bg-red-400/5 animate-shake shadow-sm': props.answerState === 'incorrect',
+          'border-red-500/30 bg-red-400/5 animate-shake shadow-sm':
+            props.answerState === 'incorrect',
         }}
       >
         {props.pronoun && (
           <div
             class="flex items-center border-r px-6 text-lg transition-colors"
             classList={{
-              'border-border bg-muted text-foreground': props.answerState === 'unanswered' || !props.answerState,
+              'border-border bg-muted text-foreground':
+                props.answerState === 'unanswered' || !props.answerState,
               'border-success/20 bg-success/[0.08] text-success': props.answerState === 'correct',
-              'border-red-500/20 bg-red-500/[0.08] text-foreground': props.answerState === 'incorrect',
+              'border-red-500/20 bg-red-500/[0.08] text-foreground':
+                props.answerState === 'incorrect',
             }}
             aria-hidden="true"
           >
@@ -104,7 +110,7 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
               }}
               disabled={props.disabled}
               placeholder="Type the conjugated verb..."
-              class="flex-1 bg-transparent px-6 py-5 text-lg text-foreground outline-none placeholder:text-muted-foreground"
+              class="text-foreground placeholder:text-muted-foreground flex-1 bg-transparent px-6 py-5 text-lg outline-none"
               maxLength={50}
               aria-label={`Conjugate ${props.pronoun || 'verb'} in the current tense`}
             />
@@ -112,7 +118,7 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
         >
           <div class="flex-1 px-6 py-5 text-lg" aria-live="polite">
             <s class="text-muted-foreground">{props.value}</s>
-            <span class="ml-2 font-medium text-foreground">{props.correctAnswer}</span>
+            <span class="text-foreground ml-2 font-medium">{props.correctAnswer}</span>
           </div>
         </Show>
       </div>
@@ -129,7 +135,7 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
             }
           }}
           disabled={props.disabled || (props.answerState === 'unanswered' && !props.value.trim())}
-          class="inline-flex h-10 items-center rounded-[var(--radius)] bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-[var(--radius)] px-8 text-sm font-medium transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {props.answerState !== 'unanswered' ? 'Next' : 'Submit'}
         </button>

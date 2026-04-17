@@ -24,11 +24,7 @@ export interface DrillProvider {
 
 type ConjugationEntry = [Pronoun, string, Partial<{ isReflexive: boolean }>?];
 
-function buildDrillData(
-  verb: string,
-  tense: Tense,
-  entries: ConjugationEntry[],
-): DrillData {
+function buildDrillData(verb: string, tense: Tense, entries: ConjugationEntry[]): DrillData {
   return {
     verb,
     tense,
@@ -145,11 +141,9 @@ class StubDrillProvider implements DrillProvider {
 
     const drillData = tenseData[tense];
     if (!drillData) {
-      return error(
-        `Tense "${tense}" not found for "${normalizedVerb}"`,
-        'NOT_FOUND',
-        { availableTenses: Object.keys(tenseData) },
-      );
+      return error(`Tense "${tense}" not found for "${normalizedVerb}"`, 'NOT_FOUND', {
+        availableTenses: Object.keys(tenseData),
+      });
     }
 
     return success({
@@ -165,9 +159,7 @@ class StubDrillProvider implements DrillProvider {
     const drillResult = this.getDrillData(verb, tense);
     if (!drillResult.ok) return drillResult;
 
-    const item = drillResult.data.items.find(
-      (i) => i.prompt.pronoun === pronounResult.data,
-    );
+    const item = drillResult.data.items.find((i) => i.prompt.pronoun === pronounResult.data);
     if (!item) {
       return error(
         `No conjugation for "${drillResult.data.verb}" "${tense}" "${pronoun}"`,

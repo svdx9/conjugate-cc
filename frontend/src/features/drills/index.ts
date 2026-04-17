@@ -4,5 +4,5 @@ export type { Pronoun, Tense, DrillPrompt, ExpectedAnswer, DrillItem, DrillData 
 
 export { type DrillProvider, drillProvider, validPronouns } from './provider';
 
-export { SingleInputDrill, DrillDisplay, AnswerInput, ResultFeedback } from './components';
+export { SingleInputDrill, DrillDisplay, AnswerInput } from './components';
 export { useDrill } from './hooks/useDrill';

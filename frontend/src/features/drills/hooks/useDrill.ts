@@ -18,7 +18,7 @@ export interface DrillActions {
   nextQuestion: () => void;
 }
 
-export function useDrill(verb: string, tense: string): [DrillState, DrillActions] {
+export function useDrill(verb: () => string, tense: () => string): [DrillState, DrillActions] {
   const [drillData, setDrillData] = createSignal<DrillData | null>(null);
   const [currentItem, setCurrentItem] = createSignal<DrillItem | null>(null);
   const [userAnswer, setUserAnswer] = createSignal('');
@@ -27,14 +27,16 @@ export function useDrill(verb: string, tense: string): [DrillState, DrillActions
   const [error, setError] = createSignal<string | null>(null);
 
   const loadDrillData = () => {
+    const v = verb();
+    const t = tense();
     setIsLoading(true);
     setError(null);
-    const result = drillProvider.getDrillData(verb, tense as Tense);
+    const result = drillProvider.getDrillData(v, t as Tense);
     if (result.ok) {
       setDrillData(result.data);
       pickRandomItem();
     } else {
-      setError(`No drill data available for "${verb}" - "${tense}"`);
+      setError(`No drill data available for "${v}" - "${t}"`);
     }
     setIsLoading(false);
   };

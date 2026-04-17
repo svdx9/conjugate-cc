@@ -14,7 +14,7 @@ const Navigation: Component = () => {
     <header class="bg-background sticky top-0 z-50 transition-colors">
       <nav class="px-4 sm:px-6 lg:px-8">
         <div class="border-border flex h-16 items-center justify-between border-b px-2">
-          <A href="/" class="text-2xl font-bold text-foreground transition-colors hover:opacity-80">
+          <A href="/" class="text-foreground text-2xl font-bold transition-colors hover:opacity-80">
             conjugate.cc
           </A>
 
@@ -25,7 +25,7 @@ const Navigation: Component = () => {
                   <li>
                     <A
                       href={link.href}
-                      class="inline-flex h-10 items-center px-4 text-sm font-medium text-foreground transition-colors hover:text-highlight"
+                      class="text-foreground hover:text-highlight inline-flex h-10 items-center px-4 text-sm font-medium transition-colors"
                     >
                       {link.label}
                     </A>
@@ -35,7 +35,7 @@ const Navigation: Component = () => {
             </ul>
             <button
               onClick={toggleDarkMode}
-              class="text-lg text-foreground transition-colors hover:opacity-80"
+              class="text-foreground text-lg transition-colors hover:opacity-80"
               aria-label="Toggle dark mode"
             >
               {isDarkMode() ? '○' : '◐'}

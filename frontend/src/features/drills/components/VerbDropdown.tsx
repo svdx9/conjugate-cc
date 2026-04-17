@@ -74,18 +74,18 @@ const VerbDropdown: Component<VerbDropdownProps> = (props) => {
         type="button"
         onClick={() => setIsOpen(!isOpen())}
         onKeyDown={handleKeyDown}
-        class="flex items-center gap-1 rounded-none border-b border-dotted border-muted-foreground px-1 py-0.5 font-bold text-foreground hover:border-solid focus:outline-none"
+        class="border-muted-foreground text-foreground flex items-center gap-1 rounded-none border-b border-dotted px-1 py-0.5 font-bold hover:border-solid focus:outline-none"
         aria-haspopup="listbox"
         aria-expanded={isOpen()}
         aria-activedescendant={isOpen() ? `option-${highlightedIndex()}` : undefined}
       >
         <span>{props.value}</span>
-        <span class="text-xs text-muted-foreground">▼</span>
+        <span class="text-muted-foreground text-xs">▼</span>
       </button>
 
       <Show when={isOpen()}>
         <div
-          class="absolute left-0 top-full z-10 mt-1 min-w-32 rounded-[var(--radius-md)] border border-border bg-card"
+          class="border-border bg-card absolute top-full left-0 z-10 mt-1 min-w-32 rounded-[var(--radius-md)] border"
           role="listbox"
         >
           <For each={props.options}>

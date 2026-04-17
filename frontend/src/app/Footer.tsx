@@ -8,7 +8,7 @@ const Footer: Component = () => {
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex w-full items-center justify-between px-2">
           <Show when={import.meta.env.DEV}>
-            <div class="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+            <div class="text-muted-foreground flex items-center gap-2 font-mono text-xs">
               <span
                 class="h-2 w-2 rounded-full"
                 classList={{
@@ -20,12 +20,15 @@ const Footer: Component = () => {
             </div>
           </Show>
           <div class="flex gap-8">
-            <A href="/contact" class="text-sm font-medium text-foreground transition-colors hover:text-highlight">
+            <A
+              href="/contact"
+              class="text-foreground hover:text-highlight text-sm font-medium transition-colors"
+            >
               Contact
             </A>
             <A
               href="/cookie-policy"
-              class="text-sm font-medium text-foreground transition-colors hover:text-highlight"
+              class="text-foreground hover:text-highlight text-sm font-medium transition-colors"
             >
               Cookie Policy
             </A>
