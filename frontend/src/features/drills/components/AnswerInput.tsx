@@ -34,10 +34,13 @@ interface AnswerInputProps {
 
 const AnswerInput: Component<AnswerInputProps> = (props) => {
   let inputRef: HTMLInputElement | undefined;
+  let nextButtonRef: HTMLButtonElement | undefined;
 
   createEffect(() => {
     if (props.answerState === 'unanswered' && inputRef) {
       inputRef.focus();
+    } else if ((props.answerState === 'correct' || props.answerState === 'incorrect') && nextButtonRef) {
+      setTimeout(() => nextButtonRef.focus(), 0);
     }
   });
 
@@ -76,54 +79,47 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
             {displayPronoun()}
           </div>
         )}
-        <input
-          ref={inputRef}
-          type="text"
-          value={props.value}
-          onInput={(e) => {
-            const value = e.currentTarget.value;
-            // Limit to 50 characters (reasonable max for French verb conjugations)
-            if (value.length <= 50) {
-              props.onInput(value);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !props.disabled) {
-              if (props.answerState !== 'unanswered' && props.onReset) {
-                props.onReset();
-              } else {
-                props.onSubmit();
-              }
-            }
-          }}
-          disabled={props.disabled}
-          placeholder="Type the conjugated verb..."
-          class="flex-1 bg-transparent px-6 py-5 text-lg text-foreground outline-none placeholder:text-muted-foreground"
-          maxLength={50}
-          aria-label={`Conjugate ${props.pronoun || 'verb'} in the current tense`}
-        />
+        <Show
+          when={props.answerState === 'incorrect'}
+          fallback={
+            <input
+              ref={inputRef}
+              type="text"
+              value={props.value}
+              onInput={(e) => {
+                const value = e.currentTarget.value;
+                // Limit to 50 characters (reasonable max for French verb conjugations)
+                if (value.length <= 50) {
+                  props.onInput(value);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !props.disabled) {
+                  if (props.answerState !== 'unanswered' && props.onReset) {
+                    props.onReset();
+                  } else {
+                    props.onSubmit();
+                  }
+                }
+              }}
+              disabled={props.disabled}
+              placeholder="Type the conjugated verb..."
+              class="flex-1 bg-transparent px-6 py-5 text-lg text-foreground outline-none placeholder:text-muted-foreground"
+              maxLength={50}
+              aria-label={`Conjugate ${props.pronoun || 'verb'} in the current tense`}
+            />
+          }
+        >
+          <div class="flex-1 px-6 py-5 text-lg" aria-live="polite">
+            <s class="text-muted-foreground">{props.value}</s>
+            <span class="ml-2 font-medium text-foreground">{props.correctAnswer}</span>
+          </div>
+        </Show>
       </div>
 
-      <Show when={props.answerState === 'correct'}>
-        <div class="rounded-[var(--radius-md)] border border-success bg-success/10 px-4 py-3 dark:bg-success-foreground/10" role="alert" aria-live="polite">
-          <p class="font-medium text-success dark:text-success-foreground">Correct!</p>
-        </div>
-      </Show>
-
-      <Show when={props.answerState === 'incorrect'}>
-        <div class="rounded-[var(--radius-md)] border border-destructive bg-destructive/10 px-4 py-3" role="alert" aria-live="polite">
-          <p class="font-medium text-destructive-foreground">Incorrect</p>
-          <Show when={props.correctAnswer}>
-            <p class="mt-1 text-sm text-muted-foreground">
-              Correct answer: <span class="font-medium text-foreground">{props.correctAnswer}</span>
-            </p>
-          </Show>
-        </div>
-      </Show>
-
-      {/* Submit / Next button — right-aligned */}
       <div class="flex justify-end">
         <button
+          ref={nextButtonRef}
           type="button"
           onClick={() => {
             if (props.answerState !== 'unanswered' && props.onReset) {
