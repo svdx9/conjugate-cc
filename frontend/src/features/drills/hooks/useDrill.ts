@@ -36,7 +36,7 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
       setDrillData(result.data);
       pickRandomItem();
     } else {
-      setError(`No drill data available for "${v}" - "${t}"`);
+      setError(result.error);
     }
     setIsLoading(false);
   };
