@@ -55,9 +55,24 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
   return (
     <div class="space-y-4">
       {/* Unified pronoun + input row */}
-      <div class="flex items-stretch overflow-hidden rounded-[var(--radius-lg)] border border-border bg-background transition-colors focus-within:border-foreground/30">
+      <div
+        class="flex items-stretch overflow-hidden rounded-[var(--radius-lg)] border bg-background transition-all"
+        classList={{
+          'border-border focus-within:border-foreground/30': props.answerState === 'unanswered',
+          'border-success/30 bg-success/5 shadow-sm': props.answerState === 'correct',
+          'border-red-500/30 bg-red-400/5 animate-shake shadow-sm': props.answerState === 'incorrect',
+        }}
+      >
         {props.pronoun && (
-          <div class="flex items-center border-r border-border bg-muted px-5 text-lg text-foreground" aria-hidden="true">
+          <div
+            class="flex items-center border-r px-6 text-lg transition-colors"
+            classList={{
+              'border-border bg-muted text-foreground': props.answerState === 'unanswered' || !props.answerState,
+              'border-success/20 bg-success/[0.08] text-success': props.answerState === 'correct',
+              'border-red-500/20 bg-red-500/[0.08] text-foreground': props.answerState === 'incorrect',
+            }}
+            aria-hidden="true"
+          >
             {displayPronoun()}
           </div>
         )}
@@ -83,7 +98,7 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
           }}
           disabled={props.disabled}
           placeholder="Type the conjugated verb..."
-          class="flex-1 bg-transparent px-5 py-4 text-lg text-foreground outline-none placeholder:text-muted-foreground"
+          class="flex-1 bg-transparent px-6 py-5 text-lg text-foreground outline-none placeholder:text-muted-foreground"
           maxLength={50}
           aria-label={`Conjugate ${props.pronoun || 'verb'} in the current tense`}
         />
