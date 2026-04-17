@@ -1,13 +1,13 @@
 import { Component } from 'solid-js';
+import { A } from '@solidjs/router';
 import PageShell from '../../shared/PageShell';
-import { SingleInputDrill } from './components';
 
 const DrillsPage: Component = () => {
   return (
     <PageShell>
       <div class="mb-6">
         <span class="bg-foreground/5 text-muted-foreground inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium tracking-widest uppercase">
-          Quick Drill
+          Drills
         </span>
       </div>
 
@@ -17,7 +17,25 @@ const DrillsPage: Component = () => {
         verb conjugations
       </h1>
 
-      <SingleInputDrill verb="être" tense="présent" />
+      <div class="grid gap-4 sm:grid-cols-2">
+        <A
+          href="/drills/quick"
+          class="border-border bg-secondary/50 hover:bg-secondary/70 block rounded-[var(--radius-xl)] border p-6 transition-colors"
+        >
+          <h2 class="mb-2 text-xl font-semibold">Quick Drill</h2>
+          <p class="text-muted-foreground">Single pronoun, random selection. Fast practice.</p>
+        </A>
+
+        <A
+          href="/drills/full"
+          class="border-border bg-secondary/50 hover:bg-secondary/70 block rounded-[var(--radius-xl)] border p-6 transition-colors"
+        >
+          <h2 class="mb-2 text-xl font-semibold">Full Drill</h2>
+          <p class="text-muted-foreground">
+            All 6 pronouns, batch submission. Comprehensive practice.
+          </p>
+        </A>
+      </div>
     </PageShell>
   );
 };

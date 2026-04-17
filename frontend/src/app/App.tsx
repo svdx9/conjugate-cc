@@ -2,6 +2,8 @@ import { Component, JSX } from 'solid-js';
 import { Route } from '@solidjs/router';
 import LandingPage from '../features/landing/LandingPage';
 import DrillsPage from '../features/drills/DrillsPage';
+import QuickDrillPage from '../features/drills/QuickDrillPage';
+import FullDrillPage from '../features/drills/FullDrillPage';
 import VerbsPage from '../features/verbs/VerbsPage';
 import HelpPage from '../features/help/HelpPage';
 import ContactPage from '../features/contact/ContactPage';
@@ -26,6 +28,8 @@ const App: Component = () => {
     <Route path="/" component={Layout}>
       <Route path="/" component={LandingPage} />
       <Route path="/drills" component={DrillsPage} />
+      <Route path="/drills/quick" component={QuickDrillPage} />
+      <Route path="/drills/full" component={FullDrillPage} />
       <Route path="/verbs" component={VerbsPage} />
       <Route path="/help" component={HelpPage} />
       <Route path="/contact" component={ContactPage} />

@@ -14,6 +14,10 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
     () => props.tense,
   );
 
+  const canSubmit = () =>
+    state.userAnswer().trim().length > 0 && state.answerState() === 'unanswered';
+  const showNext = () => state.answerState() !== 'unanswered';
+
   return (
     <div class="space-y-6">
       <Show when={state.isLoading()}>
@@ -35,13 +39,22 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
           <AnswerInput
             value={state.userAnswer()}
             onInput={actions.setUserAnswer}
-            onSubmit={actions.submitAnswer}
-            onReset={actions.nextQuestion}
-            disabled={false}
+            disabled={state.answerState() !== 'unanswered'}
             pronoun={state.currentItem()?.prompt.pronoun}
             answerState={state.answerState()}
             correctAnswer={state.currentItem()?.expectedAnswer.text}
           />
+
+          <div class="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => (showNext() ? actions.nextQuestion() : actions.submitAnswer())}
+              disabled={!canSubmit()}
+              class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-[var(--radius)] px-8 text-sm font-medium transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {showNext() ? 'Next' : 'Submit'}
+            </button>
+          </div>
         </div>
       </Show>
     </div>
