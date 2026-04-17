@@ -1,4 +1,4 @@
-import { Component, Show, createEffect, onMount } from 'solid-js';
+import { Component, Show, createEffect } from 'solid-js';
 
 const VOWELS = 'aeiouàâäéèêëïîôùûüAEIOUÀÂÄÉÈÊËÏÎÔÙÛÜ';
 const VOWEL_LIKE_CONSONANTS = 'hH';
@@ -44,12 +44,6 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
       nextButtonRef
     ) {
       setTimeout(() => nextButtonRef.focus(), 0);
-    }
-  });
-
-  onMount(() => {
-    if (inputRef) {
-      inputRef.focus();
     }
   });
 
