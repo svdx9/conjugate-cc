@@ -4,7 +4,7 @@ title: Build VerbDrill component with batch submit
 status: To Do
 assignee: []
 created_date: '2026-04-09 12:00'
-updated_date: '2026-04-17 13:46'
+updated_date: '2026-04-17 16:32'
 labels:
   - frontend
   - ui
@@ -24,7 +24,9 @@ ordinal: 73000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Build the VerbDrill component (`components/VerbDrill.tsx`) — the full conjugation drill showing all 6 pronoun rows with stacked inputs and batch submission.
 
-This component receives `DrillData` from the orchestration layer (DrillTestBuilder) and renders 6 pronoun rows (je, tu, il/elle, nous, vous, ils/elles), each reusing the existing `AnswerInput` component. The user fills all 6 fields and submits once via a single Submit button. After submission, per-row correct/incorrect feedback is shown inline.
+This component receives a `DrillData` prop (the type defined in `types.ts`) and renders 6 pronoun rows (je, tu, il/elle, nous, vous, ils/elles), each reusing the existing `AnswerInput` component. The user fills all 6 fields and submits once via a single Submit button. After submission, per-row correct/incorrect feedback is shown inline.
+
+Note: this component only depends on the `DrillData` type, not on the DrillTestBuilder implementation (built in TASK-007.04). DrillTestBuilder will later produce `DrillData` and pass it to VerbDrill.
 
 Requires a new `useVerbDrill` hook managing 6 answer signals, batch submission, and per-row correctness state.
 
