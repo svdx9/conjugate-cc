@@ -16,6 +16,7 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
 
   const canSubmit = () =>
     state.userAnswer().trim().length > 0 && state.answerState() === 'unanswered';
+  const canGoNext = () => state.answerState() !== 'unanswered';
   const showNext = () => state.answerState() !== 'unanswered';
 
   return (
@@ -49,7 +50,7 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
             <button
               type="button"
               onClick={() => (showNext() ? actions.nextQuestion() : actions.submitAnswer())}
-              disabled={!canSubmit()}
+              disabled={showNext() ? !canGoNext() : !canSubmit()}
               class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-[var(--radius)] px-8 text-sm font-medium transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {showNext() ? 'Next' : 'Submit'}
