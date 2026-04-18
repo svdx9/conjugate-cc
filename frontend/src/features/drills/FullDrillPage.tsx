@@ -10,6 +10,7 @@ const FullDrillPage: Component = () => {
   const [error, setError] = createSignal<string | null>(null);
 
   onMount(() => {
+    // TODO: Accept verb/tense from route params when routing is implemented
     const result = drillProvider.getDrillData('être', 'présent');
     if (result.ok) {
       setDrillData(result.data);
