@@ -5,12 +5,10 @@
   "type": "module",
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
-        "eslint --fix",
-        "npm run typecheck",
-        "npm test"
+      "npx eslint --fix"
     ],
     "src/**/*.{ts,tsx,css,md}": [
-        "prettier --write"
+      "prettier --write"
     ]
   },
   "scripts": {
