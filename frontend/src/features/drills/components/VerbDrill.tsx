@@ -1,4 +1,4 @@
-import { Component, For, Show } from 'solid-js';
+import { Component, For, Show, createEffect } from 'solid-js';
 import { useVerbDrill } from '../hooks/useVerbDrill';
 import DrillDisplay from './DrillDisplay';
 import AnswerInput from './AnswerInput';
@@ -13,7 +13,15 @@ interface VerbDrillProps {
 const VerbDrill: Component<VerbDrillProps> = (props) => {
   const [state, actions] = useVerbDrill(() => props.drillData);
 
+  let buttonRef: HTMLButtonElement | undefined;
+
   const currentItem = () => props.drillData.items[0] || null;
+
+  createEffect(() => {
+    if (state.isSubmitted() && buttonRef) {
+      buttonRef.focus();
+    }
+  });
 
   return (
     <div class="space-y-6">
@@ -53,11 +61,11 @@ const VerbDrill: Component<VerbDrillProps> = (props) => {
                     <AnswerInput
                       value={state.userAnswers()[actualPronoun] || ''}
                       onInput={(val) => actions.setUserAnswer(actualPronoun, val)}
-                      onSubmit={() => actions.submitBatch()}
                       disabled={state.isSubmitted()}
                       pronoun={actualPronoun}
                       answerState={state.answerStates()[actualPronoun]}
                       correctAnswer={correctAnswer()}
+                      autoFocus={pronounKey === 'je'}
                     />
                   </div>
                 </div>
@@ -75,27 +83,17 @@ const VerbDrill: Component<VerbDrillProps> = (props) => {
         </Show>
 
         <div class="mt-4 flex justify-end">
-          <Show
-            when={!state.isSubmitted()}
-            fallback={
-              <button
-                type="button"
-                onClick={actions.reset}
-                class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-[var(--radius)] px-8 text-sm font-medium transition-colors hover:opacity-90"
-              >
-                Try Again
-              </button>
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={() => (state.isSubmitted() ? actions.reset() : actions.submitBatch())}
+            disabled={
+              !state.isSubmitted() && Object.values(state.userAnswers()).every((a) => !a.trim())
             }
+            class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-[var(--radius)] px-8 text-sm font-medium transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <button
-              type="button"
-              onClick={actions.submitBatch}
-              disabled={Object.values(state.userAnswers()).every((a) => !a.trim())}
-              class="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-[var(--radius)] px-8 text-sm font-medium transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Submit
-            </button>
-          </Show>
+            {state.isSubmitted() ? 'Next' : 'Submit'}
+          </button>
         </div>
       </div>
     </div>

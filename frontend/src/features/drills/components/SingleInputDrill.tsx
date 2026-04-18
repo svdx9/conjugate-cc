@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js';
+import { Component, Show, createEffect } from 'solid-js';
 import { useDrill } from '../hooks/useDrill';
 import DrillDisplay from './DrillDisplay';
 import AnswerInput from './AnswerInput';
@@ -14,9 +14,17 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
     () => props.tense,
   );
 
+  let buttonRef: HTMLButtonElement | undefined;
+
   const canSubmit = () =>
     state.userAnswer().trim().length > 0 && state.answerState() === 'unanswered';
   const showNext = () => state.answerState() !== 'unanswered';
+
+  createEffect(() => {
+    if (showNext() && buttonRef) {
+      buttonRef.focus();
+    }
+  });
 
   return (
     <div class="space-y-6">
@@ -47,6 +55,7 @@ const SingleInputDrill: Component<SingleInputDrillProps> = (props) => {
 
           <div class="mt-4 flex justify-end">
             <button
+              ref={buttonRef}
               type="button"
               onClick={() => (showNext() ? actions.nextQuestion() : actions.submitAnswer())}
               disabled={showNext() ? false : !canSubmit()}

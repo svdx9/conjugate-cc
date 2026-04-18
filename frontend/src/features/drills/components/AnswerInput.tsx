@@ -29,6 +29,7 @@ interface AnswerInputProps {
   pronoun?: string;
   answerState?: 'unanswered' | 'correct' | 'incorrect';
   correctAnswer?: string;
+  autoFocus?: boolean;
 }
 
 const AnswerInput: Component<AnswerInputProps> = (props) => {
@@ -40,7 +41,12 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
   };
 
   createEffect(() => {
-    if (inputRef && props.answerState === 'unanswered' && !props.disabled) {
+    if (
+      inputRef &&
+      props.autoFocus !== false &&
+      props.answerState === 'unanswered' &&
+      !props.disabled
+    ) {
       inputRef.focus();
     }
   });
