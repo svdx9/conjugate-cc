@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js';
+import { Component, Show, createEffect } from 'solid-js';
 
 const VOWELS = 'aeiouàâäéèêëïîôùûüAEIOUÀÂÄÉÈÊËÏÎÔÙÛÜ';
 const VOWEL_LIKE_CONSONANTS = 'hH';
@@ -24,6 +24,8 @@ const getElidedPronoun = (pronoun: string, userInput: string): string => {
 interface AnswerInputProps {
   value: string;
   onInput: (value: string) => void;
+  onSubmit?: () => void;
+  onReset?: () => void;
   disabled: boolean;
   pronoun?: string;
   answerState?: 'unanswered' | 'correct' | 'incorrect';
@@ -36,6 +38,19 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
   const displayPronoun = () => {
     if (!props.pronoun) return '';
     return getElidedPronoun(props.pronoun, props.value);
+  };
+
+  createEffect(() => {
+    if (inputRef && !props.disabled) {
+      inputRef.focus();
+    }
+  });
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && props.onSubmit) {
+      e.preventDefault();
+      props.onSubmit();
+    }
   };
 
   return (
@@ -75,6 +90,7 @@ const AnswerInput: Component<AnswerInputProps> = (props) => {
                 props.onInput(value);
               }
             }}
+            onKeyDown={handleKeyDown}
             disabled={props.disabled}
             placeholder="Type the conjugated verb..."
             class="text-foreground placeholder:text-muted-foreground flex-1 bg-transparent px-6 py-5 text-lg outline-none"
