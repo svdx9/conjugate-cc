@@ -1,5 +1,2 @@
 #!/bin/sh
-cd frontend \
-    && npx lint-staged \
-    && npm run typecheck \
-    && npm test
+cd frontend && npx lint-staged

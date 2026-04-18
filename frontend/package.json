@@ -4,8 +4,14 @@
   "version": "0.1.0",
   "type": "module",
   "lint-staged": {
-    "src/**/*.{ts,tsx}": "eslint --fix",
-    "src/**/*.{ts,tsx,css,md}": "prettier --write"
+    "src/**/*.{ts,tsx}": [
+        "eslint --fix",
+        "npm run typecheck",
+        "npm test"
+    ],
+    "src/**/*.{ts,tsx,css,md}": [
+        "prettier --write"
+    ]
   },
   "scripts": {
     "predev": "npm install",
