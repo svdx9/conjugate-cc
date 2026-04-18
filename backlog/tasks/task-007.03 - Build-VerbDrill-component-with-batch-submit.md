@@ -1,7 +1,7 @@
 ---
 id: TASK-007.03
 title: Build VerbDrill component with batch submit
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-09 12:00'
 updated_date: '2026-04-17 16:32'
@@ -35,11 +35,11 @@ See: `backlog/docs/doc-002 - Frontend-Architecture.md` §3 (UI Layer)
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The VerbDrill component displays verb+tense header and 6 pronoun rows with one AnswerInput per row.
-- [ ] #2 Each row reuses the existing AnswerInput component — no duplicate input implementation.
-- [ ] #3 A single Submit button validates all 6 answers as a batch.
-- [ ] #4 Per-row correct/incorrect feedback is shown inline after submission.
-- [ ] #5 useVerbDrill hook manages 6 answer signals, batch submission, and per-row correctness state.
-- [ ] #6 Layout is readable on desktop and mobile with clear pronoun/input alignment.
-- [ ] #7 Component receives DrillData as props — no direct provider imports.
+- [x] #1 The VerbDrill component displays verb+tense header and 6 pronoun rows with one AnswerInput per row.
+- [x] #2 Each row reuses the existing AnswerInput component — no duplicate input implementation.
+- [x] #3 A single Submit button validates all 6 answers as a batch.
+- [x] #4 Per-row correct/incorrect feedback is shown inline after submission.
+- [x] #5 useVerbDrill hook manages 6 answer signals, batch submission, and per-row correctness state.
+- [x] #6 Layout is readable on desktop and mobile with clear pronoun/input alignment.
+- [x] #7 Component receives DrillData as props — no direct provider imports.
 <!-- AC:END -->
