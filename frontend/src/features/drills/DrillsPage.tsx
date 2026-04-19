@@ -19,7 +19,7 @@ const DrillsPage: Component = () => {
 
       <div class="grid gap-4 sm:grid-cols-2">
         <A
-          href="/drills/quick"
+          href="/drills/quick/être/présent"
           class="border-border bg-secondary/50 hover:bg-secondary/70 block rounded-[var(--radius-xl)] border p-6 transition-colors"
         >
           <h2 class="mb-2 text-xl font-semibold">Quick Drill</h2>
@@ -27,7 +27,7 @@ const DrillsPage: Component = () => {
         </A>
 
         <A
-          href="/drills/full"
+          href="/drills/full/être/présent"
           class="border-border bg-secondary/50 hover:bg-secondary/70 block rounded-[var(--radius-xl)] border p-6 transition-colors"
         >
           <h2 class="mb-2 text-xl font-semibold">Full Drill</h2>

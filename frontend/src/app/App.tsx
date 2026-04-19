@@ -28,8 +28,8 @@ const App: Component = () => {
     <Route path="/" component={Layout}>
       <Route path="/" component={LandingPage} />
       <Route path="/drills" component={DrillsPage} />
-      <Route path="/drills/quick" component={QuickDrillPage} />
-      <Route path="/drills/full" component={FullDrillPage} />
+      <Route path="/drills/quick/:verb/:tense" component={QuickDrillPage} />
+      <Route path="/drills/full/:verb/:tense" component={FullDrillPage} />
       <Route path="/verbs" component={VerbsPage} />
       <Route path="/help" component={HelpPage} />
       <Route path="/contact" component={ContactPage} />

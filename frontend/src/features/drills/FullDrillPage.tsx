@@ -1,25 +1,10 @@
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component } from 'solid-js';
+import { useParams } from '@solidjs/router';
 import PageShell from '../../shared/PageShell';
 import { VerbDrill } from './components';
-import { DrillData } from './types';
-import { drillProvider } from './provider';
 
 const FullDrillPage: Component = () => {
-  const [drillData, setDrillData] = createSignal<DrillData | null>(null);
-  const [loading, setLoading] = createSignal(true);
-  const [error, setError] = createSignal<string | null>(null);
-
-  onMount(() => {
-    // TODO: Accept verb/tense from route params when routing is implemented
-    const result = drillProvider.getDrillData('être', 'présent');
-    if (result.ok) {
-      setDrillData(result.data);
-    } else {
-      setError(result.error);
-    }
-    setLoading(false);
-  });
-
+  const params = useParams<{ verb: string; tense: string }>();
   return (
     <PageShell>
       <div class="mb-6">
@@ -34,19 +19,7 @@ const FullDrillPage: Component = () => {
         verb conjugations
       </h1>
 
-      <Show when={loading()}>
-        <div class="text-muted-foreground py-8 text-center">Loading...</div>
-      </Show>
-
-      <Show when={error()}>
-        <div class="border-destructive bg-destructive/10 rounded-[var(--radius-md)] border px-4 py-3">
-          <p class="text-destructive-foreground font-medium">Error: {error()}</p>
-        </div>
-      </Show>
-
-      <Show when={!loading() && !error() && drillData()}>
-        <VerbDrill drillData={drillData()!} />
-      </Show>
+      <VerbDrill verb={decodeURIComponent(params.verb)} tense={decodeURIComponent(params.tense)} />
     </PageShell>
   );
 };

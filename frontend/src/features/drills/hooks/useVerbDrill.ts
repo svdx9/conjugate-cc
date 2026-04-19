@@ -1,12 +1,16 @@
-import { createSignal } from 'solid-js';
+import { createSignal, createEffect } from 'solid-js';
 import { DrillData, DrillItem } from '../types';
+import { drillProvider } from '../provider';
 import { AnswerState } from './useDrill';
 
 export interface VerbDrillState {
   currentItem: () => DrillItem | null;
   userAnswers: () => Record<string, string>;
   answerStates: () => Record<string, AnswerState>;
+  correctAnswers: () => Record<string, string>;
   isSubmitted: () => boolean;
+  isLoading: () => boolean;
+  error: () => string | null;
   correctCount: () => number;
   totalCount: () => number;
 }
@@ -18,9 +22,30 @@ export interface VerbDrillActions {
 }
 
 export function useVerbDrill(
-  drillData: () => DrillData | null,
+  verb: () => string,
+  tense: () => string,
 ): [VerbDrillState, VerbDrillActions] {
   const corePronouns = ['je', 'tu', 'il', 'nous', 'vous', 'ils'];
+
+  const [drillData, setDrillData] = createSignal<DrillData | null>(null);
+  const [isLoading, setIsLoading] = createSignal(true);
+  const [error, setError] = createSignal<string | null>(null);
+
+  const loadDrillData = () => {
+    setIsLoading(true);
+    setError(null);
+    const result = drillProvider.getDrillData(verb(), tense());
+    if (result.ok) {
+      setDrillData(result.data);
+    } else {
+      setError(result.error);
+    }
+    setIsLoading(false);
+  };
+
+  createEffect(() => {
+    loadDrillData();
+  });
 
   const buildEmptyAnswers = (): Record<string, string> => {
     const answers: Record<string, string> = {};
@@ -89,7 +114,19 @@ export function useVerbDrill(
     },
     userAnswers,
     answerStates,
+    correctAnswers: () => {
+      const data = drillData();
+      if (!data) return {};
+      const answers: Record<string, string> = {};
+      corePronouns.forEach((p) => {
+        const item = data.items.find((i) => i.prompt.pronoun === p);
+        if (item) answers[p] = item.expectedAnswer.text;
+      });
+      return answers;
+    },
     isSubmitted,
+    isLoading,
+    error,
     correctCount,
     totalCount: () => corePronouns.length,
   };

@@ -1,8 +1,10 @@
 import { Component } from 'solid-js';
+import { useParams } from '@solidjs/router';
 import PageShell from '../../shared/PageShell';
 import { SingleInputDrill } from './components';
 
 const QuickDrillPage: Component = () => {
+  const params = useParams<{ verb: string; tense: string }>();
   return (
     <PageShell>
       <div class="mb-6">
@@ -17,7 +19,10 @@ const QuickDrillPage: Component = () => {
         verb conjugations
       </h1>
 
-      <SingleInputDrill verb="être" tense="présent" />
+      <SingleInputDrill
+        verb={decodeURIComponent(params.verb)}
+        tense={decodeURIComponent(params.tense)}
+      />
     </PageShell>
   );
 };
