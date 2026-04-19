@@ -1,0 +1,27 @@
+-- name: CreateSession :one
+INSERT INTO sessions (user_id, token_hash, expires_at)
+VALUES ($1, $2, $3)
+RETURNING id, user_id, token_hash, expires_at, created_at;
+
+-- name: FindSessionByTokenHash :one
+SELECT 
+  s.id, 
+  s.user_id, 
+  s.token_hash, 
+  s.expires_at, 
+  s.created_at,
+  u.email,
+  u.created_at as user_created_at,
+  u.updated_at as user_updated_at
+FROM sessions s
+JOIN users u ON u.id = s.user_id
+WHERE s.token_hash = $1
+  AND s.expires_at > now();
+
+-- name: DeleteSession :exec
+DELETE FROM sessions
+WHERE id = $1;
+
+-- name: DeleteSessionsByUserID :exec
+DELETE FROM sessions
+WHERE user_id = $1;

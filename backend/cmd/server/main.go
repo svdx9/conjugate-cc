@@ -5,15 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/svdx9/conjugate-cc/backend/internal/auth"
 	"github.com/svdx9/conjugate-cc/backend/internal/config"
+	"github.com/svdx9/conjugate-cc/backend/internal/db"
 	internalhttp "github.com/svdx9/conjugate-cc/backend/internal/http"
 	"github.com/svdx9/conjugate-cc/backend/internal/status"
 )
@@ -27,30 +27,50 @@ var (
 )
 
 func main() {
-	handler := slog.NewTextHandler(os.Stdout, nil)
-	logger := slog.New(handler)
-	slog.SetDefault(logger)
-
 	cfg, err := config.FromEnv()
 	if err != nil {
 		slog.Error("failed to load config", "error", err)
 		os.Exit(1)
 	}
+	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level:       cfg.LogLevel,
+		ReplaceAttr: nil,
+		AddSource:   true,
+	})
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 
 	logger.Info("starting conjugate-cc backend",
-		"port", cfg.Port,
-		"env", cfg.Env,
+		"config", cfg.Redacted(),
 		"git_sha", GitSHA,
 		"build_time", BuildTime,
 	)
 
-	// Dependency injection
+	// Create database pool
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	pool, err := db.NewPool(ctx, cfg.DatabaseURL)
+	cancel()
+	if err != nil {
+		logger.Error("failed to create database pool", "error", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+
+	// Dependency injection - Authentication layer
+	authStore := db.NewAuthStore(pool, logger)
+	authService := auth.NewService(authStore, cfg.AuthMagicLinkTTL, cfg.AuthSessionTTL)
+
+	// Dependency injection - HTTP layer
 	statusHandler := status.NewHandler(logger, GitSHA, BuildTime)
 	router := internalhttp.NewRouter(statusHandler)
 
+	// Wire auth service into router (when HTTP handlers are created)
+	// TODO: Add route handlers that use authService when implementing Task 008.09
+	_ = authService
+
 	//nolint:exhaustruct
 	server := &http.Server{
-		Addr:              net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
+		Addr:              cfg.Addr(),
 		Handler:           router,
 		ErrorLog:          slog.NewLogLogger(handler, slog.LevelError),
 		ReadTimeout:       5 * time.Second,

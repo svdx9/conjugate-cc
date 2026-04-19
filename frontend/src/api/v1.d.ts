@@ -4,101 +4,345 @@
  */
 
 export interface paths {
-  '/v1/status': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/v1/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health check */
+        get: operations["GetStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Health check */
-    get: operations['GetStatus'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/metadata': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/v1/metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Build metadata */
+        get: operations["GetMetadata"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Build metadata */
-    get: operations['GetMetadata'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/v1/auth/magiclink/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request magic link */
+        post: operations["RequestMagicLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/auth/magiclink/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Validate magic link token (read-only, does not consume) */
+        get: operations["GetMagicLinkVerify"];
+        put?: never;
+        /** Confirm sign-in (consume token, create session) */
+        post: operations["PostMagicLinkVerify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Logout (invalidate session) */
+        delete: operations["DeleteSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    Status: {
-      /** @example ok */
-      status: string;
+    schemas: {
+        Status: {
+            /** @example ok */
+            status: string;
+        };
+        Metadata: {
+            /** @example d32e693 */
+            git_sha: string;
+            /** @example 2026-03-14T17:33:30Z */
+            build_time: string;
+        };
+        MagicLinkRequest: {
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+        };
+        MagicLinkVerifyResponse: {
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+        };
+        MagicLinkConfirmRequest: {
+            /** @example abc123def456 */
+            token: string;
+        };
+        MagicLinkConfirmResponse: {
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            user_id: string;
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+        };
+        ErrorResponse: {
+            /** @example invalid_token */
+            code: string;
+            /** @example The provided token is invalid or has expired */
+            message: string;
+            details?: {
+                [key: string]: unknown;
+            };
+        };
+        ValidationError: {
+            /** @example validation_error */
+            code: string;
+            /** @example Validation failed */
+            message: string;
+            field_errors: {
+                /** @example email */
+                field: string;
+                /** @example must be a valid email address */
+                message: string;
+            }[];
+        };
     };
-    Metadata: {
-      /** @example d32e693 */
-      git_sha: string;
-      /** @example 2026-03-14T17:33:30Z */
-      build_time: string;
+    responses: never;
+    parameters: {
+        XRequestedWith: "XMLHttpRequest";
     };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  GetStatus: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Service is healthy */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    GetStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          'application/json': components['schemas']['Status'];
+        requestBody?: never;
+        responses: {
+            /** @description Service is healthy */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Status"];
+                };
+            };
         };
-      };
     };
-  };
-  GetMetadata: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Service build metadata */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    GetMetadata: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          'application/json': components['schemas']['Metadata'];
+        requestBody?: never;
+        responses: {
+            /** @description Service build metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Metadata"];
+                };
+            };
         };
-      };
     };
-  };
+    RequestMagicLink: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MagicLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Magic link request accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationError"];
+                };
+            };
+        };
+    };
+    GetMagicLinkVerify: {
+        parameters: {
+            query: {
+                /** @description Magic link verification token */
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token is valid; returns associated email for confirmation UI */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MagicLinkVerifyResponse"];
+                };
+            };
+            /** @description Missing token parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Token not found, already used, or expired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PostMagicLinkVerify: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MagicLinkConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Session created successfully */
+            200: {
+                headers: {
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MagicLinkConfirmResponse"];
+                };
+            };
+            /** @description Invalid, expired, or already used token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DeleteSession: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session invalidated successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
 }

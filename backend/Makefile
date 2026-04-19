@@ -10,6 +10,7 @@ GOFUMPT_VERSION := latest
 GOLANGCI_LINT_VERSION := v2.8.0
 MIGRATE_VERSION := v4.19.1
 OAPI_CODEGEN_VERSION := v2.5.1
+SQLC_VERSION := v1.29.0
 
 # Binaries
 GOLANGCI_LINT := $(TOOLS_BIN)/golangci-lint
@@ -17,6 +18,7 @@ GOFUMPT := $(TOOLS_BIN)/gofumpt
 AIR := $(TOOLS_BIN)/air
 MIGRATE := $(TOOLS_BIN)/migrate
 OAPI_CODEGEN := $(TOOLS_BIN)/oapi-codegen
+SQLC := $(TOOLS_BIN)/sqlc
 
 # Build variables
 GIT_SHA := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -42,7 +44,7 @@ tools-dir:
 	mkdir -p $(TOOLS_BIN)
 
 .PHONY: tools-install
-tools-install: tools-dir $(GOLANGCI_LINT) $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN)
+tools-install: tools-dir $(GOLANGCI_LINT) $(GOFUMPT) $(AIR) $(MIGRATE) $(OAPI_CODEGEN) $(SQLC)
 
 $(GOLANGCI_LINT):
 	GOBIN=$(TOOLS_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
@@ -59,8 +61,15 @@ $(MIGRATE):
 $(OAPI_CODEGEN):
 	GOBIN=$(TOOLS_BIN) go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@$(OAPI_CODEGEN_VERSION)
 
+$(SQLC):
+	GOBIN=$(TOOLS_BIN) go install github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
+
+.PHONY: sqlc-generate
+sqlc-generate: $(SQLC)
+	$(SQLC) generate
+
 .PHONY: generate
-generate: tools-install
+generate: tools-install sqlc-generate
 	$(OAPI_CODEGEN) -config ../docs/schema/v1/config.yaml ../docs/schema/v1/api.yaml
 
 .PHONY: test
@@ -84,6 +93,18 @@ debug-build:
 .PHONY: format
 format: tools-install
 	$(GOFUMPT) -l -w .
+
+.PHONY: migrate-up
+migrate-up: $(MIGRATE)
+	$(MIGRATE) -path sql/migrations -database "$(DATABASE_URL)" up
+
+.PHONY: migrate-down
+migrate-down: $(MIGRATE)
+	$(MIGRATE) -path sql/migrations -database "$(DATABASE_URL)" down
+
+.PHONY: migrate-create
+migrate-create: $(MIGRATE)
+	$(MIGRATE) create -ext sql -dir sql/migrations -seq $(NAME)
 
 .PHONY: clean
 clean:
