@@ -45,8 +45,9 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
   const pickRandomItem = () => {
     const data = drillData();
     if (!data || data.items.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * data.items.length);
-    setCurrentItem(data.items[randomIndex]);
+    const candidates =
+      data.items.length > 1 ? data.items.filter((i) => i !== currentItem()) : data.items;
+    setCurrentItem(candidates[Math.floor(Math.random() * candidates.length)]);
   };
 
   const submitAnswer = () => {
