@@ -2,21 +2,23 @@ import { Component, JSX } from 'solid-js';
 import { Route } from '@solidjs/router';
 import LandingPage from '../features/landing/LandingPage';
 import DrillsPage from '../features/drills/DrillsPage';
+import QuickDrillPage from '../features/drills/QuickDrillPage';
+import FullDrillPage from '../features/drills/FullDrillPage';
 import VerbsPage from '../features/verbs/VerbsPage';
 import HelpPage from '../features/help/HelpPage';
 import ContactPage from '../features/contact/ContactPage';
 import CookiePolicyPage from '../features/legal/CookiePolicyPage';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import { initBackendStatusPolling } from '../store/backend';
+import { useBackendStatus } from '../hooks/useBackendStatus';
 
 const Layout: Component<{ children?: JSX.Element }> = (props) => {
-  initBackendStatusPolling();
+  const backend = useBackendStatus();
   return (
-    <div class="bg-surface text-text-primary dark:bg-surface-dark dark:text-text-primary-dark flex min-h-screen flex-col transition-colors">
+    <div class="bg-background text-foreground flex min-h-screen flex-col transition-colors">
       <Navigation />
       <main class="flex-1">{props.children}</main>
-      <Footer />
+      <Footer backend={backend} />
     </div>
   );
 };
@@ -26,6 +28,8 @@ const App: Component = () => {
     <Route path="/" component={Layout}>
       <Route path="/" component={LandingPage} />
       <Route path="/drills" component={DrillsPage} />
+      <Route path="/drills/quick/:verb/:tense" component={QuickDrillPage} />
+      <Route path="/drills/full/:verb/:tense" component={FullDrillPage} />
       <Route path="/verbs" component={VerbsPage} />
       <Route path="/help" component={HelpPage} />
       <Route path="/contact" component={ContactPage} />

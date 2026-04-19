@@ -2,15 +2,130 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  /* Shadcn-style colors (light) */
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #030213;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f3f5;
+  --secondary-foreground: #000000;
+  --muted: #f3f3f5;
+  --muted-foreground: #717182;
+  --accent: #f3f3f5;
+  --accent-foreground: #000000;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --ring: #030213;
+  --radius: 0.625rem;
+
+  /* Custom accent - our gold highlight */
+  --highlight: #ebc61d;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --red-400: oklch(70.4% 0.191 22.216);
+  --red-500: oklch(63.7% 0.237 25.331);
+  --red-600: oklch(57.7% 0.245 27.325);
+
+  /* Button colors */
+  --btn-bg: #f8f8f8;
+  --btn-text: #374151;
+}
+
+.dark {
+  /* Shadcn-style colors (dark) */
+  --background: #111111;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #030213;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #ffffff;
+  --muted: #1f1f1f;
+  --muted-foreground: #a1a1aa;
+  --accent: #1f1f1f;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --input-background: #1f1f1f;
+  --ring: #52525b;
+
+  /* Custom accent */
+  --highlight: #ebc61d;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+
+  /* Button colors */
+  --btn-bg: #1f1f1f;
+  --btn-text: #d4d4d8;
+}
+
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --color-surface: #ffffff;
-  --color-surface-dark: #111111;
-  --color-text-primary: #000000;
-  --color-text-primary-dark: #ffffff;
-  --color-border: #00000026;
-  --color-border-dark: #ffffff26;
-  --color-highlight: #ebc61d;
-  --color-btn-bg: #f8f8f8;
-  --color-btn-text: #374151;
+
+  /* Map shadcn tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-ring: var(--ring);
+  --color-highlight: var(--highlight);
+  --color-btn-bg: var(--btn-bg);
+  --color-btn-text: var(--btn-text);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-red-400: var(--red-400);
+  --color-red-500: var(--red-500);
+  --color-red-600: var(--red-600);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Animation */
+  --animate-shake: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
 }
