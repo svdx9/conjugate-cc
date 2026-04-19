@@ -1,6 +1,7 @@
 import { createSignal, createEffect } from 'solid-js';
 import { DrillItem, DrillData } from '../types';
 import { drillProvider } from '../provider';
+import { checkAnswer } from '../checkAnswer';
 
 export type AnswerState = 'unanswered' | 'correct' | 'incorrect';
 
@@ -46,10 +47,6 @@ export function useDrill(verb: () => string, tense: () => string): [DrillState, 
     if (!data || data.items.length === 0) return;
     const randomIndex = Math.floor(Math.random() * data.items.length);
     setCurrentItem(data.items[randomIndex]);
-  };
-
-  const checkAnswer = (userAns: string, expected: string): boolean => {
-    return userAns.trim().toLowerCase() === expected.trim().toLowerCase();
   };
 
   const submitAnswer = () => {

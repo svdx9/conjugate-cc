@@ -1,6 +1,7 @@
 import { createSignal, createEffect } from 'solid-js';
 import { DrillData, DrillItem } from '../types';
 import { drillProvider } from '../provider';
+import { checkAnswer } from '../checkAnswer';
 import { AnswerState } from './useDrill';
 
 export interface VerbDrillState {
@@ -72,10 +73,6 @@ export function useVerbDrill(
   const setUserAnswer = (pronoun: string, answer: string) => {
     if (isSubmitted()) return;
     setUserAnswers((prev) => ({ ...prev, [pronoun]: answer }));
-  };
-
-  const checkAnswer = (userAns: string, expected: string): boolean => {
-    return userAns.trim().toLowerCase() === expected.trim().toLowerCase();
   };
 
   const submitBatch = () => {
